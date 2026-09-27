@@ -10,6 +10,7 @@
  *   /img/<marker>/<w>x<h>.png[?seed=n][&cors=1][&delay=ms]
  *   /video/<pattern>.webm    pattern: neutral | switch (neutral → explicit after 2 s)
  *                            | woman | man (neutral → a face of that apparent gender after 2 s)
+ *                            | pair (a woman walking across, a man standing still)
  */
 import http from 'node:http';
 import { readFile, readdir, mkdir, rename, writeFile, stat } from 'node:fs/promises';
@@ -19,7 +20,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import jpeg from 'jpeg-js';
-import { fixturePixels, fixturePng } from './png.mjs';
+import { fixturePixels, fixturePng, pairFaces, scenePixels } from './png.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const cacheDir = path.join(here, '..', '.cache', 'lab');
@@ -59,7 +60,7 @@ function findFfmpeg() {
 
 const FFMPEG = findFfmpeg();
 
-const VIDEO_PATTERNS = ['neutral', 'switch', 'woman', 'man'];
+const VIDEO_PATTERNS = ['neutral', 'switch', 'woman', 'man', 'pair'];
 const generating = new Map();
 
 /** Generates each clip once, even when several requests (or both origins) ask at the same time. */
@@ -93,11 +94,18 @@ async function generateVideo(pattern) {
   const framesFile = path.join(cacheDir, `${pattern}.${process.pid}.mjpeg`);
   const frames = [];
   for (let i = 0; i < fps * seconds; i++) {
-    const later = { switch: 'explicit', woman: 'woman', man: 'man' }[pattern] ?? 'neutral';
-    const marker = i >= fps * 2 ? later : 'neutral';
-    frames.push(
-      jpeg.encode({ data: fixturePixels(320, 180, marker, i % 5), width: 320, height: 180 }, 92).data,
-    );
+    const pixels =
+      pattern === 'pair'
+        ? scenePixels(320, 180, pairFaces(i / fps), 0)
+        : fixturePixels(
+            320,
+            180,
+            i >= fps * 2
+              ? ({ switch: 'explicit', woman: 'woman', man: 'man' }[pattern] ?? 'neutral')
+              : 'neutral',
+            i % 5,
+          );
+    frames.push(jpeg.encode({ data: pixels, width: 320, height: 180 }, 92).data);
   }
   await writeFile(framesFile, Buffer.concat(frames));
   await new Promise((resolve, reject) => {

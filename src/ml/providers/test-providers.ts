@@ -22,6 +22,10 @@ import type { ClassifierProvider, DetectorProvider, FaceAttributeProvider, Prepa
  * The gender provider reads the *face crop* rather than the marker: lab
  * images paint the face area in the marker colour, so the real cropping
  * path is exercised. A plain green face reads as undecided (0.38).
+ *
+ * Painted teal / blue areas anywhere in the image (not touching the
+ * top-left corner, where markers live) are found as faces where they are,
+ * so moving faces in lab videos are detected at their real position.
  */
 export const TEST_MARKERS = {
   explicit: [255, 0, 255],
@@ -46,6 +50,72 @@ function nearest(rgb: number[]): Marker {
 }
 
 const hasFace = (marker: Marker) => marker === 'face' || marker === 'woman' || marker === 'man';
+
+const PAINTED = [TEST_MARKERS.woman, TEST_MARKERS.man] as const;
+
+/** Bounding boxes of teal / blue painted areas, excluding the corner marker. */
+async function paintedFaces(image: PreparedImage): Promise<Region[]> {
+  const [h, w] = image.pixels.shape;
+  const data = await image.pixels.data();
+  const step = 2;
+  const cols = Math.ceil(w / step);
+  const rows = Math.ceil(h / step);
+  const mask = new Uint8Array(cols * rows);
+  for (let gy = 0; gy < rows; gy++) {
+    for (let gx = 0; gx < cols; gx++) {
+      const i = (gy * step * w + gx * step) * 3;
+      const rgb = [data[i]!, data[i + 1]!, data[i + 2]!];
+      if (PAINTED.some((c) => c.every((v, k) => Math.abs(v - rgb[k]!) <= 45))) mask[gy * cols + gx] = 1;
+    }
+  }
+  const faces: Region[] = [];
+  const seen = new Uint8Array(cols * rows);
+  for (let start = 0; start < mask.length; start++) {
+    if (!mask[start] || seen[start]) continue;
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -1;
+    let maxY = -1;
+    let count = 0;
+    const stack = [start];
+    seen[start] = 1;
+    while (stack.length) {
+      const cell = stack.pop()!;
+      const x = cell % cols;
+      const y = Math.floor(cell / cols);
+      count++;
+      minX = Math.min(minX, x);
+      maxX = Math.max(maxX, x);
+      minY = Math.min(minY, y);
+      maxY = Math.max(maxY, y);
+      for (const [dx, dy] of [
+        [1, 0],
+        [-1, 0],
+        [0, 1],
+        [0, -1],
+      ] as const) {
+        const nx = x + dx;
+        const ny = y + dy;
+        if (nx < 0 || ny < 0 || nx >= cols || ny >= rows) continue;
+        const next = ny * cols + nx;
+        if (mask[next] && !seen[next]) {
+          seen[next] = 1;
+          stack.push(next);
+        }
+      }
+    }
+    const touchesCorner = minX === 0 && minY === 0;
+    if (touchesCorner || count < 12) continue;
+    faces.push({
+      x: minX / cols,
+      y: minY / rows,
+      w: (maxX - minX + 1) / cols,
+      h: (maxY - minY + 1) / rows,
+      score: 0.96,
+    });
+  }
+  return faces;
+}
 
 async function markerOf(image: PreparedImage): Promise<Marker> {
   const [h, w] = image.pixels.shape;
@@ -114,6 +184,8 @@ export class TestFaceDetector implements DetectorProvider {
   }
 
   async detect(image: PreparedImage): Promise<Region[]> {
+    const painted = await paintedFaces(image);
+    if (painted.length) return painted;
     return hasFace(await markerOf(image)) ? [{ x: 0.35, y: 0.3, w: 0.3, h: 0.35, score: 0.96 }] : [];
   }
 }
@@ -132,6 +204,14 @@ export class TestPersonDetector implements DetectorProvider {
   }
 
   async detect(image: PreparedImage): Promise<Region[]> {
+    // A body below each painted face, or the fixed one for marker images.
+    const painted = await paintedFaces(image);
+    if (painted.length)
+      return painted.map((f) => {
+        const x = Math.max(0, f.x - f.w / 2);
+        const y = Math.max(0, f.y - f.h * 0.2);
+        return { x, y, w: Math.min(1 - x, f.w * 2), h: Math.min(1 - y, f.h * 3.5), score: 0.9 };
+      });
     return hasFace(await markerOf(image)) ? [{ x: 0.25, y: 0.2, w: 0.5, h: 0.75, score: 0.9 }] : [];
   }
 }

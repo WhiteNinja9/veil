@@ -73,6 +73,11 @@ export class ProtectionRenderer {
         this.protectWhole(item);
         return;
       case 'regions':
+        if (item.kind === 'video') {
+          // Drawn over the playing video by VideoRegionOverlay (media/video.ts).
+          setState(item.el, 'rg');
+          return;
+        }
         if (item.kind !== 'image' || this.regionsBlocked || !decision.regions?.length) {
           this.protectWhole(item);
           return;

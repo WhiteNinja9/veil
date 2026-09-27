@@ -168,7 +168,7 @@ describe('selecting regions', () => {
     expect(requiredSignals(policyWith({ peopleFilter: { who: 'women' } }), 'video')).toEqual(['classifier']);
     expect(
       requiredSignals(
-        policyWith({ peopleFilter: { who: 'women' }, video: { regionsProtectWhole: true } }),
+        policyWith({ peopleFilter: { who: 'women' }, video: { peopleInVideos: true } }),
         'video',
       ),
     ).toEqual(['classifier', 'gender', 'people']);

@@ -95,10 +95,28 @@ How it works:
 4. **Unsure** faces follow the user's _When unsure_ choice: _Blur_ (default) or _Show_.
 5. A detected **person** takes the reading of the largest face whose centre lies in the upper 60 %
    of their box. People with no visible face (turned away, too far) are **unsure**.
-6. **Video:** frames are analysed at up to 480 px. When _Also in videos_ is on, the whole video is
-   hidden while a matching person is on screen, and restored after several frames without one.
-   Frame-accurate blurring of individual people in moving video isn't possible at the rates an
-   extension can sample; hiding the whole video is the reliable option.
+6. **Video:** when _Also in videos_ is on and the category blurs regions, matching people are
+   blurred as the video plays and the rest of the picture stays visible:
+   - Frames are analysed at up to 480 px, at most every 200 ms of playback, paced by the frames the
+     browser actually presents and by how long each analysis takes.
+   - Each face (and person) is **tracked** between analyses: the blur moves with the person's
+     recent velocity and grows with the time since they were last seen (up to 700 ms of
+     prediction). A track is dropped only after two analyses in a row that no longer find it, or
+     after 2.5 s unseen.
+   - Apparent gender is estimated once for each new face and refreshed every 3 s, averaging the
+     last few estimates, so one odd frame doesn't flip a person.
+   - A **scene cut** (a large change between presented frames) or a **seek** covers the whole
+     frame until the new picture has been analysed.
+   - The blur is drawn as a canvas over the video: a blurred, pixelated or solid copy of that part
+     of the frame, clipped to the part of the video the page shows. Nothing is sent anywhere.
+   - When the video element itself is fullscreen or in picture-in-picture, nothing can be drawn
+     over it; the whole video is protected while a matching person is on screen, as it is when
+     the category is set to _whole image_.
+
+   What this can't do: someone who walks in is visible until the next analysis finds them, and
+   very fast motion can outrun the prediction. In the lab, analyses were about 300 ms apart with
+   the instant test detector; the real models add their own time, more on a slow machine.
+   Coverage on the lab clip is in [BENCHMARKS.md](BENCHMARKS.md#6-people-in-video).
 
 The estimate is computed in memory for the current page and never stored or sent anywhere, like
 every other signal ([PRIVACY.md](PRIVACY.md)).

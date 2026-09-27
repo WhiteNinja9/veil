@@ -156,10 +156,10 @@ function PeopleFilterControls(): JSX.Element {
         disabled={!regionsOn || !settings.media.videos}
       >
         <Switch
-          checked={settings.video.regionsProtectWhole}
+          checked={settings.video.peopleInVideos}
           disabled={!regionsOn || !settings.media.videos}
           label={t.t('people.videos')}
-          onChange={(regionsProtectWhole) => void update({ video: { regionsProtectWhole } })}
+          onChange={(peopleInVideos) => void update({ video: { peopleInVideos } })}
         />
       </Row>
     </>

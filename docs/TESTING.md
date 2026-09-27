@@ -93,9 +93,13 @@ What the E2E suite covers (`tests/e2e/*.spec.ts`):
   (weakening only), onboarding, the interstitial, and **axe** checks (no serious or critical
   violations) on every page in English and Arabic.
 - **People filter:** women only and men only (same- and cross-origin), the unsure setting, whole
-  image vs regions, instant re-decision when the choice changes, and hiding a video while a matching
-  face is on screen. The test gender model reads the colour of the actual face crop, so the
-  cropping path is covered.
+  image vs regions, instant re-decision when the choice changes, and hiding a whole video while a
+  matching face is on screen (scope _whole image_). The test gender model reads the colour of the
+  actual face crop, so the cropping path is covered.
+- **People in video** (`video-regions.spec.ts`, lab _pair_ clip): only the woman is blurred and the
+  blur follows her as she walks; only the man with _men_; the painted box is opaque and has no
+  sharp edges while the frame under it does (pixel check); a paused video's blur stays still and a
+  seek re-checks the new frame; reveal removes the blur and hide restores it.
 - **Regressions:** the offscreen-listener start-up race, and re-verification when an image's
   source changes.
 
@@ -105,21 +109,21 @@ What the E2E suite covers (`tests/e2e/*.spec.ts`):
 npm run lab     # http://127.0.0.1:4700  (second origin: http://localhost:4701)
 ```
 
-| Page                     | Exercises                                                                              |
-| ------------------------ | -------------------------------------------------------------------------------------- |
-| Static images            | Baseline: every marker at several sizes                                                |
-| Lazy-loaded images       | `loading="lazy"` and JS lazy loaders (`data-src` swaps)                                |
-| srcset and `<picture>`   | Responsive sources, art direction, runtime `src` swaps                                 |
-| Inline background images | `style="background-image: url(…)"`, gradients with images                              |
-| Infinite feed            | Cards appended on scroll (sentinel observer)                                           |
-| SPA with recycled nodes  | A virtual list that reuses `<img>` nodes with new sources                              |
-| Shadow DOM               | Open, closed and late-attached shadow roots                                            |
-| Cross-origin iframe      | Media in a frame from the second origin                                                |
-| Advertisement slots      | Ad-like containers (stricter thresholds)                                               |
-| Video                    | Generated WebM clips that switch from safe to unsafe, same- and cross-origin           |
-| People filter            | Faces that appear female, male or undecided (images and video), same- and cross-origin |
-| Search results           | Base64 `data:` thumbnails like image search results                                    |
-| Stress                   | 600 thumbnails: priority, concurrency, memory                                          |
+| Page                     | Exercises                                                                                                                      |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| Static images            | Baseline: every marker at several sizes                                                                                        |
+| Lazy-loaded images       | `loading="lazy"` and JS lazy loaders (`data-src` swaps)                                                                        |
+| srcset and `<picture>`   | Responsive sources, art direction, runtime `src` swaps                                                                         |
+| Inline background images | `style="background-image: url(…)"`, gradients with images                                                                      |
+| Infinite feed            | Cards appended on scroll (sentinel observer)                                                                                   |
+| SPA with recycled nodes  | A virtual list that reuses `<img>` nodes with new sources                                                                      |
+| Shadow DOM               | Open, closed and late-attached shadow roots                                                                                    |
+| Cross-origin iframe      | Media in a frame from the second origin                                                                                        |
+| Advertisement slots      | Ad-like containers (stricter thresholds)                                                                                       |
+| Video                    | Generated WebM clips that switch from safe to unsafe, same- and cross-origin                                                   |
+| People filter            | Faces that appear female, male or undecided (images and video), same- and cross-origin; a clip with a woman walking past a man |
+| Search results           | Base64 `data:` thumbnails like image search results                                                                            |
+| Stress                   | 600 thumbnails: priority, concurrency, memory                                                                                  |
 
 Marker images come from `/img/<marker>/<w>x<h>.png` and videos from `/video/*.webm`. Both are
 generated on the fly (`lab/png.mjs`, with ffmpeg from Playwright for video). No binary fixtures are

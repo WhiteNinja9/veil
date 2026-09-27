@@ -61,8 +61,12 @@ export interface Settings {
     baseIntervalMs: number;
     /** Lift protection automatically after several consecutive safe frames. */
     autoRestore: boolean;
-    /** When faces/people are enabled, protect whole videos containing them. */
-    regionsProtectWhole: boolean;
+    /**
+     * Faces and People protection also applies to videos: matching people
+     * are blurred as the video plays (or the whole video is hidden, when a
+     * category's scope is "whole").
+     */
+    peopleInVideos: boolean;
   };
   strictBrowsing: {
     enabled: boolean;
@@ -104,7 +108,7 @@ export function defaultSettings(): Settings {
     appearance: { style: 'blur-strong', theme: 'system', motion: 'system', showChip: true },
     reveal: { mode: balanced.reveal.mode, confirm: balanced.reveal.confirm, reprotectAfterSec: 0 },
     fallback: balanced.fallback,
-    video: { baseIntervalMs: balanced.videoIntervalMs, autoRestore: true, regionsProtectWhole: false },
+    video: { baseIntervalMs: balanced.videoIntervalMs, autoRestore: true, peopleInVideos: false },
     strictBrowsing: { enabled: false, safeSearch: true, youtubeRestricted: true, ignoreSiteExceptions: true },
     sites: [],
     performance: { backend: 'auto', unloadAfterMin: 10 },
@@ -231,7 +235,8 @@ export function sanitizeSettings(raw: unknown): Settings {
     video: {
       baseIntervalMs: Math.round(num(video.baseIntervalMs, d.video.baseIntervalMs, 250, 5000)),
       autoRestore: bool(video.autoRestore, d.video.autoRestore),
-      regionsProtectWhole: bool(video.regionsProtectWhole, d.video.regionsProtectWhole),
+      // Named regionsProtectWhole before region blurring for video existed.
+      peopleInVideos: bool(video.peopleInVideos ?? video.regionsProtectWhole, d.video.peopleInVideos),
     },
     strictBrowsing: {
       enabled: bool(strict.enabled, d.strictBrowsing.enabled),

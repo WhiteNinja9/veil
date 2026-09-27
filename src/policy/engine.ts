@@ -162,7 +162,7 @@ export function evaluate(signals: Signals, context: PolicyContext, policy: Effec
     if (setting.scope === 'whole' || (!regionsRenderable && context.kind === 'background')) {
       reasons.push({ category: id, score: best, threshold: setting.threshold });
     } else if (!regionsRenderable) {
-      if (policy.video.regionsProtectWhole)
+      if (policy.video.peopleInVideos)
         reasons.push({ category: id, score: best, threshold: setting.threshold });
     } else {
       regions.push(...hits.map((r) => padRegion(r, REGION_PADDING[id])));
@@ -211,7 +211,7 @@ export function requiredSignals(policy: EffectivePolicy, kind: PolicyContext['ki
   const kinds: SignalKind[] = [];
   const c = policy.categories;
   if (c.explicit.enabled || c.illustrated.enabled || c.suggestive.enabled) kinds.push('classifier');
-  const regionsUseful = kind === 'image' || kind === 'background' || policy.video.regionsProtectWhole;
+  const regionsUseful = kind === 'image' || kind === 'background' || policy.video.peopleInVideos;
   if (!regionsUseful) return kinds;
   // Filtering by apparent gender needs faces with gender estimates, for the
   // Faces category and to tell who a detected person is.

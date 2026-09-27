@@ -112,12 +112,12 @@ export class ProtectionController {
     );
     this.videos = new VideoProtectionManager({
       policy: () => this.policy,
-      detectFrame: (item, dataUrl, width, height, key) =>
+      detectFrame: (item, dataUrl, width, height, key, signals) =>
         this.detect(
           item,
           { kind: 'pixels', dataUrl, width, height },
           key,
-          requiredSignals(this.policy, 'video'),
+          signals ?? requiredSignals(this.policy, 'video'),
         ),
       detectUrl: (item, url) =>
         this.detect(item, { kind: 'url', url }, hashString(url), requiredSignals(this.policy, 'video')),

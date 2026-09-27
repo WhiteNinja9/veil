@@ -96,6 +96,35 @@ out of the Firefox bundle (`__BROWSER__` constant, dead-code elimination).
   read. Veil applies the **fallback** policy: _reveal_ at Minimal/Balanced, _protect_ at
   Strict/Maximum.
 
+**Region mode** (Faces or People set to blur regions, with _Also in videos_ on) replaces the whole
+video decision for those categories with blurred regions that follow people:
+
+- **Pacing.** `requestVideoFrameCallback` runs once per presented frame: it compares a tiny frame
+  signature with the previous one to spot cuts, and starts an analysis when 200 ms of media time
+  have passed since the last. Gender is requested only for new faces and every 3 s per face;
+  people detection every 600 ms. All videos in region mode share a page-wide budget of 10
+  analyses per second, and off-screen videos aren't analysed. Times are media time
+  (`currentTime`), so pausing, seeking and playback rate need no special cases, and a paused
+  video's blur stays exactly still.
+- **Tracking** (`src/content/media/tracks.ts`, pure and unit-tested). Detections are matched to
+  tracks by overlap, or by distance for small fast faces. Each track keeps a smoothed velocity, its
+  box is extrapolated to the frame on screen and grown with the time since it was seen. Tracks are
+  dropped on evidence (two analyses without them), never because analyses are slow.
+- **Selection.** Tracked faces and people go through the same `selectRegions` as images, so the
+  people filter, thresholds and _When unsure_ behave identically. The whole-video decision still
+  runs for the other categories (explicit, suggestive…) and takes precedence.
+- **Drawing** (`src/content/render/video-overlay.ts`). One fixed layer in a closed shadow root
+  holds a canvas per video, repainted every animation frame from the video's layout box,
+  `object-fit`/`object-position` and clipping ancestors. Each box gets a blurred (downscaled,
+  `ctx.filter`), pixelated or solid copy of that part of the current frame. A CSS
+  `backdrop-filter` was tried first and dropped: whether it sees video pixels depends on how the
+  browser composites video, and in headless Chromium it left faces sharp.
+- **Cuts and seeks.** A cut, a `seeking` event, or a media time that jumped away from the last
+  analysis (a loop can present its first frame before `seeking` arrives) covers the whole frame
+  until a frame from after it is analysed. Analyses started before a seek are discarded.
+- **Fallback.** If the video element itself is fullscreen or in picture-in-picture, nothing can be
+  drawn over it, and the whole-video decision applies.
+
 ## Policy resolution
 
 Managed policy is applied first, as an overlay on the stored settings inside `SettingsStore`. A

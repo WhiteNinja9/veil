@@ -57,15 +57,15 @@ export function VideosSection(): JSX.Element {
           </Row>
           <Row
             id="regionswhole"
-            label={t.t('videos.regionsWhole')}
-            description={t.t('videos.regionsWhole.desc')}
+            label={t.t('videos.regions')}
+            description={t.t('videos.regions.desc')}
             disabled={!regionsOn}
           >
             <Switch
-              checked={settings.video.regionsProtectWhole}
+              checked={settings.video.peopleInVideos}
               disabled={!regionsOn || !settings.media.videos}
-              label={t.t('videos.regionsWhole')}
-              onChange={(regionsProtectWhole) => void update({ video: { regionsProtectWhole } })}
+              label={t.t('videos.regions')}
+              onChange={(peopleInVideos) => void update({ video: { peopleInVideos } })}
             />
           </Row>
         </div>

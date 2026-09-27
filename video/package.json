@@ -7,7 +7,7 @@
   "scripts": {
     "voice": "node scripts/voice.mjs",
     "align": "python3 scripts/align.py",
-    "timeline": "node scripts/timeline.mjs",
+    "sfx": "python3 scripts/sfx.py",
     "studio": "remotion studio src/index.ts",
     "render": "node scripts/render.mjs",
     "typecheck": "tsc --noEmit"

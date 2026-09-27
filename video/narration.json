@@ -1,7 +1,7 @@
 {
-  "voice": "Fola",
+  "voice": "Charon",
   "model": "gemini-3.8-flash-lite-tts",
-  "direction": "# Audio profile\nA calm, assured narrator for a premium technology film. Warm, clear and unhurried, with quiet confidence. Never salesy.\n\n## Director's notes\nMeasured pace, about 140 words per minute. Natural short pauses at commas and full stops. Land gently on the last word of each sentence, with no upward inflection. No excitement spikes. Read only the transcript.",
+  "direction": "# Audio profile\nA calm, assured male narrator for a premium technology film. Warm, low and unhurried, with quiet confidence. Never salesy.\n\n## Director's notes\nMeasured pace, about 140 words per minute. Natural short pauses at commas and full stops. Land gently on the last word of each sentence, with no upward inflection. No excitement spikes. Read only the transcript.",
   "scenes": [
     {
       "id": "hook",

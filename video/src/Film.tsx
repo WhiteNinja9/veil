@@ -1,13 +1,14 @@
 /**
  * The Veil showcase film: scenes laid on the narration's timeline, the
- * voice, and the stage. Voice only, no music.
+ * voice, sound effects and the stage. No music.
  */
 import { AbsoluteFill, Html5Audio, Sequence, staticFile, useCurrentFrame } from 'remotion';
 import { Backdrop, Grain } from './components/Backdrop';
 import { PixelateDefs } from './components/media';
 import { prog } from './lib/anim';
 import { easeInOut } from './theme';
-import { TIMELINE, type SceneTiming } from './timeline';
+import { CUES, SOUND_SEC } from './sfx';
+import { FPS, TIMELINE, type SceneTiming } from './timeline';
 import { Gate } from './scenes/Gate';
 import { Hook } from './scenes/Hook';
 import { Levels } from './scenes/Levels';
@@ -69,6 +70,17 @@ export const Film: React.FC<{ scenes: { id: string; from: number; length: number
             trimBefore={scene.audio.trimBefore}
             trimAfter={scene.audio.trimAfter}
           />
+        </Sequence>
+      ))}
+      {CUES.map((cue, i) => (
+        <Sequence
+          key={`sfx-${i}`}
+          from={cue.at}
+          durationInFrames={Math.ceil(SOUND_SEC[cue.sound] * FPS)}
+          name={`sfx: ${cue.sound}`}
+          layout="none"
+        >
+          <Html5Audio src={staticFile(`sfx/${cue.sound}.wav`)} volume={cue.volume} />
         </Sequence>
       ))}
     </AbsoluteFill>

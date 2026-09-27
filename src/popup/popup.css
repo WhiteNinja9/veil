@@ -230,6 +230,9 @@ body.surface-popup {
   font-size: var(--text-sm);
   font-weight: 600;
 }
+.level__label--next {
+  margin-top: var(--space-2);
+}
 .level__desc {
   min-height: 2.9em;
   color: var(--text-2);

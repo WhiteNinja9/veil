@@ -188,3 +188,98 @@ export function emaScores(
     sexy: mix(previous.sexy, next.sexy),
   };
 }
+
+/**
+ * Source rectangle (pixels) for a face-attribute crop: a square centred on
+ * the detected face, `scale` times its longer side. Returns null when the
+ * face is smaller than `minSide` pixels in the source: too little detail
+ * to judge.
+ */
+export function faceCropBox(
+  face: Region,
+  width: number,
+  height: number,
+  scale: number,
+  minSide: number,
+): { sx: number; sy: number; side: number } | null {
+  const fw = face.w * width;
+  const fh = face.h * height;
+  if (Math.max(fw, fh) < minSide) return null;
+  const side = Math.max(fw, fh) * scale;
+  const cx = (face.x + face.w / 2) * width;
+  const cy = (face.y + face.h / 2) * height;
+  return { sx: cx - side / 2, sy: cy - side / 2, side };
+}
+
+export interface Rect {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+/**
+ * Overlapping tiles (normalised) for a second face-detection pass on large
+ * images, where a single downscaled pass makes small faces (group photos)
+ * vanish. Empty when the image is small enough for one pass.
+ */
+export function faceTiles(
+  width: number,
+  height: number,
+  tileSide: number,
+  maxPerAxis = 4,
+  overlap = 0.2,
+): Rect[] {
+  if (Math.max(width, height) <= tileSide * 1.25) return [];
+  const axis = (length: number) => {
+    const n = Math.min(maxPerAxis, Math.max(1, Math.ceil(length / tileSide)));
+    const size = 1 / (n - (n - 1) * overlap);
+    return Array.from({ length: n }, (_, i) => ({
+      start: Math.min(1 - size, i * size * (1 - overlap)),
+      size,
+    }));
+  };
+  const tiles: Rect[] = [];
+  for (const row of axis(height)) {
+    for (const col of axis(width)) tiles.push({ x: col.start, y: row.start, w: col.size, h: row.size });
+  }
+  return tiles;
+}
+
+/** Maps a region detected inside `tile` back to whole-image coordinates. */
+export function fromTile(region: Region, tile: Rect): Region {
+  return {
+    ...region,
+    x: tile.x + region.x * tile.w,
+    y: tile.y + region.y * tile.h,
+    w: region.w * tile.w,
+    h: region.h * tile.h,
+  };
+}
+
+/**
+ * Merges detections from overlapping passes: highest score first, dropping
+ * boxes that overlap a kept one (IoU) or lie mostly inside it (a face cut
+ * in half by a tile edge).
+ */
+export function mergeDetections(
+  regions: Region[],
+  iouThreshold = 0.3,
+  containment = 0.6,
+  maxOutput = 64,
+): Region[] {
+  const kept: Region[] = [];
+  for (const candidate of [...regions].sort((a, b) => b.score - a.score)) {
+    const duplicate = kept.some((k) => {
+      const ix = Math.max(0, Math.min(k.x + k.w, candidate.x + candidate.w) - Math.max(k.x, candidate.x));
+      const iy = Math.max(0, Math.min(k.y + k.h, candidate.y + candidate.h) - Math.max(k.y, candidate.y));
+      const inter = ix * iy;
+      const areaC = candidate.w * candidate.h;
+      const areaK = k.w * k.h;
+      return inter / (areaC + areaK - inter) > iouThreshold || inter / Math.min(areaC, areaK) > containment;
+    });
+    if (!duplicate) kept.push(candidate);
+    if (kept.length >= maxOutput) break;
+  }
+  return kept;
+}

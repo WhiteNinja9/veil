@@ -98,19 +98,35 @@ how to calibrate on your own data with `npm run calibrate`.
 Face detector scores on the same images: real faces 0.85–0.90; false detections on objects
 0.54–0.63, all below the default threshold of 0.75.
 
-## 5. Package size
+## 5. People filter (apparent gender)
+
+Measured with the shipped worker on the 16 labelled photos from [ML.md](ML.md#people-filter-women-men-or-everyone)
+(WASM backend, this VM), with the `gender` signal on: face detection (tiled on large images) plus
+a gender estimate per face.
+
+|                                                      | Value                                                       |
+| ---------------------------------------------------- | ----------------------------------------------------------- |
+| Gender estimate, per face (160 px crop)              | 88 ms median (224 px: 170 ms)                               |
+| Portraits and small groups (1–7 faces)               | 0.25–0.8 s per image                                        |
+| 24-person group (1986 × 1545)                        | 2.7 s                                                       |
+| 56-person class photo (1280 × 1024), 20 faces judged | 2.4 s (was 10.4 s before capping faces and shrinking crops) |
+
+Images stay hidden until decided, so on a CPU-only machine, pages with many people take noticeably
+longer with the filter on. Accuracy is in [ML.md](ML.md#people-filter-women-men-or-everyone).
+
+## 6. Package size
 
 Production Chrome build (`npm run build:chrome`):
 
-| File                                   | Size           | gzip    |
-| -------------------------------------- | -------------- | ------- |
-| `content.js` (runs in every frame)     | 72.5 KB        | 23.8 KB |
-| `content.css`                          | 3.3 KB         | 1.0 KB  |
-| `background.js`                        | 23.6 KB        | 8.5 KB  |
-| `engine-worker.js` (TF.js + providers) | 1.24 MB        | 305 KB  |
-| Models (3)                             | 9.4 MB         | —       |
-| WASM kernels (SIMD + baseline)         | 724 KB         | —       |
-| **Store upload** (`npm run package`)   | **7.2 MB** zip |         |
+| File                                   | Size            | gzip    |
+| -------------------------------------- | --------------- | ------- |
+| `content.js` (runs in every frame)     | 72.5 KB         | 23.8 KB |
+| `content.css`                          | 3.3 KB          | 1.0 KB  |
+| `background.js`                        | 23.6 KB         | 8.5 KB  |
+| `engine-worker.js` (TF.js + providers) | 1.24 MB         | 305 KB  |
+| Models (4, loaded only when needed)    | 16.1 MB         | —       |
+| WASM kernels (SIMD + baseline)         | 724 KB          | —       |
+| **Store upload** (`npm run package`)   | **13.4 MB** zip |         |
 
 The engine worker and models load only in the offscreen document (Chrome) or background page
 (Firefox), never in web pages. `content.js` is all first-party code, with no ML runtime.
@@ -125,6 +141,7 @@ npm run bench -- --csp                 # §1, §2  (add --webgpu --swiftshader f
 npm run build:chrome
 node scripts/bench/latency.mjs --runs=5   # §3
 npm run test:e2e                       # includes the real-model smoke tests (§4)
+npm run models && node scripts/fetch-eval-images.mjs   # people photos for §5 land in .cache/eval/people
 ```
 
 `npm run bench -- --out=bench-results/local/<name>.json` saves a machine-readable report.

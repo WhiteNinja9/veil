@@ -53,6 +53,16 @@ export const REVEAL_MODES: readonly RevealMode[] = ['click', 'hold', 'hover', 'd
 /** What to do when media cannot be verified (decode/fetch failure, cross-origin video, timeout). */
 export type FallbackAction = 'reveal' | 'protect';
 
+/** Whose faces / bodies the Faces and People categories blur. */
+export type PeopleTarget = 'everyone' | 'women' | 'men';
+export const PEOPLE_TARGETS: readonly PeopleTarget[] = ['everyone', 'women', 'men'];
+
+export interface PeopleFilter {
+  who: PeopleTarget;
+  /** Faces whose apparent gender is uncertain (or too small to judge). */
+  unsure: FallbackAction;
+}
+
 export type MediaKind = 'image' | 'background' | 'video';
 
 export interface PolicyContext {
@@ -83,6 +93,7 @@ export interface EffectivePolicy {
   video: { baseIntervalMs: number; autoRestore: boolean; regionsProtectWhole: boolean };
   /** Context-aware score adjustments (see engine.ts). */
   contextAware: boolean;
+  peopleFilter: PeopleFilter;
 }
 
 export type DecisionAction = 'allow' | 'protect' | 'regions';

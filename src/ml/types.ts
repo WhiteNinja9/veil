@@ -4,9 +4,12 @@
  * content script, which ships to every page.
  */
 
-/** Signals a request can ask for. Each maps to one model provider. */
-export type SignalKind = 'classifier' | 'faces' | 'people';
-export const SIGNAL_KINDS: readonly SignalKind[] = ['classifier', 'faces', 'people'];
+/**
+ * Signals a request can ask for. Each maps to one model provider, except
+ * `gender`, which runs the face detector and then the face-attribute model.
+ */
+export type SignalKind = 'classifier' | 'faces' | 'people' | 'gender';
+export const SIGNAL_KINDS: readonly SignalKind[] = ['classifier', 'faces', 'people', 'gender'];
 
 /** Normalised axis-aligned box: x, y, width, height in [0, 1] of the source image. */
 export interface Region {
@@ -15,6 +18,11 @@ export interface Region {
   w: number;
   h: number;
   score: number;
+  /**
+   * Faces only, with the `gender` signal: estimated probability in [0, 1]
+   * that the face appears female. Absent when the face is too small to judge.
+   */
+  female?: number;
 }
 
 /** Output of the content classifier (softmax over five classes). */
@@ -30,6 +38,8 @@ export interface Signals {
   classifier?: ClassifierScores;
   faces?: Region[];
   people?: Region[];
+  /** Faces with `female` estimates (the `gender` signal). */
+  gender?: Region[];
   /** Source dimensions in pixels (after decode, before any resizing). */
   width: number;
   height: number;

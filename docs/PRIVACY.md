@@ -55,7 +55,8 @@ The allowance entries necessarily name a host. They exist only for sites _you_ c
 
 - Which pages you visited.
 - Which images were protected.
-- Image contents and model outputs. Model outputs are kept in memory caches (the background's
+- Image contents and model outputs, including the people filter's apparent-gender estimates, which
+  exist only to decide what to blur on your screen. Model outputs are kept in memory caches (the background's
   5,000-entry, 30-minute cache and a per-page cache) keyed by a hash of the media's address. They are
   never persisted. Settings → Privacy → _Clear recent results_ empties the background cache
   immediately. A per-page cache disappears when its page is closed or reloaded.

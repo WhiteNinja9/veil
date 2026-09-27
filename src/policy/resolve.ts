@@ -64,6 +64,7 @@ export function resolvePolicy(settings: Settings, hostname: string, now: number 
       regionsProtectWhole: settings.video.regionsProtectWhole,
     },
     contextAware: settings.contextAware,
+    peopleFilter: { ...settings.peopleFilter },
   };
 
   if (!settings.enabled) return { policy: { ...policy, active: false, inactiveReason: 'disabled' }, rule };

@@ -5,6 +5,7 @@
  * photographs. Requires `npm run models` and `node scripts/fetch-eval-images.mjs`.
  */
 import { existsSync, readdirSync } from 'node:fs';
+import type { Page } from '@playwright/test';
 import { expect, REAL_BUILD, setSettings, test } from './fixtures';
 
 const EVAL_DIR = '.cache/eval';
@@ -55,4 +56,35 @@ test('face protection blurs only face regions in real photos', async ({ context,
       { timeout: 60_000 },
     );
   }
+});
+
+test('the people filter tells a man from no one in real photos', async ({ context, lab }) => {
+  test.skip(
+    !images.includes('messi5.jpg') || !images.includes('karen-and-rob.png'),
+    'people samples missing',
+  );
+  const decided = (page: Page, id: string) =>
+    page.waitForFunction(
+      (sel) => ['ok', 'x', 'rg'].includes(document.querySelector(sel)?.getAttribute('data-veil') ?? ''),
+      `#${id}`,
+      { timeout: 150_000 },
+    );
+  const stateOf = (page: Page, id: string) => page.locator(`#${id}`).getAttribute('data-veil');
+
+  // Men: the footballer and the groom are blurred; photos without people are not.
+  await setSettings(context, {
+    categories: { faces: { enabled: true, scope: 'regions' }, people: { enabled: false } },
+    peopleFilter: { who: 'men', unsure: 'reveal' },
+  });
+  const page = await context.newPage();
+  await page.goto(`${lab.originA}/eval.html`);
+  for (const id of ['messi5-jpg', 'karen-and-rob-png', 'fruits-jpg']) await decided(page, id);
+  // Region-protected images are fully hidden (x) until their blurred copy is rendered (rg).
+  await expect.poll(() => stateOf(page, 'messi5-jpg'), { timeout: 30_000 }).toBe('rg');
+  await expect.poll(() => stateOf(page, 'karen-and-rob-png'), { timeout: 30_000 }).toBe('rg');
+  expect(await stateOf(page, 'fruits-jpg')).toBe('ok');
+
+  // Women, sure faces only: the footballer is left alone.
+  await setSettings(context, { peopleFilter: { who: 'women', unsure: 'reveal' } });
+  await expect.poll(() => stateOf(page, 'messi5-jpg'), { timeout: 30_000 }).toBe('ok');
 });

@@ -121,6 +121,7 @@ export function mergeSignals(base: Signals | undefined, next: Signals): Signals 
     classifier: next.classifier ?? base.classifier,
     faces: next.faces ?? base.faces,
     people: next.people ?? base.people,
+    gender: next.gender ?? base.gender,
     models: [...new Set([...base.models, ...next.models])],
   };
 }

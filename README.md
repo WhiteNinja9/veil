@@ -11,7 +11,7 @@ logged or shared, and there is no Veil server.
 </p>
 
 <p align="center">
-  <img src="docs/images/popup-light.png" alt="Veil popup: protection on, Balanced level, 8 checked and 5 hidden on this page" width="240">
+  <img src="docs/images/popup-light.png" alt="Veil popup: protection on, Balanced level, page counters, and the Blur people choice (off, women, men, everyone)" width="240">
   &nbsp;
   <img src="docs/images/options-privacy-dark.png" alt="Privacy Center in dark mode: on-device processing on, cloud processing off, analytics off, browsing history not collected" width="520">
 </p>
@@ -26,7 +26,9 @@ logged or shared, and there is no Veil server.
   images, animated GIF/WebP and video.
 - **On-device AI:**
   - a content classifier (explicit, illustrated, suggestive);
-  - optional face and person detectors that can blur just those regions.
+  - optional face and person detectors that can blur just those regions;
+  - an optional **people filter**: blur everyone, or only people who appear to be **women** or
+    **men**, in images and videos. The estimate comes from each face, on your device.
 
   Inference runs on WebGPU, WebGL, WebAssembly or CPU, whichever is fastest on your machine.
 
@@ -113,8 +115,8 @@ Requires Node.js 20+. Build flags, store submission and model updates are covere
 ## Testing
 
 ```sh
-npm run check           # typecheck, lint, 149 unit + integration tests
-npm run test:e2e        # 49 Playwright tests with the real extension in Chromium
+npm run check           # typecheck, lint, 162 unit + integration tests
+npm run test:e2e        # 55 Playwright tests with the real extension in Chromium
 npm run lint:firefox    # addons-linter on the Firefox build
 npm run bench           # inference per backend and full-pipeline timings
 npm run calibrate -- --data=<labelled folder>   # thresholds from your own data
@@ -147,8 +149,12 @@ unwanted media will be missed, and some safe media will be hidden.
   - media smaller than the minimum size (default 36 px).
 - **Cross-origin video without CORS** can't be read by any extension. It gets the _fallback_
   decision instead: shown at Minimal and Balanced, protected at Strict and Maximum.
+- **The people filter estimates apparent gender from faces and can be wrong.** In a small labelled
+  test it misjudged 1 face in 60 and was unsure about 1 in 10 (unsure faces follow your "When
+  unsure" choice). People with no visible face count as unsure. See
+  [docs/ML.md](docs/ML.md#people-filter-women-men-or-everyone).
 - **Region blurring** (faces, people) works on images. On video, those categories can only protect
-  the whole video. On sites whose Content Security Policy forbids `data:` images, region
+  the whole video (while a matching person is on screen). On sites whose Content Security Policy forbids `data:` images, region
   protection falls back to protecting the whole image.
 - **Pages built to evade filters** (serving different images to the analyser, drawing to canvas,
   overriding CSS) can get around any extension ([docs/SECURITY.md](docs/SECURITY.md)).
@@ -159,7 +165,8 @@ unwanted media will be missed, and some safe media will be hidden.
 - **Speed depends on hardware.** On a machine without a GPU, a page full of new images takes about
   a second to settle (images stay hidden until decided).
 - Firefox support is verified by linting and a manual checklist, not by automated browser tests.
-- Veil does not classify gender, by design ([docs/ML.md](docs/ML.md#why-there-is-no-gender-filter)).
+- The people filter adds a 6.7 MB model (loaded only when used) and, on CPU-only machines, about
+  90 ms per face, so crowded pages take longer to settle.
 
 ## Documentation
 

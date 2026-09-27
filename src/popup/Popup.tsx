@@ -5,7 +5,7 @@ import { ext } from '../browser/api';
 import type { HostStatus } from '../ml/host/inference-host';
 import { STRICTNESS_LEVELS, type StrictnessLevel } from '../policy/types';
 import { useApp } from '../ui/app-context';
-import { levelPatch } from '../ui/actions';
+import { levelPatch, PEOPLE_CHOICES, type PeopleChoice, peopleChoice, peoplePatch } from '../ui/actions';
 import { IconButton, Segmented, Switch } from '../ui/components/controls';
 import { Stat } from '../ui/components/layout';
 import { Icon, Mark } from '../ui/icons';
@@ -233,6 +233,15 @@ export function Popup(): JSX.Element {
           onChange={setLevel}
         />
         <p class="level__desc">{t.t(`level.${settings.strictness}.desc`)}</p>
+        <div class="level__label level__label--next" id="people-label">
+          {t.t('popup.people')}
+        </div>
+        <Segmented<PeopleChoice>
+          value={peopleChoice(settings)}
+          label={t.t('popup.people')}
+          options={PEOPLE_CHOICES.map((choice) => ({ value: choice, label: t.t(`people.choice.${choice}`) }))}
+          onChange={(choice) => void update(peoplePatch(choice))}
+        />
       </section>
 
       <footer class="popup__footer">

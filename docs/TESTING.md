@@ -16,8 +16,8 @@ npm run test:watch   # Vitest in watch mode
 npx vitest run --coverage
 ```
 
-At the time of writing: 19 Vitest files with 149 tests, and 49 Playwright tests (47 with the test
-model, 2 with the real models). All pass on Chromium 141.
+At the time of writing: 20 Vitest files with 162 tests, and 55 Playwright tests (52 with the test
+model, 3 with the real models). All pass on Chromium 141.
 
 ## Unit and integration
 
@@ -59,6 +59,8 @@ Playwright launches Chromium with the **unpacked extension** (`--load-extension`
   | orange  | suggestive                  |
   | yellow  | borderline (between levels) |
   | green   | contains a face             |
+  | teal    | a face that appears female  |
+  | blue    | a face that appears male    |
 
   This exercises the whole pipeline (gate, discovery, capture, messaging, policy, rendering,
   reveal, DNR) with exact, reproducible verdicts, and without any real sensitive content in the
@@ -67,7 +69,10 @@ Playwright launches Chromium with the **unpacked extension** (`--load-extension`
 - **`chromium-real-model`** uses the production build `dist/chrome` with the real models, on safe
   sample photos (`node scripts/fetch-eval-images.mjs`). It checks that model loading, backend
   selection and inference work, that no safe photo is protected at Balanced, and that face
-  protection blurs only face regions. It is skipped when models or images are missing.
+  protection blurs only face regions. With the people filter set to men, it checks that real men's
+  faces are blurred and a photo without people is not. It is skipped when models or images are
+  missing. Accuracy of the people filter is measured separately by `node scripts/bench/people.mjs`
+  ([ML.md](ML.md#people-filter-women-men-or-everyone)).
 
 What the E2E suite covers (`tests/e2e/*.spec.ts`):
 
@@ -87,6 +92,10 @@ What the E2E suite covers (`tests/e2e/*.spec.ts`):
 - **UI:** popup status and pause, level change, settings search and deep links, the lock
   (weakening only), onboarding, the interstitial, and **axe** checks (no serious or critical
   violations) on every page in English and Arabic.
+- **People filter:** women only and men only (same- and cross-origin), the unsure setting, whole
+  image vs regions, instant re-decision when the choice changes, and hiding a video while a matching
+  face is on screen. The test gender model reads the colour of the actual face crop, so the
+  cropping path is covered.
 - **Regressions:** the offscreen-listener start-up race, and re-verification when an image's
   source changes.
 
@@ -96,20 +105,21 @@ What the E2E suite covers (`tests/e2e/*.spec.ts`):
 npm run lab     # http://127.0.0.1:4700  (second origin: http://localhost:4701)
 ```
 
-| Page                     | Exercises                                                                    |
-| ------------------------ | ---------------------------------------------------------------------------- |
-| Static images            | Baseline: every marker at several sizes                                      |
-| Lazy-loaded images       | `loading="lazy"` and JS lazy loaders (`data-src` swaps)                      |
-| srcset and `<picture>`   | Responsive sources, art direction, runtime `src` swaps                       |
-| Inline background images | `style="background-image: url(…)"`, gradients with images                    |
-| Infinite feed            | Cards appended on scroll (sentinel observer)                                 |
-| SPA with recycled nodes  | A virtual list that reuses `<img>` nodes with new sources                    |
-| Shadow DOM               | Open, closed and late-attached shadow roots                                  |
-| Cross-origin iframe      | Media in a frame from the second origin                                      |
-| Advertisement slots      | Ad-like containers (stricter thresholds)                                     |
-| Video                    | Generated WebM clips that switch from safe to unsafe, same- and cross-origin |
-| Search results           | Base64 `data:` thumbnails like image search results                          |
-| Stress                   | 600 thumbnails: priority, concurrency, memory                                |
+| Page                     | Exercises                                                                              |
+| ------------------------ | -------------------------------------------------------------------------------------- |
+| Static images            | Baseline: every marker at several sizes                                                |
+| Lazy-loaded images       | `loading="lazy"` and JS lazy loaders (`data-src` swaps)                                |
+| srcset and `<picture>`   | Responsive sources, art direction, runtime `src` swaps                                 |
+| Inline background images | `style="background-image: url(…)"`, gradients with images                              |
+| Infinite feed            | Cards appended on scroll (sentinel observer)                                           |
+| SPA with recycled nodes  | A virtual list that reuses `<img>` nodes with new sources                              |
+| Shadow DOM               | Open, closed and late-attached shadow roots                                            |
+| Cross-origin iframe      | Media in a frame from the second origin                                                |
+| Advertisement slots      | Ad-like containers (stricter thresholds)                                               |
+| Video                    | Generated WebM clips that switch from safe to unsafe, same- and cross-origin           |
+| People filter            | Faces that appear female, male or undecided (images and video), same- and cross-origin |
+| Search results           | Base64 `data:` thumbnails like image search results                                    |
+| Stress                   | 600 thumbnails: priority, concurrency, memory                                          |
 
 Marker images come from `/img/<marker>/<w>x<h>.png` and videos from `/video/*.webm`. Both are
 generated on the fly (`lab/png.mjs`, with ffmpeg from Playwright for video). No binary fixtures are

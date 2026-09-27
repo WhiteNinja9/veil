@@ -225,6 +225,17 @@ function describe(name: HardwareBackend): string {
   }
 }
 
+/**
+ * Jobs per engine batch. GPU backends amortise dispatch and upload costs
+ * over a batch. On CPU-bound backends a batch costs the same per image
+ * (measured: WASM 89 ms/image in a batch of 4 vs 90 ms alone) but delays
+ * every result until the whole batch is done, so jobs run one by one and
+ * each image appears as soon as it is decided.
+ */
+export function preferredBatchSize(backend: HardwareBackend | undefined): number {
+  return backend === 'webgl' || backend === 'webgpu' ? 8 : 1;
+}
+
 /** Candidate list honouring an explicit preference, then falling back in default order. */
 export function candidateOrder(
   preference: HardwareBackend | 'auto',

@@ -70,7 +70,9 @@ export type DetectErrorCode =
   | 'timeout'
   | 'engine-unavailable'
   | 'cancelled'
-  | 'invalid';
+  | 'invalid'
+  /** A cache-only probe found nothing. */
+  | 'not-cached';
 
 export type DetectResponse =
   | { id: string; ok: true; signals: Signals; cached?: boolean }

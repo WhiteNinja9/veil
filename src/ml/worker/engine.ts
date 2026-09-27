@@ -1,5 +1,11 @@
 import * as tf from '@tensorflow/tfjs-core';
-import { type BackendSelection, candidateOrder, type HardwareBackend, selectBackend } from '../backend';
+import {
+  type BackendSelection,
+  candidateOrder,
+  type HardwareBackend,
+  preferredBatchSize,
+  selectBackend,
+} from '../backend';
 import { type DecodedMedia, decodeImage, rasterize } from '../decode';
 import { aggregateFrames } from '../postprocess';
 import { FaceDetector } from '../providers/face-detector';
@@ -147,7 +153,7 @@ export class DetectionEngine {
     try {
       while (this.queue.length) {
         this.queue.sort((a, b) => a.job.priority - b.job.priority || a.seq - b.seq);
-        const batch = this.queue.splice(0, 8);
+        const batch = this.queue.splice(0, preferredBatchSize(this.selection?.name));
         await this.processBatch(batch);
       }
     } finally {

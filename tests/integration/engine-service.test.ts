@@ -46,6 +46,17 @@ describe('EngineService', () => {
     expect(second).toMatchObject({ id: '2', ok: true, cached: true });
   });
 
+  it('answers cache-only lookups without running inference', async () => {
+    const { client, calls } = fakeClient(() => ({ classifier }));
+    const service = new EngineService(client);
+    expect(service.lookup('k', ['classifier'])).toBeNull();
+    await service.detect(request('1', 'k', ['classifier']));
+    expect(service.lookup('k', ['classifier'])?.classifier).toEqual(classifier);
+    // Partially cached media is a miss: the caller must analyse.
+    expect(service.lookup('k', ['classifier', 'faces'])).toBeNull();
+    expect(calls).toHaveLength(1);
+  });
+
   it('de-duplicates concurrent identical requests across tabs', async () => {
     const { client, calls } = fakeClient(() => ({ classifier }));
     const service = new EngineService(client);

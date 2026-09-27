@@ -6,31 +6,31 @@ resist, and to say plainly which ones it can't.
 
 ## Assets
 
-| Asset | Why it matters |
-|---|---|
-| The user's browsing | Veil sees media on every page. It must never leak, log or transmit it. |
-| Extension privileges | Host access and cross-origin fetch could be abused, for example to read a user's LAN. |
+| Asset                 | Why it matters                                                                              |
+| --------------------- | ------------------------------------------------------------------------------------------- |
+| The user's browsing   | Veil sees media on every page. It must never leak, log or transmit it.                      |
+| Extension privileges  | Host access and cross-origin fetch could be abused, for example to read a user's LAN.       |
 | The protection itself | Users (and parents, schools, organisations) rely on it to hide media they chose not to see. |
-| The lock and policy | Settings a household or administrator chose should resist casual change. |
+| The lock and policy   | Settings a household or administrator chose should resist casual change.                    |
 
 ## Adversaries and what Veil does about them
 
 ### 1. A web page trying to abuse Veil's privileges
 
-| Attack | Mitigation |
-|---|---|
-| Send forged messages to the background | The background has no `externally_connectable` or web-exposed messaging. The engine port accepts only Veil's own content scripts, identified by the browser's sender record. Every message is schema-validated (`src/shared/messages.ts`). |
+| Attack                                            | Mitigation                                                                                                                                                                                                                                                      |
+| ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Send forged messages to the background            | The background has no `externally_connectable` or web-exposed messaging. The engine port accepts only Veil's own content scripts, identified by the browser's sender record. Every message is schema-validated (`src/shared/messages.ts`).                      |
 | Make Veil fetch internal URLs (SSRF, LAN probing) | Only `http(s)`; no credentials or referrer; URLs with embedded credentials are refused; private-network targets are refused unless the initiating page is itself private. The initiator comes from the browser, not the message (`src/ml/host/fetch-media.ts`). |
-| Read responses through Veil | Fetched bytes go only to the model. Pages receive at most a verdict attribute on their own element. |
-| Exhaust CPU or memory | 6 concurrent analyses per frame; 64 in-flight requests per port; 20 MB and 15 s per fetch; 8 MB data-URL cap; 20 s per detection; worker crash cooldown (3 crashes/min → 30 s pause with the fallback decision); a token bucket for video frames. |
-| Exploit a decoder or model | Decoding and inference run in a dedicated worker with no DOM or extension APIs. A crash only costs a restart. |
-| Craft the interstitial URL | The interstitial accepts only `http(s)` targets, shows the host isolated from surrounding bidirectional text, and can "continue" only where the matching rule is *warn*. The background re-checks this itself (`site/proceed`). |
-| Inject script into Veil's UI | Preact renders text as text. ESLint forbids `innerHTML`, `outerHTML`, `insertAdjacentHTML` and `dangerouslySetInnerHTML` in `src/`. CSP `script-src 'self' 'wasm-unsafe-eval'` rules out inline or remote script anyway. |
+| Read responses through Veil                       | Fetched bytes go only to the model. Pages receive at most a verdict attribute on their own element.                                                                                                                                                             |
+| Exhaust CPU or memory                             | 6 concurrent analyses per frame; 64 in-flight requests per port; 20 MB and 15 s per fetch; 8 MB data-URL cap; 20 s per detection; worker crash cooldown (3 crashes/min → 30 s pause with the fallback decision); a token bucket for video frames.               |
+| Exploit a decoder or model                        | Decoding and inference run in a dedicated worker with no DOM or extension APIs. A crash only costs a restart.                                                                                                                                                   |
+| Craft the interstitial URL                        | The interstitial accepts only `http(s)` targets, shows the host isolated from surrounding bidirectional text, and can "continue" only where the matching rule is _warn_. The background re-checks this itself (`site/proceed`).                                 |
+| Inject script into Veil's UI                      | Preact renders text as text. ESLint forbids `innerHTML`, `outerHTML`, `insertAdjacentHTML` and `dangerouslySetInnerHTML` in `src/`. CSP `script-src 'self' 'wasm-unsafe-eval'` rules out inline or remote script anyway.                                        |
 
 ### 2. A web page trying to evade protection
 
 Veil is designed against **incidental exposure**: ordinary pages, feeds, ads, search results and
-embeds. It is not a guarantee against a page *engineered* to show media to a Veil user. A page
+embeds. It is not a guarantee against a page _engineered_ to show media to a Veil user. A page
 that controls its own markup can, for example:
 
 - draw pixels on `<canvas>` or WebGL, or use SVG `<image>`, `<object>`/`<embed>`, or CSS-generated
@@ -51,13 +51,13 @@ Within those bounds, Veil closes the gaps it can:
 - Video verdicts are keyed by source and timestamp, never by a perceptual hash a crafted frame could
   collide with.
 - Media that can't be verified (tainted canvas, decode failure, engine unavailable) gets the
-  **fallback** decision, which is *protect* at Strict, Maximum and under Strict Browsing.
+  **fallback** decision, which is _protect_ at Strict, Maximum and under Strict Browsing.
 
 ### 3. Someone at the keyboard trying to turn protection off
 
 The settings lock is a speed bump against casual changes, and the UI says so. It is a
 PBKDF2-SHA-256 verifier (600,000 iterations, 16-byte random salt), compared in constant time. After
-5 failed attempts it backs off from 30 s, doubling up to 15 min. It guards only *weakening* changes,
+5 failed attempts it backs off from 30 s, doubling up to 15 min. It guards only _weakening_ changes,
 as classified by `src/security/weakening.ts`:
 
 - disabling, pausing, or turning off Strict Browsing or any of its parts;

@@ -25,13 +25,13 @@ or kept protected according to the user's policy.
 
 ## Processes and why they exist
 
-| Component | Where it runs | Responsibility |
-|---|---|---|
-| **Content script** (`src/content`) | Every frame, `document_start`, including `about:blank` and sandboxed frames | Pre-display gate, media discovery, capture, policy decisions, rendering protection, reveal UI |
-| **Background** (`src/background`) | Chrome service worker / Firefox event page | Message routing and validation, engine cache, DNR rules, badge, commands, context menu, managed-policy mirror |
-| **Inference host** (`src/ml/host`) | Chrome offscreen document; Firefox background page | Owns the worker; fetches cross-origin media under strict rules; restarts a crashed worker with back-off |
-| **Engine worker** (`src/ml/worker`) | Dedicated Worker | Decoding, batching, model execution, region rendering |
-| **Extension pages** (`src/popup`, `src/options`, `src/onboarding`, `src/interstitial`) | Extension origin | UI; read and write settings through `SettingsStore` |
+| Component                                                                              | Where it runs                                                               | Responsibility                                                                                                |
+| -------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| **Content script** (`src/content`)                                                     | Every frame, `document_start`, including `about:blank` and sandboxed frames | Pre-display gate, media discovery, capture, policy decisions, rendering protection, reveal UI                 |
+| **Background** (`src/background`)                                                      | Chrome service worker / Firefox event page                                  | Message routing and validation, engine cache, DNR rules, badge, commands, context menu, managed-policy mirror |
+| **Inference host** (`src/ml/host`)                                                     | Chrome offscreen document; Firefox background page                          | Owns the worker; fetches cross-origin media under strict rules; restarts a crashed worker with back-off       |
+| **Engine worker** (`src/ml/worker`)                                                    | Dedicated Worker                                                            | Decoding, batching, model execution, region rendering                                                         |
+| **Extension pages** (`src/popup`, `src/options`, `src/onboarding`, `src/interstitial`) | Extension origin                                                            | UI; read and write settings through `SettingsStore`                                                           |
 
 Chrome service workers cannot run WebGL/WebGPU or keep a Worker alive, so Chrome hosts inference in an
 offscreen document. Firefox event pages can host the Worker directly, so the offscreen code is compiled
@@ -45,15 +45,15 @@ out of the Firefox bundle (`__BROWSER__` constant, dead-code elimination).
    elements, `background-image: none` for backgrounds. Layout is untouched: dimensions, flow and
    click targets stay the same.
 2. **Settings.** The script reads settings and the managed-policy mirror from `storage.local` and
-   resolves the *effective policy* for this site (see [Policy resolution](#policy-resolution)). If
+   resolves the _effective policy_ for this site (see [Policy resolution](#policy-resolution)). If
    protection is off here, the gate is released at once. If anything throws during start-up, the
    script **fails open**: it releases the gate, so Veil can never leave a page blank.
 3. **Discovery.** A `MutationObserver` watches the document and every shadow root, open or closed
    (via the browser's privileged `openOrClosedShadowRoot`). It picks up `img`, `video`,
    `<picture>`/`srcset` changes, `poster`, and inline `url(...)` backgrounds. Recycled nodes
    (virtualised lists, SPA routes) are re-verified when their source signature changes.
-4. **Priority.** An `IntersectionObserver` sorts media into *visible* (0), *near viewport* (1) and
-   *other* (2). The per-frame `AnalysisScheduler` runs at most 6 requests at once and caps
+4. **Priority.** An `IntersectionObserver` sorts media into _visible_ (0), _near viewport_ (1) and
+   _other_ (2). The per-frame `AnalysisScheduler` runs at most 6 requests at once and caps
    low-priority work at half of that, so above-the-fold media is decided first even on a page with
    hundreds of thumbnails.
 5. **Capture.**
@@ -87,11 +87,11 @@ out of the Firefox bundle (`__BROWSER__` constant, dead-code elimination).
   bucket (4 frames/s per page, ≥ 250 ms between frames of one video) keeps cost bounded. The most
   overdue video goes first.
 - **Stability.** Scores are smoothed with an exponential moving average. Protection lifts only after
-  3 consecutive safe frames and a 2 s minimum, and only when *auto-restore* is on.
+  3 consecutive safe frames and a 2 s minimum, and only when _auto-restore_ is on.
 - **Keys.** Frames are keyed by `src` and `currentTime`, never by hash, so a safe verdict can't be
   reused for an unsafe frame that happens to hash alike.
 - **Unreadable video.** A cross-origin video without CORS taints the canvas, so its frames can't be
-  read. Veil applies the **fallback** policy: *reveal* at Minimal/Balanced, *protect* at
+  read. Veil applies the **fallback** policy: _reveal_ at Minimal/Balanced, _protect_ at
   Strict/Maximum.
 
 ## Policy resolution
@@ -104,8 +104,8 @@ user change can't take effect underneath it (see [DEPLOYMENT.md](DEPLOYMENT.md))
 1. Disabled or paused → off. Pause doesn't apply under Strict Browsing.
 2. A site rule set to `off` → off, unless Strict Browsing ignores site exceptions.
 3. A site rule with its own level → that level's thresholds.
-4. Strict Browsing raises the floor to **Strict**: reveal needs at least *hold* plus a confirmation,
-   the fallback is *protect*, and there is no auto-restore.
+4. Strict Browsing raises the floor to **Strict**: reveal needs at least _hold_ plus a confirmation,
+   the fallback is _protect_, and there is no auto-restore.
 
 Site patterns (`src/sites/rules.ts`) support `example.com` (domain and subdomains), `*.example.com`
 (subdomains only), `=example.com` (exact host) and globs such as `cdn*.example.*`. The most specific
@@ -116,11 +116,11 @@ match wins; a temporary rule beats a permanent one of equal specificity.
 `src/background/dnr.ts` compiles settings into browser-enforced rules. The browser applies them to
 navigations; Veil's code never observes the pages you visit.
 
-| Rule IDs | Purpose | Mechanism |
-|---|---|---|
-| 1–99 | SafeSearch (Google, Bing, DuckDuckGo, Yandex…), YouTube Restricted Mode | `queryTransform` redirects adding the engine's safe parameter; `YouTube-Restrict: Strict` request header |
-| 1000–8999 | Blocked and warned sites | Regex redirect to `interstitial.html#block\|<url>` or `#warn\|<url>` |
-| 10000+ | "Continue anyway" on warned sites | Session-scoped allow rules that expire through `alarms` (≤ 60 min) |
+| Rule IDs  | Purpose                                                                 | Mechanism                                                                                                |
+| --------- | ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| 1–99      | SafeSearch (Google, Bing, DuckDuckGo, Yandex…), YouTube Restricted Mode | `queryTransform` redirects adding the engine's safe parameter; `YouTube-Restrict: Strict` request header |
+| 1000–8999 | Blocked and warned sites                                                | Regex redirect to `interstitial.html#block\|<url>` or `#warn\|<url>`                                     |
+| 10000+    | "Continue anyway" on warned sites                                       | Session-scoped allow rules that expire through `alarms` (≤ 60 min)                                       |
 
 The background grants an allowance only when the matching rule's mode is `warn`. A crafted
 interstitial URL therefore can't unblock a blocked site; `tests/e2e/sites.spec.ts` covers this.
@@ -138,10 +138,10 @@ Two deliberate properties:
 
 - `SettingsStore` (`src/storage/settings-store.ts`) wraps `storage.local` under the key
   `veil.settings`. It validates every field on read (`sanitizeSettings`), so a corrupt value falls
-  back to its default *individually* and can't weaken the rest. It notifies subscribers on change.
+  back to its default _individually_ and can't weaken the rest. It notifies subscribers on change.
 - **Lock** (`src/security/lock.ts`): a PBKDF2-SHA-256 verifier with 600,000 iterations, a 16-byte
   salt and constant-time comparison. After 5 failures it backs off progressively. An unlock lasts
-  5 minutes in `storage.session`. `weakenedScopes()` classifies each change, so only *weakening*
+  5 minutes in `storage.session`. `weakenedScopes()` classifies each change, so only _weakening_
   changes (lower level, disable, site exceptions…) ask for the passcode; strengthening never does.
 - **Managed policy** (Chrome `storage.managed`, see [DEPLOYMENT.md](DEPLOYMENT.md)) is read only by
   the background, with a 3 s bound. It is mirrored to `veil.managedPolicy` in `storage.local`, so

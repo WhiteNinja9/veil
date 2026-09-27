@@ -505,6 +505,22 @@ export class ProtectionController {
     item.state = 'analyzing';
     const needed = requiredSignals(this.policy, item.kind);
     const regionsWanted = needed.includes('faces') || needed.includes('people');
+    if (item.key && this.capturesPixels(item)) {
+      // Capturing and encoding pixels is the costly part of a cache hit;
+      // ask the background first.
+      const probe = await this.engine.probe(
+        `${this.generation.slice(0, 6)}-p${++this.requestSeq}`,
+        item.key,
+        needed,
+      );
+      if (item.src !== src || !item.el.isConnected) return;
+      if (probe.ok) {
+        this.signalCache.set(item.key, { ...this.signalCache.peek(item.key), ...probe.signals });
+        item.signals = probe.signals;
+        this.decide(item);
+        return;
+      }
+    }
     const source = await this.sourceFor(item, regionsWanted ? CAPTURE_SIDE_REGIONS : CAPTURE_SIDE);
     if (item.src !== src) return;
     if (!source) {
@@ -524,6 +540,12 @@ export class ProtectionController {
       item.unverifiable = true;
     }
     this.decide(item);
+  }
+
+  /** Whether analysing this item means capturing pixels in the page (vs. sending a URL). */
+  private capturesPixels(item: MediaItem): boolean {
+    if (item.kind === 'image') return isPageReadable(item.src, item.el as HTMLImageElement);
+    return item.src.startsWith('data:') || item.src.startsWith('blob:');
   }
 
   private async sourceFor(item: MediaItem, maxSide: number): Promise<MediaSource | null> {

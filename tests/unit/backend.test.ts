@@ -23,7 +23,7 @@ vi.mock('@tensorflow/tfjs-backend-webgl', () => ({}));
 vi.mock('@tensorflow/tfjs-backend-webgpu', () => ({}));
 vi.mock('@tensorflow/tfjs-backend-wasm', () => ({ setWasmPaths: () => {} }));
 
-const { candidateOrder, isSoftwareRenderer, probeWebGpu, selectBackend } =
+const { candidateOrder, isSoftwareRenderer, preferredBatchSize, probeWebGpu, selectBackend } =
   await import('../../src/ml/backend');
 
 function stubGpu(adapter: object | null) {
@@ -144,5 +144,15 @@ describe('candidate order', () => {
     expect(candidateOrder('webgl', 'wasm')).toEqual(['webgl', 'webgpu', 'wasm', 'cpu']);
     expect(candidateOrder('auto', undefined, ['webgpu'])).toEqual(['webgl', 'wasm', 'cpu']);
     expect(candidateOrder('auto', undefined, ['webgpu', 'webgl', 'wasm', 'cpu'])).toEqual(['cpu']);
+  });
+});
+
+describe('batch size', () => {
+  it('batches on GPU backends only', () => {
+    expect(preferredBatchSize('webgpu')).toBe(8);
+    expect(preferredBatchSize('webgl')).toBe(8);
+    expect(preferredBatchSize('wasm')).toBe(1);
+    expect(preferredBatchSize('cpu')).toBe(1);
+    expect(preferredBatchSize(undefined)).toBe(1);
   });
 });

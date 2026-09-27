@@ -17,6 +17,8 @@ import type {
 import { type FrameStats, PORT_NAME, type PortInbound, type PortOutbound } from '../../shared/messages';
 
 export const REQUEST_TIMEOUT_MS = 25_000;
+/** A probe is answered from memory; if it takes longer, analysing is the faster path. */
+export const PROBE_TIMEOUT_MS = 1_500;
 
 type Pending =
   | {
@@ -29,6 +31,11 @@ type Pending =
       kind: 'render';
       request: RenderRequest;
       resolve: (r: RenderResponse) => void;
+      timer: ReturnType<typeof setTimeout>;
+    }
+  | {
+      kind: 'probe';
+      resolve: (r: DetectResponse) => void;
       timer: ReturnType<typeof setTimeout>;
     };
 
@@ -74,7 +81,7 @@ export class EngineClient {
     this.invalidated = true;
     for (const [id, pending] of this.pending) {
       clearTimeout(pending.timer);
-      if (pending.kind === 'detect')
+      if (pending.kind !== 'render')
         pending.resolve({ id, ok: false, error: 'engine-unavailable', message: 'extension reloaded' });
       else pending.resolve({ id, ok: false, error: 'extension reloaded' });
     }
@@ -85,12 +92,14 @@ export class EngineClient {
   private replay(): void {
     const port = this.connect();
     if (!port) return;
-    for (const pending of this.pending.values()) {
-      this.post(
-        pending.kind === 'detect'
-          ? { type: 'detect', request: pending.request }
-          : { type: 'render', request: pending.request },
-      );
+    for (const [id, pending] of this.pending) {
+      if (pending.kind === 'probe') {
+        // Not worth replaying: the caller falls back to a full analysis.
+        clearTimeout(pending.timer);
+        this.pending.delete(id);
+        pending.resolve({ id, ok: false, error: 'not-cached' });
+      } else if (pending.kind === 'detect') this.post({ type: 'detect', request: pending.request });
+      else this.post({ type: 'render', request: pending.request });
     }
   }
 
@@ -114,7 +123,7 @@ export class EngineClient {
     if (!pending) return;
     clearTimeout(pending.timer);
     this.pending.delete(id);
-    if (message.type === 'detected' && pending.kind === 'detect') pending.resolve(message.response);
+    if (message.type === 'detected' && pending.kind !== 'render') pending.resolve(message.response);
     else if (message.type === 'rendered' && pending.kind === 'render') pending.resolve(message.response);
   }
 
@@ -130,6 +139,23 @@ export class EngineClient {
         clearTimeout(timer);
         this.pending.delete(request.id);
         resolve({ id: request.id, ok: false, error: 'engine-unavailable' });
+      }
+    });
+  }
+
+  /** Asks the background for already-computed signals, without analysing anything. */
+  probe(id: string, key: string, signals: SignalKind[]): Promise<DetectResponse> {
+    return new Promise((resolve) => {
+      const miss = () => resolve({ id, ok: false, error: 'not-cached' });
+      const timer = setTimeout(() => {
+        this.pending.delete(id);
+        miss();
+      }, PROBE_TIMEOUT_MS);
+      this.pending.set(id, { kind: 'probe', resolve, timer });
+      if (!this.post({ type: 'probe', id, key, signals })) {
+        clearTimeout(timer);
+        this.pending.delete(id);
+        miss();
       }
     });
   }

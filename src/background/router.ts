@@ -90,6 +90,16 @@ export function registerRouter(engine: EngineService, stats: TabStatsStore, hand
         case 'cancel':
           if (owned.delete(message.id)) engine.cancel(message.id);
           return;
+        case 'probe': {
+          const signals = engine.lookup(message.key, message.signals);
+          reply({
+            type: 'detected',
+            response: signals
+              ? { id: message.id, ok: true, signals, cached: true }
+              : { id: message.id, ok: false, error: 'not-cached' },
+          });
+          return;
+        }
         case 'detect': {
           const request = { ...message.request, initiator };
           if (inflight >= MAX_INFLIGHT_PER_PORT) {

@@ -41,6 +41,16 @@ export class EngineService {
     return this.client.configure(preferences);
   }
 
+  /** Cached signals covering `signals`, or null. Never runs inference. */
+  lookup(key: string, signals: readonly SignalKind[]): Signals | null {
+    const cached = this.cache.get(key);
+    if (!cached || signals.some((kind) => cached[kind] === undefined)) return null;
+    // A hit replaces a detect call, so it counts as one; a miss is followed by one.
+    this.lookups++;
+    this.hits++;
+    return cached;
+  }
+
   async detect(request: DetectRequest): Promise<DetectResponse> {
     this.lookups++;
     const cached = this.cache.get(request.key);

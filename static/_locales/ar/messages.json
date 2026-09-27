@@ -1,0 +1,8 @@
+{
+  "extName": { "message": "Veil — حماية خاصة للمحتوى" },
+  "extDescription": { "message": "يخفي الصور ومقاطع الفيديو الصريحة وغير المرغوب فيها قبل أن تراها. ذكاء اصطناعي على جهازك؛ لا شيء يغادر متصفحك." },
+  "actionTitle": { "message": "Veil" },
+  "commandOpenPopup": { "message": "فتح Veil" },
+  "commandToggleSite": { "message": "إيقاف الحماية مؤقتًا أو استئنافها على هذا الموقع" },
+  "commandReveal": { "message": "إظهار الوسائط المحمية تحت المؤشر أو التركيز أو إخفاؤها" }
+}

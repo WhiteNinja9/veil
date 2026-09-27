@@ -1,0 +1,16 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "types": [
+      "chrome",
+      "node"
+    ]
+  },
+  "include": [
+    "../src",
+    "../types",
+    "./**/*.ts",
+    "../vitest.config.ts",
+    "../playwright.config.ts"
+  ]
+}

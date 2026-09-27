@@ -1,0 +1,16 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Search</title><link rel="stylesheet" href="/lab.css"></head>
+<body><h1>Search results</h1><p class="lede">Thumbnails embedded as <code>data:</code> URIs, as image search engines do.</p>
+<div id="results" class="grid"></div>
+<script>
+  (async () => {
+    const markers = ['neutral', 'explicit', 'neutral', 'suggestive', 'neutral', 'explicit'];
+    for (const [i, marker] of markers.entries()) {
+      const blob = await (await fetch(`/img/${marker}/200x150.png?seed=${40 + i}`)).blob();
+      const url = await new Promise((r) => { const fr = new FileReader(); fr.onload = () => r(fr.result); fr.readAsDataURL(blob); });
+      const card = document.createElement('div'); card.className = 'card';
+      card.innerHTML = `<img id="result-${i}" data-marker="${marker}" src="${url}" alt=""><div class="meta">${marker}</div>`;
+      document.getElementById('results').append(card);
+    }
+    document.body.dataset.ready = '1';
+  })();
+</script></body></html>

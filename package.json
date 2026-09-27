@@ -1,0 +1,58 @@
+{
+  "name": "veil",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Veil — private, on-device protection from unwanted visual content for Chrome and Firefox.",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "models": "node scripts/fetch-models.mjs",
+    "dev": "node scripts/build.mjs --target=chrome --mode=development --watch",
+    "dev:firefox": "node scripts/build.mjs --target=firefox --mode=development --watch",
+    "build": "node scripts/build.mjs --target=all --mode=production",
+    "build:chrome": "node scripts/build.mjs --target=chrome --mode=production",
+    "build:firefox": "node scripts/build.mjs --target=firefox --mode=production",
+    "build:test": "node scripts/build.mjs --target=chrome --mode=development --test-model --out=dist/chrome-test",
+    "package": "node scripts/package.mjs",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tests/tsconfig.json",
+    "lint": "eslint .",
+    "lint:firefox": "web-ext lint --source-dir dist/firefox --self-hosted",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "npm run build:test && npm run build:chrome && playwright test",
+    "lab": "node lab/server.mjs",
+    "bench": "node scripts/bench/run.mjs",
+    "calibrate": "node scripts/calibrate.mjs",
+    "check": "npm run typecheck && npm run lint && npm run test"
+  },
+  "dependencies": {
+    "@tensorflow/tfjs-backend-cpu": "4.22.0",
+    "@tensorflow/tfjs-backend-wasm": "4.22.0",
+    "@tensorflow/tfjs-backend-webgl": "4.22.0",
+    "@tensorflow/tfjs-backend-webgpu": "4.22.0",
+    "@tensorflow/tfjs-converter": "4.22.0",
+    "@tensorflow/tfjs-core": "4.22.0",
+    "preact": "10.29.8"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "@fontsource-variable/inter": "5.3.0",
+    "@playwright/test": "1.56.1",
+    "@types/chrome": "0.3.0",
+    "@types/node": "22.20.4",
+    "@vitest/coverage-v8": "5.0.2",
+    "esbuild": "0.28.2",
+    "eslint": "10.11.0",
+    "jsdom": "26.1.0",
+    "onnxruntime-web": "1.30.0",
+    "prettier": "3.9.9",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.70.1",
+    "vitest": "5.0.2",
+    "web-ext": "10.7.0"
+  }
+}

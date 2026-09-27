@@ -1,0 +1,15 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>SPA</title><link rel="stylesheet" href="/lab.css"></head>
+<body><h1>SPA with recycled nodes</h1><p class="lede">A virtualised list: a fixed pool of &lt;img&gt; nodes whose <code>src</code> is reassigned on "navigation" (pushState).</p>
+<button id="next">Next page</button> <span id="page">page 0</span>
+<div id="pool" class="grid"></div>
+<script>
+  const pool = document.getElementById('pool');
+  const imgs = Array.from({ length: 6 }, (_, i) => { const card = document.createElement('div'); card.className = 'card'; const img = document.createElement('img'); img.id = 'slot-' + i; card.append(img); pool.append(card); return img; });
+  let page = 0;
+  function render() {
+    imgs.forEach((img, i) => { const marker = (page + i) % 3 === 2 ? 'explicit' : 'neutral'; img.dataset.marker = marker; img.src = `/img/${marker}/360x270.png?seed=${page * 10 + i}`; });
+    document.getElementById('page').textContent = 'page ' + page;
+  }
+  document.getElementById('next').onclick = () => { page++; history.pushState({ page }, '', '?page=' + page); render(); };
+  render();
+</script></body></html>

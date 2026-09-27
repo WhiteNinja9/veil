@@ -1,0 +1,8 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Video</title><link rel="stylesheet" href="/lab.css"></head>
+<body><h1>Video</h1><p class="lede">Autoplaying videos. "switch" becomes explicit after 2 s.</p>
+<div class="grid">
+  <div class="card"><video id="v-neutral" src="/video/neutral.webm" autoplay muted loop playsinline width="320" height="180"></video><div class="meta">neutral · same-origin</div></div>
+  <div class="card"><video id="v-switch" src="/video/switch.webm" autoplay muted loop playsinline width="320" height="180"></video><div class="meta">switch · same-origin</div></div>
+  <div class="card"><video id="v-xo" src="__OTHER_ORIGIN__/video/switch.webm" autoplay muted loop playsinline width="320" height="180"></video><div class="meta">switch · cross-origin, no CORS (unverifiable)</div></div>
+  <div class="card"><video id="v-xo-cors" crossorigin="anonymous" src="__OTHER_ORIGIN__/video/switch.webm?cors=1" autoplay muted loop playsinline width="320" height="180"></video><div class="meta">switch · cross-origin with CORS</div></div>
+</div></body></html>

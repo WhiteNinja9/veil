@@ -1,0 +1,93 @@
+/**
+ * Icon set: 24×24, 1.75 stroke, round caps — drawn for Veil. Icons are
+ * decorative (aria-hidden) unless given a label; meaning is always also
+ * carried by text.
+ */
+import type { JSX } from 'preact';
+
+const PATHS = {
+  shield: ['M12 3l7.5 3v5.6c0 4.4-3.1 8.3-7.5 9.4-4.4-1.1-7.5-5-7.5-9.4V6L12 3z', 'M9 12l2 2 4-4'],
+  eyeOff: [
+    'M3 3l18 18',
+    'M10.6 5.1A10.4 10.4 0 0 1 12 5c5 0 8.6 4.2 9.6 7-.4 1.1-1.2 2.5-2.4 3.8M6.2 6.3C4.3 7.6 3 9.6 2.4 12c1 2.8 4.6 7 9.6 7 1.8 0 3.4-.5 4.8-1.3',
+    'M9.9 9.9a3 3 0 0 0 4.2 4.2',
+  ],
+  eye: ['M2.4 12C3.4 9.2 7 5 12 5s8.6 4.2 9.6 7c-1 2.8-4.6 7-9.6 7s-8.6-4.2-9.6-7z', 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z'],
+  image: ['M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v11a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 17.5v-11z', 'M4 16l4.5-4.5 4 4 2.5-2.5L20 18', 'M15.5 9.5h.01'],
+  video: ['M3.5 7.5A2.5 2.5 0 0 1 6 5h8a2.5 2.5 0 0 1 2.5 2.5v9A2.5 2.5 0 0 1 14 19H6a2.5 2.5 0 0 1-2.5-2.5v-9z', 'M16.5 10.5l4-2.5v8l-4-2.5'],
+  globe: ['M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z', 'M3.5 9h17M3.5 15h17', 'M12 3c2.3 2.5 3.5 5.5 3.5 9s-1.2 6.5-3.5 9c-2.3-2.5-3.5-5.5-3.5-9S9.7 5.5 12 3z'],
+  lock: ['M6.5 11h11a1.5 1.5 0 0 1 1.5 1.5v6a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 18.5v-6A1.5 1.5 0 0 1 6.5 11z', 'M8.5 11V8a3.5 3.5 0 0 1 7 0v3'],
+  unlock: ['M6.5 11h11a1.5 1.5 0 0 1 1.5 1.5v6a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 18.5v-6A1.5 1.5 0 0 1 6.5 11z', 'M8.5 11V8a3.5 3.5 0 0 1 6.8-1.2'],
+  sliders: ['M4 7h10M18 7h2M4 17h4M12 17h8', 'M16 9a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM10 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4z'],
+  gauge: ['M4.5 17a8.5 8.5 0 1 1 15 0', 'M12 13l3.5-4', 'M12 14a1 1 0 1 0 0-2 1 1 0 0 0 0 2z'],
+  info: ['M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z', 'M12 11v5', 'M12 8h.01'],
+  check: ['M5 12.5l4.5 4.5L19 7.5'],
+  chevronRight: ['M9.5 6l6 6-6 6'],
+  chevronDown: ['M6 9.5l6 6 6-6'],
+  search: ['M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14z', 'M20 20l-4-4'],
+  pause: ['M9 6v12M15 6v12'],
+  play: ['M8 5.5v13l10.5-6.5L8 5.5z'],
+  x: ['M6 6l12 12M18 6L6 18'],
+  plus: ['M12 5v14M5 12h14'],
+  trash: ['M5 7h14', 'M10 11v6M14 11v6', 'M6.5 7l.8 11.2A2 2 0 0 0 9.3 20h5.4a2 2 0 0 0 2-1.8L17.5 7', 'M9.5 7V5.5A1.5 1.5 0 0 1 11 4h2a1.5 1.5 0 0 1 1.5 1.5V7'],
+  download: ['M12 4v11', 'M7.5 10.5L12 15l4.5-4.5', 'M5 19h14'],
+  upload: ['M12 15V4', 'M7.5 8.5L12 4l4.5 4.5', 'M5 19h14'],
+  keyboard: ['M3.5 7.5A1.5 1.5 0 0 1 5 6h14a1.5 1.5 0 0 1 1.5 1.5v9A1.5 1.5 0 0 1 19 18H5a1.5 1.5 0 0 1-1.5-1.5v-9z', 'M7 10h.01M10 10h.01M13 10h.01M16 10h.01M7.5 14h9'],
+  access: ['M12 6.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z', 'M5 8.5l7 1.5 7-1.5', 'M12 10v4.5l-3 5.5M12 14.5l3 5.5'],
+  language: ['M4 5h8M8 3.5V5c0 4-2 7-4.5 8.5', 'M5.5 9c1.2 2 3.2 3.6 5.5 4.5', 'M12.5 20.5l4-9.5 4 9.5M14 17h5'],
+  cpu: ['M7.5 5.5h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-9a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2z', 'M9.5 9.5h5v5h-5z', 'M9.5 2.5v3M14.5 2.5v3M9.5 18.5v3M14.5 18.5v3M2.5 9.5h3M2.5 14.5h3M18.5 9.5h3M18.5 14.5h3'],
+  sparkle: ['M12 3.5l1.8 5.2 5.2 1.8-5.2 1.8L12 17.5l-1.8-5.2L5 10.5l5.2-1.8L12 3.5z', 'M18.5 16l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7.7-1.8z'],
+  ban: ['M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z', 'M5.6 5.6l12.8 12.8'],
+  alert: ['M12 4l9 15.5H3L12 4z', 'M12 10v4', 'M12 17h.01'],
+  settings: [
+    'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
+    'M19.4 13.5a7.7 7.7 0 0 0 0-3l2-1.6-2-3.4-2.4 1a7.6 7.6 0 0 0-2.6-1.5L14 2.5h-4l-.4 2.5A7.6 7.6 0 0 0 7 6.5l-2.4-1-2 3.4 2 1.6a7.7 7.7 0 0 0 0 3l-2 1.6 2 3.4 2.4-1a7.6 7.6 0 0 0 2.6 1.5l.4 2.5h4l.4-2.5a7.6 7.6 0 0 0 2.6-1.5l2.4 1 2-3.4-2-1.6z',
+  ],
+  device: ['M5 5.5A1.5 1.5 0 0 1 6.5 4h11A1.5 1.5 0 0 1 19 5.5v9a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 14.5v-9z', 'M3 19.5h18', 'M10 16l-.5 3.5M14 16l.5 3.5'],
+  cloudOff: ['M3 3l18 18', 'M8.5 6.3A6 6 0 0 1 17.7 10 4 4 0 0 1 20.3 16.8M17 19H7a5 5 0 0 1-1.6-9.7'],
+  history: ['M3.5 12a8.5 8.5 0 1 0 2.5-6', 'M3.5 4.5V9H8', 'M12 8v4.5l3 2'],
+  chart: ['M4 19.5h16', 'M7 16v-4M11.5 16V8M16 16v-6.5'],
+  arrowLeft: ['M19 12H5', 'M11 6l-6 6 6 6'],
+  external: ['M14 5h5v5', 'M19 5l-8 8', 'M17 14v4a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 5 18V8.5A1.5 1.5 0 0 1 6.5 7H10'],
+  copy: ['M9 9.5A1.5 1.5 0 0 1 10.5 8h8A1.5 1.5 0 0 1 20 9.5v9a1.5 1.5 0 0 1-1.5 1.5h-8A1.5 1.5 0 0 1 9 18.5v-9z', 'M15 8V5.5A1.5 1.5 0 0 0 13.5 4h-8A1.5 1.5 0 0 0 4 5.5v9A1.5 1.5 0 0 0 5.5 16H9'],
+  refresh: ['M19.5 12a7.5 7.5 0 1 1-2.2-5.3', 'M19.5 4.5v4h-4'],
+  user: ['M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z', 'M4.5 20c.8-3.4 3.8-5.5 7.5-5.5s6.7 2.1 7.5 5.5'],
+} as const;
+
+export type IconName = keyof typeof PATHS;
+const DIRECTIONAL: ReadonlySet<IconName> = new Set(['chevronRight', 'arrowLeft', 'external']);
+
+export function Icon({ name, label, size, class: className }: { name: IconName; label?: string; size?: number; class?: string }): JSX.Element {
+  const classes = [DIRECTIONAL.has(name) ? 'icon-directional' : '', className ?? ''].filter(Boolean).join(' ');
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width={size}
+      height={size}
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.75"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      class={classes || undefined}
+      role={label ? 'img' : undefined}
+      aria-label={label}
+      aria-hidden={label ? undefined : 'true'}
+      focusable="false"
+    >
+      {PATHS[name].map((d) => (
+        <path key={d} d={d} />
+      ))}
+    </svg>
+  );
+}
+
+/** The Veil mark (layered V), used in headers. */
+export function Mark({ size = 22 }: { size?: number }): JSX.Element {
+  return (
+    <svg viewBox="0 0 64 64" width={size} height={size} fill="none" aria-hidden="true" focusable="false">
+      <path d="M15 16 32 49" stroke="var(--accent)" stroke-opacity="0.55" stroke-width="9" stroke-linecap="round" />
+      <path d="M49 16 32 49" stroke="var(--accent)" stroke-width="9" stroke-linecap="round" />
+    </svg>
+  );
+}

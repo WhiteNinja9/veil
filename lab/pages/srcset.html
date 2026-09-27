@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>srcset</title>
+    <link rel="stylesheet" href="/lab.css" />
+  </head>
+  <body>
+    <h1>srcset and &lt;picture&gt;</h1>
+    <p class="lede">Responsive candidates; the browser picks one.</p>
+    <div class="grid">
+      <div class="card">
+        <img
+          id="srcset"
+          srcset="/img/explicit/200x150.png?seed=6 200w, /img/explicit/800x600.png?seed=6 800w"
+          sizes="(max-width: 600px) 200px, 400px"
+          src="/img/explicit/400x300.png?seed=6"
+          alt=""
+        />
+        <div class="meta">srcset · explicit</div>
+      </div>
+      <div class="card">
+        <picture id="picture"
+          ><source srcset="/img/suggestive/400x300.png?seed=7" media="(min-width: 1px)" />
+          <img id="picture-img" src="/img/neutral/400x300.png?seed=7" alt=""
+        /></picture>
+        <div class="meta">picture · suggestive source</div>
+      </div>
+      <div class="card">
+        <img id="swap" src="/img/neutral/400x300.png?seed=8" alt="" />
+        <div class="meta">src swapped to explicit after 1.5 s</div>
+      </div>
+    </div>
+    <script>
+      setTimeout(() => {
+        document.getElementById('swap').src = '/img/explicit/400x300.png?seed=9';
+      }, 1500);
+    </script>
+  </body>
+</html>

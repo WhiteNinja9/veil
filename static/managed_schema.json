@@ -1,0 +1,27 @@
+{
+  "type": "object",
+  "properties": {
+    "enforceEnabled": {
+      "title": "Keep protection on",
+      "description": "When true, Veil cannot be turned off or paused from its own interface.",
+      "type": "boolean"
+    },
+    "minimumStrictness": {
+      "title": "Minimum protection level",
+      "description": "Protection level floor: minimal, balanced, strict or maximum.",
+      "type": "string",
+      "enum": ["minimal", "balanced", "strict", "maximum"]
+    },
+    "strictBrowsing": {
+      "title": "Enforce Strict Browsing",
+      "description": "Turns on Strict Browsing (SafeSearch, YouTube Restricted Mode, protected fallback).",
+      "type": "boolean"
+    },
+    "revealMode": {
+      "title": "Reveal behaviour",
+      "description": "How protected media can be revealed: click, hold, hover or disabled.",
+      "type": "string",
+      "enum": ["click", "hold", "hover", "disabled"]
+    }
+  }
+}

@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Shadow DOM</title>
+    <link rel="stylesheet" href="/lab.css" />
+  </head>
+  <body>
+    <h1>Shadow DOM</h1>
+    <p class="lede">Images inside open and closed shadow roots, including a late-upgraded custom element.</p>
+    <open-card id="open"></open-card> <closed-card id="closed"></closed-card>
+    <late-card id="late"></late-card>
+    <script>
+      class OpenCard extends HTMLElement {
+        connectedCallback() {
+          const r = this.attachShadow({ mode: 'open' });
+          r.innerHTML =
+            '<img id="inner" style="width:240px;height:180px" src="/img/explicit/400x300.png?seed=20">';
+        }
+      }
+      class ClosedCard extends HTMLElement {
+        connectedCallback() {
+          const r = this.attachShadow({ mode: 'closed' });
+          r.innerHTML =
+            '<img id="inner" style="width:240px;height:180px" src="/img/explicit/400x300.png?seed=21">';
+          window.closedRoot = r;
+        }
+      }
+      customElements.define('open-card', OpenCard);
+      customElements.define('closed-card', ClosedCard);
+      setTimeout(
+        () =>
+          customElements.define(
+            'late-card',
+            class extends HTMLElement {
+              connectedCallback() {
+                const r = this.attachShadow({ mode: 'open' });
+                r.innerHTML =
+                  '<img id="inner" style="width:240px;height:180px" src="/img/explicit/400x300.png?seed=22">';
+              }
+            },
+          ),
+        400,
+      );
+    </script>
+  </body>
+</html>

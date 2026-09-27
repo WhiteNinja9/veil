@@ -1,0 +1,10 @@
+{
+  "extName": { "message": "Veil — Protection privée du contenu" },
+  "extDescription": {
+    "message": "Masque les images et vidéos explicites ou indésirables avant que vous ne les voyiez. IA locale : rien ne quitte votre navigateur."
+  },
+  "actionTitle": { "message": "Veil" },
+  "commandOpenPopup": { "message": "Ouvrir Veil" },
+  "commandToggleSite": { "message": "Suspendre ou reprendre la protection sur ce site" },
+  "commandReveal": { "message": "Afficher ou masquer le média protégé sous le pointeur ou le focus" }
+}

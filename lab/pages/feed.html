@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Feed</title>
+    <link rel="stylesheet" href="/lab.css" />
+  </head>
+  <body>
+    <h1>Infinite feed</h1>
+    <p class="lede">
+      Cards are appended as you scroll; every 5th card is explicit, every 7th uses a background image.
+    </p>
+    <div id="feed" class="grid"></div>
+    <div id="sentinel" style="height: 1px"></div>
+    <script>
+      let n = 0;
+      const feed = document.getElementById('feed');
+      function addCards(count) {
+        for (let i = 0; i < count; i++, n++) {
+          const marker = n % 5 === 4 ? 'explicit' : 'neutral';
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.dataset.index = n;
+          card.dataset.marker = marker;
+          if (n % 7 === 6)
+            card.innerHTML = `<div class="bg" style="background-image:url('/img/${marker}/360x270.png?seed=${n}')"></div><div class="meta">#${n} ${marker} (bg)</div>`;
+          else
+            card.innerHTML = `<img src="/img/${marker}/360x270.png?seed=${n}" alt=""><div class="meta">#${n} ${marker}</div>`;
+          feed.append(card);
+        }
+      }
+      addCards(20);
+      new IntersectionObserver(
+        (e) => {
+          if (e[0].isIntersecting) addCards(10);
+        },
+        { rootMargin: '600px' },
+      ).observe(document.getElementById('sentinel'));
+      window.labAddCards = addCards;
+    </script>
+  </body>
+</html>

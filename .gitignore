@@ -1,0 +1,12 @@
+node_modules/
+dist/
+artifacts/
+.cache/
+assets/models/*/
+assets/models/models.json
+coverage/
+test-results/
+playwright-report/
+bench-results/local/
+*.log
+.DS_Store

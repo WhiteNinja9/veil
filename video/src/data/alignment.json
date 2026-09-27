@@ -1,0 +1,1101 @@
+{
+ "scenes": [
+  {
+   "id": "hook",
+   "src": "voice/full.wav",
+   "from": 0.1,
+   "duration": 5.91,
+   "words": [
+    {
+     "text": "Every",
+     "line": 0,
+     "em": false,
+     "start": 0.12,
+     "end": 0.44
+    },
+    {
+     "text": "day,",
+     "line": 0,
+     "em": false,
+     "start": 0.44,
+     "end": 0.86
+    },
+    {
+     "text": "the",
+     "line": 0,
+     "em": false,
+     "start": 0.86,
+     "end": 1.05
+    },
+    {
+     "text": "web",
+     "line": 0,
+     "em": false,
+     "start": 1.05,
+     "end": 1.34
+    },
+    {
+     "text": "shows",
+     "line": 0,
+     "em": false,
+     "start": 1.34,
+     "end": 1.71
+    },
+    {
+     "text": "you",
+     "line": 0,
+     "em": false,
+     "start": 1.71,
+     "end": 1.84
+    },
+    {
+     "text": "thousands",
+     "line": 1,
+     "em": false,
+     "start": 1.84,
+     "end": 2.72
+    },
+    {
+     "text": "of",
+     "line": 1,
+     "em": false,
+     "start": 2.72,
+     "end": 2.86
+    },
+    {
+     "text": "images.",
+     "line": 1,
+     "em": false,
+     "start": 2.86,
+     "end": 3.39
+    },
+    {
+     "text": "You",
+     "line": 2,
+     "em": false,
+     "start": 4.2,
+     "end": 4.33
+    },
+    {
+     "text": "never",
+     "line": 2,
+     "em": false,
+     "start": 4.33,
+     "end": 4.57
+    },
+    {
+     "text": "chose",
+     "line": 2,
+     "em": false,
+     "start": 4.57,
+     "end": 4.96
+    },
+    {
+     "text": "most",
+     "line": 3,
+     "em": false,
+     "start": 4.96,
+     "end": 5.25
+    },
+    {
+     "text": "of",
+     "line": 3,
+     "em": false,
+     "start": 5.25,
+     "end": 5.33
+    },
+    {
+     "text": "them.",
+     "line": 3,
+     "em": false,
+     "start": 5.33,
+     "end": 5.61
+    }
+   ]
+  },
+  {
+   "id": "meet",
+   "src": "voice/full.wav",
+   "from": 6.48,
+   "duration": 1.21,
+   "words": [
+    {
+     "text": "Meet",
+     "line": 0,
+     "em": false,
+     "start": 0.12,
+     "end": 0.43
+    },
+    {
+     "text": "Veil.",
+     "line": 0,
+     "em": true,
+     "start": 0.43,
+     "end": 0.91
+    }
+   ]
+  },
+  {
+   "id": "gate",
+   "src": "voice/full.wav",
+   "from": 7.99,
+   "duration": 4.57,
+   "words": [
+    {
+     "text": "Veil",
+     "line": 0,
+     "em": false,
+     "start": 0.12,
+     "end": 0.49
+    },
+    {
+     "text": "hides",
+     "line": 0,
+     "em": false,
+     "start": 0.49,
+     "end": 1.02
+    },
+    {
+     "text": "unwanted",
+     "line": 0,
+     "em": false,
+     "start": 1.02,
+     "end": 1.51
+    },
+    {
+     "text": "images",
+     "line": 0,
+     "em": false,
+     "start": 1.51,
+     "end": 2.05
+    },
+    {
+     "text": "and",
+     "line": 0,
+     "em": false,
+     "start": 2.05,
+     "end": 2.2
+    },
+    {
+     "text": "video",
+     "line": 0,
+     "em": false,
+     "start": 2.2,
+     "end": 2.56
+    },
+    {
+     "text": "before",
+     "line": 1,
+     "em": true,
+     "start": 2.56,
+     "end": 3.15
+    },
+    {
+     "text": "they",
+     "line": 1,
+     "em": false,
+     "start": 3.15,
+     "end": 3.32
+    },
+    {
+     "text": "appear",
+     "line": 1,
+     "em": false,
+     "start": 3.32,
+     "end": 3.64
+    },
+    {
+     "text": "on",
+     "line": 2,
+     "em": false,
+     "start": 3.64,
+     "end": 3.74
+    },
+    {
+     "text": "your",
+     "line": 2,
+     "em": false,
+     "start": 3.74,
+     "end": 3.84
+    },
+    {
+     "text": "screen.",
+     "line": 2,
+     "em": false,
+     "start": 3.84,
+     "end": 4.27
+    }
+   ]
+  },
+  {
+   "id": "scan",
+   "src": "voice/full.wav",
+   "from": 13.1,
+   "duration": 4.89,
+   "words": [
+    {
+     "text": "The",
+     "line": 0,
+     "em": false,
+     "start": 0.12,
+     "end": 0.2
+    },
+    {
+     "text": "moment",
+     "line": 0,
+     "em": false,
+     "start": 0.2,
+     "end": 0.55
+    },
+    {
+     "text": "a",
+     "line": 0,
+     "em": false,
+     "start": 0.55,
+     "end": 0.58
+    },
+    {
+     "text": "page",
+     "line": 0,
+     "em": false,
+     "start": 0.58,
+     "end": 0.86
+    },
+    {
+     "text": "loads,",
+     "line": 0,
+     "em": false,
+     "start": 0.86,
+     "end": 1.35
+    },
+    {
+     "text": "it",
+     "line": 1,
+     "em": false,
+     "start": 1.35,
+     "end": 1.49
+    },
+    {
+     "text": "checks",
+     "line": 1,
+     "em": false,
+     "start": 1.49,
+     "end": 1.87
+    },
+    {
+     "text": "each",
+     "line": 1,
+     "em": false,
+     "start": 2.0,
+     "end": 2.27
+    },
+    {
+     "text": "image,",
+     "line": 1,
+     "em": false,
+     "start": 2.27,
+     "end": 2.78
+    },
+    {
+     "text": "and",
+     "line": 2,
+     "em": false,
+     "start": 2.78,
+     "end": 3.19
+    },
+    {
+     "text": "each",
+     "line": 2,
+     "em": false,
+     "start": 3.19,
+     "end": 3.49
+    },
+    {
+     "text": "video",
+     "line": 2,
+     "em": false,
+     "start": 3.49,
+     "end": 3.9
+    },
+    {
+     "text": "as",
+     "line": 3,
+     "em": false,
+     "start": 3.9,
+     "end": 4.07
+    },
+    {
+     "text": "it",
+     "line": 3,
+     "em": false,
+     "start": 4.07,
+     "end": 4.15
+    },
+    {
+     "text": "plays.",
+     "line": 3,
+     "em": false,
+     "start": 4.15,
+     "end": 4.59
+    }
+   ]
+  },
+  {
+   "id": "private",
+   "src": "voice/full.wav",
+   "from": 18.2,
+   "duration": 6.84,
+   "words": [
+    {
+     "text": "And",
+     "line": 0,
+     "em": false,
+     "start": 0.12,
+     "end": 0.52
+    },
+    {
+     "text": "it",
+     "line": 0,
+     "em": false,
+     "start": 0.52,
+     "end": 0.66
+    },
+    {
+     "text": "all",
+     "line": 0,
+     "em": false,
+     "start": 0.66,
+     "end": 0.87
+    },
+    {
+     "text": "happens",
+     "line": 0,
+     "em": false,
+     "start": 0.87,
+     "end": 1.4
+    },
+    {
+     "text": "on",
+     "line": 1,
+     "em": true,
+     "start": 1.4,
+     "end": 1.55
+    },
+    {
+     "text": "your",
+     "line": 1,
+     "em": false,
+     "start": 1.55,
+     "end": 1.67
+    },
+    {
+     "text": "device.",
+     "line": 1,
+     "em": true,
+     "start": 1.67,
+     "end": 2.19
+    },
+    {
+     "text": "Nothing",
+     "line": 2,
+     "em": false,
+     "start": 2.6,
+     "end": 2.91
+    },
+    {
+     "text": "is",
+     "line": 2,
+     "em": false,
+     "start": 2.91,
+     "end": 3.02
+    },
+    {
+     "text": "uploaded.",
+     "line": 2,
+     "em": false,
+     "start": 3.02,
+     "end": 3.55
+    },
+    {
+     "text": "No",
+     "line": 3,
+     "em": false,
+     "start": 3.97,
+     "end": 4.09
+    },
+    {
+     "text": "servers.",
+     "line": 3,
+     "em": false,
+     "start": 4.09,
+     "end": 4.89
+    },
+    {
+     "text": "No",
+     "line": 4,
+     "em": false,
+     "start": 4.89,
+     "end": 5.11
+    },
+    {
+     "text": "accounts.",
+     "line": 4,
+     "em": false,
+     "start": 5.11,
+     "end": 5.8
+    },
+    {
+     "text": "No",
+     "line": 5,
+     "em": false,
+     "start": 5.99,
+     "end": 6.09
+    },
+    {
+     "text": "tracking.",
+     "line": 5,
+     "em": false,
+     "start": 6.09,
+     "end": 6.54
+    }
+   ]
+  },
+  {
+   "id": "levels",
+   "src": "voice/full.wav",
+   "from": 25.59,
+   "duration": 5.98,
+   "words": [
+    {
+     "text": "You",
+     "line": 0,
+     "em": false,
+     "start": 0.12,
+     "end": 0.3
+    },
+    {
+     "text": "decide",
+     "line": 0,
+     "em": false,
+     "start": 0.3,
+     "end": 0.67
+    },
+    {
+     "text": "how",
+     "line": 0,
+     "em": false,
+     "start": 0.67,
+     "end": 0.87
+    },
+    {
+     "text": "strict",
+     "line": 0,
+     "em": false,
+     "start": 0.87,
+     "end": 1.23
+    },
+    {
+     "text": "it",
+     "line": 0,
+     "em": false,
+     "start": 1.23,
+     "end": 1.32
+    },
+    {
+     "text": "is.",
+     "line": 0,
+     "em": false,
+     "start": 1.32,
+     "end": 1.6
+    },
+    {
+     "text": "Minimal.",
+     "line": 1,
+     "em": false,
+     "start": 2.17,
+     "end": 2.67
+    },
+    {
+     "text": "Balanced.",
+     "line": 2,
+     "em": false,
+     "start": 3.15,
+     "end": 3.8
+    },
+    {
+     "text": "Strict.",
+     "line": 3,
+     "em": false,
+     "start": 4.03,
+     "end": 4.47
+    },
+    {
+     "text": "Or",
+     "line": 4,
+     "em": false,
+     "start": 4.68,
+     "end": 5.05
+    },
+    {
+     "text": "Maximum.",
+     "line": 4,
+     "em": false,
+     "start": 5.16,
+     "end": 5.68
+    }
+   ]
+  },
+  {
+   "id": "people",
+   "src": "voice/full.wav",
+   "from": 32.04,
+   "duration": 5.48,
+   "words": [
+    {
+     "text": "Choose",
+     "line": 0,
+     "em": false,
+     "start": 0.12,
+     "end": 0.57
+    },
+    {
+     "text": "to",
+     "line": 0,
+     "em": false,
+     "start": 0.57,
+     "end": 0.67
+    },
+    {
+     "text": "blur",
+     "line": 0,
+     "em": false,
+     "start": 0.67,
+     "end": 0.93
+    },
+    {
+     "text": "faces",
+     "line": 0,
+     "em": false,
+     "start": 0.93,
+     "end": 1.68
+    },
+    {
+     "text": "and",
+     "line": 0,
+     "em": false,
+     "start": 1.68,
+     "end": 1.82
+    },
+    {
+     "text": "people.",
+     "line": 0,
+     "em": false,
+     "start": 1.82,
+     "end": 2.25
+    },
+    {
+     "text": "Everyone,",
+     "line": 1,
+     "em": false,
+     "start": 2.81,
+     "end": 3.48
+    },
+    {
+     "text": "only",
+     "line": 2,
+     "em": false,
+     "start": 3.48,
+     "end": 3.78
+    },
+    {
+     "text": "women,",
+     "line": 2,
+     "em": false,
+     "start": 3.78,
+     "end": 4.25
+    },
+    {
+     "text": "or",
+     "line": 3,
+     "em": false,
+     "start": 4.25,
+     "end": 4.61
+    },
+    {
+     "text": "only",
+     "line": 3,
+     "em": false,
+     "start": 4.61,
+     "end": 4.81
+    },
+    {
+     "text": "men.",
+     "line": 3,
+     "em": false,
+     "start": 4.81,
+     "end": 5.18
+    }
+   ]
+  },
+  {
+   "id": "video",
+   "src": "voice/full.wav",
+   "from": 37.95,
+   "duration": 3.07,
+   "words": [
+    {
+     "text": "Even",
+     "line": 0,
+     "em": false,
+     "start": 0.12,
+     "end": 0.42
+    },
+    {
+     "text": "in",
+     "line": 0,
+     "em": false,
+     "start": 0.42,
+     "end": 0.56
+    },
+    {
+     "text": "video,",
+     "line": 0,
+     "em": false,
+     "start": 0.56,
+     "end": 0.97
+    },
+    {
+     "text": "the",
+     "line": 1,
+     "em": false,
+     "start": 0.97,
+     "end": 1.11
+    },
+    {
+     "text": "blur",
+     "line": 1,
+     "em": false,
+     "start": 1.11,
+     "end": 1.35
+    },
+    {
+     "text": "follows",
+     "line": 1,
+     "em": true,
+     "start": 1.35,
+     "end": 1.93
+    },
+    {
+     "text": "them",
+     "line": 1,
+     "em": false,
+     "start": 1.93,
+     "end": 2.13
+    },
+    {
+     "text": "as",
+     "line": 2,
+     "em": false,
+     "start": 2.13,
+     "end": 2.26
+    },
+    {
+     "text": "they",
+     "line": 2,
+     "em": false,
+     "start": 2.26,
+     "end": 2.37
+    },
+    {
+     "text": "move.",
+     "line": 2,
+     "em": false,
+     "start": 2.37,
+     "end": 2.77
+    }
+   ]
+  },
+  {
+   "id": "styles",
+   "src": "voice/full.wav",
+   "from": 41.6,
+   "duration": 5.64,
+   "words": [
+    {
+     "text": "Soft",
+     "line": 0,
+     "em": false,
+     "start": 0.12,
+     "end": 0.58
+    },
+    {
+     "text": "blur.",
+     "line": 0,
+     "em": false,
+     "start": 0.58,
+     "end": 1.05
+    },
+    {
+     "text": "Pixelate.",
+     "line": 1,
+     "em": false,
+     "start": 1.31,
+     "end": 2.13
+    },
+    {
+     "text": "Or",
+     "line": 2,
+     "em": false,
+     "start": 2.13,
+     "end": 2.42
+    },
+    {
+     "text": "hide",
+     "line": 2,
+     "em": false,
+     "start": 2.42,
+     "end": 2.68
+    },
+    {
+     "text": "it",
+     "line": 2,
+     "em": false,
+     "start": 2.68,
+     "end": 2.79
+    },
+    {
+     "text": "completely.",
+     "line": 2,
+     "em": false,
+     "start": 2.79,
+     "end": 3.32
+    },
+    {
+     "text": "Shown",
+     "line": 3,
+     "em": false,
+     "start": 3.76,
+     "end": 4.15
+    },
+    {
+     "text": "only",
+     "line": 3,
+     "em": false,
+     "start": 4.15,
+     "end": 4.63
+    },
+    {
+     "text": "when",
+     "line": 3,
+     "em": false,
+     "start": 4.63,
+     "end": 4.81
+    },
+    {
+     "text": "you",
+     "line": 3,
+     "em": true,
+     "start": 4.81,
+     "end": 4.91
+    },
+    {
+     "text": "choose.",
+     "line": 3,
+     "em": false,
+     "start": 4.91,
+     "end": 5.34
+    }
+   ]
+  },
+  {
+   "id": "sites",
+   "src": "voice/full.wav",
+   "from": 47.89,
+   "duration": 6.49,
+   "words": [
+    {
+     "text": "Pause",
+     "line": 0,
+     "em": false,
+     "start": 0.12,
+     "end": 0.42
+    },
+    {
+     "text": "a",
+     "line": 0,
+     "em": false,
+     "start": 0.42,
+     "end": 0.45
+    },
+    {
+     "text": "site,",
+     "line": 0,
+     "em": false,
+     "start": 0.45,
+     "end": 1.16
+    },
+    {
+     "text": "make",
+     "line": 1,
+     "em": false,
+     "start": 1.16,
+     "end": 1.31
+    },
+    {
+     "text": "it",
+     "line": 1,
+     "em": false,
+     "start": 1.31,
+     "end": 1.4
+    },
+    {
+     "text": "stricter,",
+     "line": 1,
+     "em": false,
+     "start": 1.4,
+     "end": 1.9
+    },
+    {
+     "text": "or",
+     "line": 2,
+     "em": false,
+     "start": 1.9,
+     "end": 2.1
+    },
+    {
+     "text": "block",
+     "line": 2,
+     "em": false,
+     "start": 2.1,
+     "end": 2.37
+    },
+    {
+     "text": "it.",
+     "line": 2,
+     "em": false,
+     "start": 2.37,
+     "end": 2.6
+    },
+    {
+     "text": "Strict",
+     "line": 3,
+     "em": false,
+     "start": 3.04,
+     "end": 3.41
+    },
+    {
+     "text": "Browsing",
+     "line": 3,
+     "em": false,
+     "start": 3.41,
+     "end": 3.86
+    },
+    {
+     "text": "enforces",
+     "line": 4,
+     "em": false,
+     "start": 3.86,
+     "end": 4.33
+    },
+    {
+     "text": "SafeSearch",
+     "line": 4,
+     "em": false,
+     "start": 4.33,
+     "end": 4.97
+    },
+    {
+     "text": "on",
+     "line": 5,
+     "em": false,
+     "start": 4.97,
+     "end": 5.15
+    },
+    {
+     "text": "major",
+     "line": 5,
+     "em": false,
+     "start": 5.15,
+     "end": 5.45
+    },
+    {
+     "text": "search",
+     "line": 5,
+     "em": false,
+     "start": 5.45,
+     "end": 5.73
+    },
+    {
+     "text": "engines.",
+     "line": 5,
+     "em": false,
+     "start": 5.73,
+     "end": 6.19
+    }
+   ]
+  },
+  {
+   "id": "lock",
+   "src": "voice/full.wav",
+   "from": 54.82,
+   "duration": 3.28,
+   "words": [
+    {
+     "text": "Lock",
+     "line": 0,
+     "em": false,
+     "start": 0.12,
+     "end": 0.35
+    },
+    {
+     "text": "your",
+     "line": 0,
+     "em": false,
+     "start": 0.35,
+     "end": 0.46
+    },
+    {
+     "text": "settings",
+     "line": 0,
+     "em": false,
+     "start": 0.46,
+     "end": 0.87
+    },
+    {
+     "text": "with",
+     "line": 0,
+     "em": false,
+     "start": 0.87,
+     "end": 0.98
+    },
+    {
+     "text": "a",
+     "line": 0,
+     "em": false,
+     "start": 0.98,
+     "end": 1.01
+    },
+    {
+     "text": "passcode,",
+     "line": 0,
+     "em": false,
+     "start": 1.01,
+     "end": 1.7
+    },
+    {
+     "text": "so",
+     "line": 1,
+     "em": false,
+     "start": 1.7,
+     "end": 1.91
+    },
+    {
+     "text": "protection",
+     "line": 1,
+     "em": false,
+     "start": 1.91,
+     "end": 2.42
+    },
+    {
+     "text": "stays",
+     "line": 1,
+     "em": true,
+     "start": 2.42,
+     "end": 2.71
+    },
+    {
+     "text": "on.",
+     "line": 1,
+     "em": true,
+     "start": 2.71,
+     "end": 2.98
+    }
+   ]
+  },
+  {
+   "id": "outro",
+   "src": "voice/full.wav",
+   "from": 58.63,
+   "duration": 4.69,
+   "words": [
+    {
+     "text": "Veil.",
+     "line": 0,
+     "em": false,
+     "start": 0.12,
+     "end": 0.47
+    },
+    {
+     "text": "See",
+     "line": 1,
+     "em": false,
+     "start": 1.06,
+     "end": 1.39
+    },
+    {
+     "text": "what",
+     "line": 1,
+     "em": false,
+     "start": 1.39,
+     "end": 1.54
+    },
+    {
+     "text": "you",
+     "line": 1,
+     "em": false,
+     "start": 1.54,
+     "end": 1.66
+    },
+    {
+     "text": "choose",
+     "line": 1,
+     "em": true,
+     "start": 1.66,
+     "end": 1.97
+    },
+    {
+     "text": "to",
+     "line": 1,
+     "em": false,
+     "start": 1.97,
+     "end": 2.06
+    },
+    {
+     "text": "see.",
+     "line": 1,
+     "em": false,
+     "start": 2.06,
+     "end": 2.37
+    },
+    {
+     "text": "For",
+     "line": 2,
+     "em": false,
+     "start": 2.91,
+     "end": 3.05
+    },
+    {
+     "text": "Chrome",
+     "line": 2,
+     "em": false,
+     "start": 3.05,
+     "end": 3.5
+    },
+    {
+     "text": "and",
+     "line": 2,
+     "em": false,
+     "start": 3.72,
+     "end": 3.83
+    },
+    {
+     "text": "Firefox.",
+     "line": 2,
+     "em": false,
+     "start": 3.83,
+     "end": 4.46
+    }
+   ]
+  }
+ ]
+}

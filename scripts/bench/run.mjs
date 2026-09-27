@@ -110,7 +110,7 @@ async function main() {
       `  warm wall-clock per image: median ${walls[Math.floor(walls.length / 2)]?.toFixed(1)} ms, p95 ${walls[Math.floor(walls.length * 0.95)]?.toFixed(1)} ms`,
     );
     console.log(
-      `  concurrent burst of ${run.burst.count}: ${run.burst.totalMs.toFixed(0)} ms total (${(run.burst.totalMs / run.burst.count).toFixed(1)} ms/image with batching)`,
+      `  concurrent burst of ${run.burst.count}: ${run.burst.totalMs.toFixed(0)} ms total (${(run.burst.totalMs / run.burst.count).toFixed(1)} ms/image; batched only on GPU backends)`,
     );
     report.accuracy = {
       backend: best.backend,

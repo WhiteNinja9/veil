@@ -68,7 +68,10 @@ function serve() {
     }
     try {
       const body = await readFile(file);
-      res.writeHead(200, { 'content-type': TYPES[path.extname(file)] ?? 'application/octet-stream' }).end(body);
+      const headers = { 'content-type': TYPES[path.extname(file)] ?? 'application/octet-stream' };
+      // --csp reproduces the extension-page policy (manifest content_security_policy).
+      if (args.csp && /\.(html|js)$/.test(file)) headers['content-security-policy'] = "script-src 'self' 'wasm-unsafe-eval'; object-src 'none'; base-uri 'none'";
+      res.writeHead(200, headers).end(body);
     } catch {
       res.writeHead(404).end();
     }

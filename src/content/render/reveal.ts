@@ -202,7 +202,9 @@ export class RevealController {
     if (this.host?.isConnected) return;
     const host = document.createElement('veil-layer');
     host.setAttribute('style', 'all:initial;position:fixed;top:0;left:0;width:0;height:0;z-index:2147483647;');
-    const shadow = host.attachShadow({ mode: 'closed' });
+    // Closed in production so pages cannot inspect or restyle it; open in
+    // development builds so tooling and tests can drive it.
+    const shadow = host.attachShadow({ mode: __DEV__ ? 'open' : 'closed' });
     const style = document.createElement('style');
     style.textContent = CHIP_CSS;
     const layer = document.createElement('div');

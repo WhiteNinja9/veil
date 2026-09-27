@@ -58,7 +58,7 @@ export class SettingsStore {
     } catch (error) {
       log.warn('Failed to read settings, using defaults', error);
     }
-    this.managed = await readManagedPolicy();
+    this.managed = await readManagedMirror();
     this.current = this.applyManaged(sanitizeSettings(raw));
     return this.current;
   }
@@ -131,15 +131,13 @@ export class SettingsStore {
         this.current = next;
         this.emit(next, previous);
       }
-      if (area === 'managed') {
-        void readManagedPolicy().then((managed) => {
-          this.managed = managed;
-          if (this.current) {
-            const previous = this.current;
-            this.current = this.applyManaged(this.current);
-            this.emit(this.current, previous);
-          }
-        });
+      if (area === 'local' && changes[MANAGED_MIRROR_KEY]) {
+        this.managed = parseManagedPolicy(changes[MANAGED_MIRROR_KEY].newValue);
+        if (this.current) {
+          const previous = this.current;
+          this.current = this.applyManaged(this.current);
+          this.emit(this.current, previous);
+        }
       }
     });
   }
@@ -147,29 +145,59 @@ export class SettingsStore {
 
 /**
  * Administrator policy (Chrome `storage.managed` via managed_schema.json,
- * Firefox via policies.json "3rdparty" extension settings). Only a curated
- * subset of settings can be enforced; see docs/DEPLOYMENT.md.
+ * Firefox via policies.json "3rdparty" extension settings).
+ *
+ * Only the background reads the managed area — in Chrome that read can
+ * take seconds when no policy exists, which must never delay a page. The
+ * background mirrors the parsed policy into local storage; every other
+ * context reads the mirror.
  */
-async function readManagedPolicy(): Promise<ManagedPolicy | null> {
-  const managedArea = (ext().storage as Partial<typeof chrome.storage>).managed;
-  if (!managedArea) return null;
+export const MANAGED_MIRROR_KEY = 'veil.managedPolicy';
+
+export function parseManagedPolicy(raw: unknown): ManagedPolicy | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const input = raw as Record<string, unknown>;
+  const policy: ManagedPolicy = {};
+  if (input.enforceEnabled === true) policy.enforceEnabled = true;
+  if (typeof input.minimumStrictness === 'string' && (STRICTNESS_LEVELS as readonly string[]).includes(input.minimumStrictness)) {
+    policy.minimumStrictness = input.minimumStrictness as StrictnessLevel;
+  }
+  if (input.strictBrowsing === true) policy.strictBrowsing = true;
+  if (typeof input.revealMode === 'string' && (REVEAL_MODES as readonly string[]).includes(input.revealMode)) {
+    policy.revealMode = input.revealMode as RevealMode;
+  }
+  return Object.keys(policy).length ? policy : null;
+}
+
+async function readManagedMirror(): Promise<ManagedPolicy | null> {
   try {
-    const raw = (await managedArea.get(null)) as Record<string, unknown>;
-    if (!raw || !Object.keys(raw).length) return null;
-    const policy: ManagedPolicy = {};
-    if (raw.enforceEnabled === true) policy.enforceEnabled = true;
-    if (typeof raw.minimumStrictness === 'string' && (STRICTNESS_LEVELS as readonly string[]).includes(raw.minimumStrictness)) {
-      policy.minimumStrictness = raw.minimumStrictness as StrictnessLevel;
-    }
-    if (raw.strictBrowsing === true) policy.strictBrowsing = true;
-    if (typeof raw.revealMode === 'string' && (REVEAL_MODES as readonly string[]).includes(raw.revealMode)) {
-      policy.revealMode = raw.revealMode as RevealMode;
-    }
-    return Object.keys(policy).length ? policy : null;
+    return parseManagedPolicy((await ext().storage.local.get(MANAGED_MIRROR_KEY))[MANAGED_MIRROR_KEY]);
   } catch {
-    // storage.managed rejects when no policy is configured on some platforms.
     return null;
   }
+}
+
+/** Background only: reads the managed area (bounded wait) and refreshes the mirror. */
+export async function syncManagedPolicy(timeoutMs = 3000): Promise<ManagedPolicy | null> {
+  const managedArea = (ext().storage as Partial<typeof chrome.storage>).managed;
+  let policy: ManagedPolicy | null = null;
+  if (managedArea) {
+    try {
+      const raw = await Promise.race([
+        managedArea.get(null) as Promise<Record<string, unknown>>,
+        new Promise<null>((resolve) => setTimeout(() => resolve(null), timeoutMs)),
+      ]);
+      policy = parseManagedPolicy(raw);
+    } catch {
+      // storage.managed rejects when no policy is configured on some platforms.
+    }
+  }
+  const current = await readManagedMirror();
+  if (JSON.stringify(current) !== JSON.stringify(policy)) {
+    if (policy) await ext().storage.local.set({ [MANAGED_MIRROR_KEY]: policy });
+    else await ext().storage.local.remove(MANAGED_MIRROR_KEY);
+  }
+  return policy;
 }
 
 /** Process-wide singleton for each extension context. */

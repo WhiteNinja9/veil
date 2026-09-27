@@ -8,13 +8,14 @@
 import { ext, extensionUrl } from '../browser/api';
 import { pageTranslator } from '../i18n/page';
 import type { HardwareBackend } from '../ml/backend';
+import type { BenchmarkResult } from '../ml/worker/protocol';
 import { isUnlocked, readLock } from '../security/lock';
 import { createLogger } from '../shared/logger';
 import type { RuntimeRequest } from '../shared/messages';
 import { hostnameOf } from '../shared/url';
 import { createRuleId, findRule } from '../sites/rules';
 import type { Settings } from '../storage/schema';
-import { settingsStore } from '../storage/settings-store';
+import { settingsStore, syncManagedPolicy } from '../storage/settings-store';
 import { grantAllowance, pruneAllowances, syncDynamicRules } from './dnr';
 import { EngineService } from './engine-service';
 import { createInferenceClient } from './inference-client';
@@ -129,7 +130,12 @@ async function handle(request: RuntimeRequest, sender: chrome.runtime.MessageSen
 
 async function benchmark() {
   const candidates: HardwareBackend[] = ['webgpu', 'webgl', 'wasm'];
-  const results = await engine.benchmark(candidates);
+  const reply = (await engine.benchmark(candidates).catch((error: unknown) => ({ ok: false, error: String(error) }))) as unknown;
+  if (!Array.isArray(reply)) {
+    log.warn('Benchmark failed', reply);
+    return { results: [], best: null, error: (reply as { error?: string } | null)?.error ?? 'benchmark failed' };
+  }
+  const results = reply as BenchmarkResult[];
   const ok = results.filter((r) => r.ok && typeof r.medianMs === 'number').sort((a, b) => a.medianMs! - b.medianMs!);
   const best = ok[0]?.backend;
   if (best) {
@@ -221,6 +227,7 @@ async function injectIntoOpenTabs(): Promise<void> {
 }
 
 async function initialize(): Promise<Settings> {
+  await syncManagedPolicy().catch(() => undefined);
   const settings = await settingsStore.get();
   lastRulesKey = '';
   lastEngineKey = '';
@@ -257,6 +264,11 @@ ext().alarms?.onAlarm.addListener((alarm) => {
 });
 
 ext().tabs.onRemoved.addListener((tabId) => tabStats.removeTab(tabId));
+
+// Administrator policy changes are mirrored for every other context.
+ext().storage.onChanged.addListener((_changes, area) => {
+  if (area === 'managed') void syncManagedPolicy();
+});
 
 // Service-worker restarts do not fire onStartup: make sure derived state exists.
 void settingsStore.get().then((settings) => applySettings(settings));

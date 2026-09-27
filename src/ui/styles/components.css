@@ -342,9 +342,11 @@
   align-items: stretch;
   gap: var(--space-3);
 }
-.row--disabled .row__label,
+.row--disabled .row__label {
+  color: var(--text-2);
+}
 .row--disabled .row__desc {
-  opacity: 0.55;
+  color: var(--text-3);
 }
 .row--highlight {
   animation: veil-highlight 1600ms var(--ease-out);
@@ -537,6 +539,11 @@ kbd {
   height: 18px;
   flex: none;
   margin-top: 1px;
+}
+.banner a,
+.row__desc a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 .banner strong {
   color: var(--text);

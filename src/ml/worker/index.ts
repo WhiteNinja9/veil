@@ -32,7 +32,7 @@ async function handle(message: ToWorker): Promise<void> {
     case 'init': {
       config = message.config;
       engine?.dispose();
-      engine = new DetectionEngine(config);
+      engine = new DetectionEngine(config, (backend) => post({ type: 'trying', backend }));
       try {
         const selection = await engine.init();
         post({ type: 'ready', backend: selection.name, detail: selection.detail, initMs: selection.initMs });

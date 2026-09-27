@@ -25,9 +25,16 @@ export function hashString(input: string): string {
 export interface FrameSignature {
   hi: number;
   lo: number;
+  /** Mean RGB of the thumbnail: catches colour changes luminance misses. */
+  rgb?: [number, number, number];
 }
 
-export function differenceHash(gray: ArrayLike<number>, width = 9, height = 8): FrameSignature {
+/**
+ * @param deadBand minimum brightness difference for a bit to be set. Flat
+ *   areas (sky, walls, gradients) otherwise flip bits on codec noise and
+ *   look like constant scene changes.
+ */
+export function differenceHash(gray: ArrayLike<number>, width = 9, height = 8, deadBand = 4): FrameSignature {
   if (gray.length < width * height) throw new RangeError('differenceHash: not enough pixels');
   let hi = 0;
   let lo = 0;
@@ -36,7 +43,7 @@ export function differenceHash(gray: ArrayLike<number>, width = 9, height = 8): 
     for (let x = 0; x < width - 1; x++) {
       const left = gray[y * width + x] ?? 0;
       const right = gray[y * width + x + 1] ?? 0;
-      if (left > right) {
+      if (left - right > deadBand) {
         if (bit < 32) lo |= 1 << bit;
         else hi |= 1 << (bit - 32);
       }
@@ -54,6 +61,25 @@ function popcount32(n: number): number {
 
 export function hammingDistance(a: FrameSignature, b: FrameSignature): number {
   return popcount32((a.hi ^ b.hi) >>> 0) + popcount32((a.lo ^ b.lo) >>> 0);
+}
+
+/** Largest per-channel difference of mean colour (0 when either lacks colour data). */
+export function colorDistance(a: FrameSignature, b: FrameSignature): number {
+  if (!a.rgb || !b.rgb) return 0;
+  return Math.max(Math.abs(a.rgb[0] - b.rgb[0]), Math.abs(a.rgb[1] - b.rgb[1]), Math.abs(a.rgb[2] - b.rgb[2]));
+}
+
+export function meanColor(rgba: ArrayLike<number>): [number, number, number] {
+  let r = 0;
+  let g = 0;
+  let b = 0;
+  const n = Math.floor(rgba.length / 4) || 1;
+  for (let i = 0; i < n; i++) {
+    r += rgba[i * 4] ?? 0;
+    g += rgba[i * 4 + 1] ?? 0;
+    b += rgba[i * 4 + 2] ?? 0;
+  }
+  return [r / n, g / n, b / n];
 }
 
 /** Converts RGBA pixel data to luma (Rec. 601), the input of differenceHash. */

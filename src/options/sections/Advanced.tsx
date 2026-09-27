@@ -1,6 +1,6 @@
 import type { JSX } from 'preact';
 import { useRef, useState } from 'preact/hooks';
-import { createLockRecord, type LockRecord, validatePasscode, writeLock } from '../../security/lock';
+import { createLockRecord, type LockRecord, markUnlocked, validatePasscode, writeLock } from '../../security/lock';
 import { downloadBlob, exportSettings, importSettings, resetSettings } from '../../ui/actions';
 import { sendToBackground, useApp } from '../../ui/app-context';
 import { Button, Switch } from '../../ui/components/controls';
@@ -72,6 +72,8 @@ function LockCard(): JSX.Element {
     setBusy(true);
     // PBKDF2 with 600k iterations takes a moment by design.
     await writeLock(await createLockRecord(code, lock?.scope ?? DEFAULT_SCOPE));
+    // Whoever just set the passcode knows it: start with the normal unlock window.
+    await markUnlocked();
     setBusy(false);
     setMode('idle');
     await refreshLock();
@@ -190,7 +192,7 @@ export function AdvancedSection(): JSX.Element {
             </Button>
           </Row>
           <Row id="import" label={t.t('data.import')} description={t.t('data.import.desc')}>
-            <input ref={file} type="file" accept="application/json,.json" class="sr-only" tabIndex={-1} onChange={(e) => void onImport(e)} />
+            <input ref={file} type="file" accept="application/json,.json" class="sr-only" tabIndex={-1} aria-hidden="true" onChange={(e) => void onImport(e)} />
             <Button size="sm" icon="upload" onClick={() => file.current?.click()}>
               {t.t('data.import')}
             </Button>

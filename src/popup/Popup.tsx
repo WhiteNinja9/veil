@@ -81,7 +81,8 @@ export function Popup(): JSX.Element {
   };
 
   const status = model?.status ?? 'active';
-  const statusTone = status === 'active' ? 'positive' : status === 'off' || status === 'unsupported' ? 'neutral' : 'caution';
+  const statusTone =
+    status === 'active' ? 'positive' : status === 'off' || status === 'unsupported' ? 'neutral' : 'caution';
   const statusTitle = {
     active: t.t('popup.status.active'),
     'paused-site': t.t('popup.status.pausedSite'),
@@ -104,7 +105,10 @@ export function Popup(): JSX.Element {
       <section class={`hero hero--${statusTone}`} aria-live="polite">
         <div class="hero__text">
           <div class="hero__title">
-            <span class={`dot dot--${statusTone}${status === 'active' ? ' dot--live' : ''}`} aria-hidden="true" />
+            <span
+              class={`dot dot--${statusTone}${status === 'active' ? ' dot--live' : ''}`}
+              aria-hidden="true"
+            />
             <span>{statusTitle}</span>
           </div>
           <div class="hero__detail">
@@ -124,7 +128,12 @@ export function Popup(): JSX.Element {
           )}
         </div>
         {status !== 'unsupported' && (
-          <Switch size="lg" checked={settings.enabled} label={t.t('popup.protection')} onChange={(enabled) => void update({ enabled })} />
+          <Switch
+            size="lg"
+            checked={settings.enabled}
+            label={t.t('popup.protection')}
+            onChange={(enabled) => void update({ enabled })}
+          />
         )}
       </section>
 
@@ -162,12 +171,19 @@ export function Popup(): JSX.Element {
                 <Icon name="cpu" />
                 <span>
                   {engine?.running && engine.backend
-                    ? t.t('popup.engine.ready', { backend: BACKEND_LABEL[engine.backend] ?? engine.backend, ms: t.t('common.ms', { value: Math.round(engine.avgMs || 0) }) })
+                    ? t.t('popup.engine.ready', {
+                        backend: BACKEND_LABEL[engine.backend] ?? engine.backend,
+                        ms: t.t('common.ms', { value: Math.round(engine.avgMs || 0) }),
+                      })
                     : engine?.state === 'loading'
                       ? t.t('popup.engine.loading')
                       : t.t('popup.engine.idle')}
                 </span>
-                {stats && stats.unverified > 0 && <span class="site__unverified">{t.t('popup.engine.unverified', { count: stats.unverified })}</span>}
+                {stats && stats.unverified > 0 && (
+                  <span class="site__unverified">
+                    {t.t('popup.engine.unverified', { count: stats.unverified })}
+                  </span>
+                )}
               </div>
             </>
           )}
@@ -206,23 +222,26 @@ export function Popup(): JSX.Element {
         </section>
       )}
 
-      {status !== 'unsupported' && (
-        <section class="level">
-          <div class="level__label" id="level-label">
-            {t.t('popup.level.global')}
-          </div>
-          <Segmented
-            value={settings.strictness}
-            label={t.t('popup.level.global')}
-            options={STRICTNESS_LEVELS.map((level) => ({ value: level, label: t.t(`level.${level}`) }))}
-            onChange={setLevel}
-          />
-          <p class="level__desc">{t.t(`level.${settings.strictness}.desc`)}</p>
-        </section>
-      )}
+      <section class="level">
+        <div class="level__label" id="level-label">
+          {t.t('popup.level.global')}
+        </div>
+        <Segmented
+          value={settings.strictness}
+          label={t.t('popup.level.global')}
+          options={STRICTNESS_LEVELS.map((level) => ({ value: level, label: t.t(`level.${level}`) }))}
+          onChange={setLevel}
+        />
+        <p class="level__desc">{t.t(`level.${settings.strictness}.desc`)}</p>
+      </section>
 
       <footer class="popup__footer">
-        <button type="button" class="footer__privacy" title={t.t('popup.privacy.full')} onClick={() => openSettings('privacy')}>
+        <button
+          type="button"
+          class="footer__privacy"
+          title={t.t('popup.privacy.full')}
+          onClick={() => openSettings('privacy')}
+        >
           <Icon name="lock" />
           <span>{t.t('popup.privacy')}</span>
         </button>

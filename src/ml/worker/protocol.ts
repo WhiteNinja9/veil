@@ -10,6 +10,8 @@ export interface WorkerConfig {
   testModel: boolean;
   /** Sample up to N frames of animated images. */
   animatedFrames: number;
+  /** Backends that crashed this worker's predecessors; never retried this session. */
+  exclude?: HardwareBackend[];
 }
 
 export interface DetectJob {
@@ -53,6 +55,7 @@ export type ToWorker =
 
 export type FromWorker =
   | { type: 'ready'; backend: string; detail: string; initMs: number }
+  | { type: 'trying'; backend: string }
   | { type: 'fatal'; message: string }
   | { type: 'detected'; id: string; ok: true; signals: Signals }
   | { type: 'detected'; id: string; ok: false; error: 'decode-failed' | 'engine-unavailable' | 'cancelled'; message?: string }

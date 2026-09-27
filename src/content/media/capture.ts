@@ -4,7 +4,7 @@
  * Captures are downscaled before leaving the page; cross-origin media that
  * would taint a canvas is reported as 'tainted' and handled elsewhere.
  */
-import { differenceHash, type FrameSignature, rgbaToGray } from '../../shared/hash';
+import { differenceHash, type FrameSignature, meanColor, rgbaToGray } from '../../shared/hash';
 import { safeUrl } from '../../shared/url';
 
 export type CaptureResult = { dataUrl: string; width: number; height: number } | 'tainted' | null;
@@ -72,7 +72,8 @@ export function frameSignature(video: HTMLVideoElement): FrameSignature | 'taint
   if (!ctx) return null;
   try {
     ctx.drawImage(video, 0, 0, 9, 8);
-    return differenceHash(rgbaToGray(ctx.getImageData(0, 0, 9, 8).data));
+    const data = ctx.getImageData(0, 0, 9, 8).data;
+    return { ...differenceHash(rgbaToGray(data)), rgb: meanColor(data) };
   } catch (error) {
     return isSecurityError(error) ? 'tainted' : null;
   }

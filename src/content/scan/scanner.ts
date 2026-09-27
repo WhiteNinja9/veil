@@ -19,7 +19,8 @@ export interface ScannerHandlers {
   removed(): void;
 }
 
-const MEDIA_SELECTOR = 'img, video, [style*="url(" i]';
+// Broad attribute match; dispatch() confirms with a regex (some selector engines mishandle "(").
+const MEDIA_SELECTOR = 'img, video, [style*="url"], [style*="URL"]';
 const ATTRIBUTES = ['src', 'srcset', 'poster'];
 
 export class MediaScanner {

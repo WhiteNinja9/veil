@@ -55,7 +55,10 @@ export class DetectionEngine {
   private lastError: string | undefined;
   private state: EngineStatus['state'] = 'idle';
 
-  constructor(private readonly config: WorkerConfig) {}
+  constructor(
+    private readonly config: WorkerConfig,
+    private readonly onAttempt: (backend: HardwareBackend) => void = () => undefined,
+  ) {}
 
   init(): Promise<BackendSelection> {
     if (!this.initPromise) {
@@ -66,8 +69,9 @@ export class DetectionEngine {
           await tf.ready();
           this.selection = { name: 'cpu', detail: 'test model (deterministic)', initMs: 0, skipped: [] };
         } else {
-          this.selection = await selectBackend(candidateOrder(this.config.backend, this.config.profileBest), {
+          this.selection = await selectBackend(candidateOrder(this.config.backend, this.config.profileBest, this.config.exclude), {
             wasmBaseUrl: this.config.wasmBaseUrl,
+            onAttempt: this.onAttempt,
           });
         }
         this.state = 'ready';

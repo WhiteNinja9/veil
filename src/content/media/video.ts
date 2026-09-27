@@ -23,14 +23,21 @@ import { evaluate } from '../../policy/engine';
 import type { Decision, EffectivePolicy } from '../../policy/types';
 import type { ClassifierScores, DetectResponse, Signals } from '../../ml/types';
 import { emaScores } from '../../ml/postprocess';
-import { type FrameSignature, hammingDistance, hashString } from '../../shared/hash';
+import { colorDistance, type FrameSignature, hammingDistance, hashString } from '../../shared/hash';
+import { createLogger } from '../../shared/logger';
 import { captureElement, frameSignature } from './capture';
+
+const log = createLogger('video');
 import type { MediaItem } from './item';
 
 export const TICK_MS = 200;
 export const SCENE_CHANGE_BITS = 12;
+/** Mean-colour shift (0–255 per channel) that also counts as a scene change. */
+export const SCENE_CHANGE_COLOR = 12;
 export const SAFE_FRAMES_TO_RESTORE = 3;
 export const MIN_PROTECTED_MS = 2000;
+/** Even on scene changes, a video is analysed at most this often. */
+export const MIN_GAP_MS = 250;
 const TOKENS_PER_SECOND = 4;
 const FRAME_MAX_SIDE = 256;
 
@@ -166,13 +173,14 @@ export class VideoProtectionManager {
 
   private onPlaybackIntent(state: VideoState): void {
     const src = state.video.currentSrc;
-    if (state.item.revealed || (state.verifiedSrc && state.verifiedSrc === src)) return;
+    // Unreadable (cross-origin) video keeps its fallback decision across loops/replays.
+    if (state.tainted || state.item.revealed || (state.verifiedSrc && state.verifiedSrc === src)) return;
     this.host.pending(state.item);
     if (state.video.readyState >= 2) this.sampleSoon(state, true);
   }
 
   private onFrameAvailable(state: VideoState): void {
-    if (state.item.revealed) return;
+    if (state.item.revealed || state.tainted) return;
     if (state.verifiedSrc !== state.video.currentSrc) {
       this.host.pending(state.item);
       this.sampleSoon(state, true);
@@ -206,11 +214,13 @@ export class VideoProtectionManager {
     for (const [video, state] of this.videos) {
       if (!video.isConnected) this.untrack(video);
     }
-    // Largest visible (fullscreen first) videos get the budget first.
+    // Fullscreen first, then the most overdue (relative to its own interval),
+    // so one busy video cannot starve the others of the shared budget.
     const fullscreen = document.fullscreenElement;
+    const now = performance.now();
     const candidates = [...this.videos.values()]
       .filter((s) => !s.video.paused && !s.video.ended && (s.item.visible || (fullscreen && fullscreen.contains(s.video))))
-      .sort((a, b) => weight(b, fullscreen) - weight(a, fullscreen));
+      .sort((a, b) => urgency(b, fullscreen, now) - urgency(a, fullscreen, now));
     for (const state of candidates) void this.sample(state, false);
   }
 
@@ -227,7 +237,11 @@ export class VideoProtectionManager {
     if (!signature) return;
 
     const now = performance.now();
-    const changed = !state.signature || hammingDistance(signature, state.signature) > SCENE_CHANGE_BITS;
+    if (!force && now - state.lastAnalyzedAt < MIN_GAP_MS) return;
+    const changed =
+      !state.signature ||
+      hammingDistance(signature, state.signature) > SCENE_CHANGE_BITS ||
+      colorDistance(signature, state.signature) > SCENE_CHANGE_COLOR;
     const due = now - state.lastAnalyzedAt >= state.interval;
     if (!force && !changed && !due) return;
 
@@ -247,7 +261,10 @@ export class VideoProtectionManager {
     state.lastAnalyzedAt = now;
     const src = video.currentSrc;
     try {
-      const key = `vf:${hashString(src)}:${signature.hi.toString(16)}${signature.lo.toString(16)}`;
+      // Frames are keyed by source and timestamp — never by perceptual hash:
+      // two different frames can share a hash, and reusing a safe verdict for
+      // an unsafe frame is exactly the failure this component exists to prevent.
+      const key = `vf:${hashString(src)}:${video.currentTime.toFixed(2)}`;
       const response = await this.host.detectFrame(item, capture.dataUrl, capture.width, capture.height, key);
       if (video.currentSrc !== src) return; // source switched while analysing
       if (!response.ok) {
@@ -271,6 +288,7 @@ export class VideoProtectionManager {
     const smoothed = state.ema ? evaluate({ ...signals, classifier: state.ema }, context, policy) : current;
 
     this.host.onAnalyzed(state.item, signals);
+    if (__DEV__) log.debug('frame', state.video.id || state.video.currentSrc.slice(-30), current.action, `porn=${signals.classifier?.porn.toFixed(2)}`, `interval=${state.interval}`);
     const wasProtected = state.item.decision?.action === 'protect' && state.verifiedSrc !== null;
     state.verifiedSrc = state.video.currentSrc;
 
@@ -323,14 +341,16 @@ export class VideoProtectionManager {
     // The user's fallback policy decides (Balanced: show; Strict: protect).
     if (state.tainted) return;
     state.tainted = true;
+    state.verifiedSrc = state.video.currentSrc;
     state.item.unverifiable = true;
     this.host.fallback(state.item);
   }
 }
 
-function weight(state: VideoState, fullscreen: Element | null): number {
+function urgency(state: VideoState, fullscreen: Element | null, now: number): number {
   if (fullscreen && fullscreen.contains(state.video)) return Number.MAX_SAFE_INTEGER;
-  return state.item.renderedSize;
+  // Overdue ratio, with a mild preference for larger videos.
+  return ((now - state.lastAnalyzedAt) / state.interval) * (1 + Math.min(state.item.renderedSize, 1200) / 2400);
 }
 
 /** Adaptive sampling interval (exported for tests). */

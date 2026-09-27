@@ -22,8 +22,13 @@ async function launch(extensionPath: string): Promise<BrowserContext> {
 }
 
 export async function backgroundWorker(context: BrowserContext): Promise<Worker> {
-  let [sw] = context.serviceWorkers();
-  if (!sw) sw = await context.waitForEvent('serviceworker');
+  let sw = context.serviceWorkers().find((w) => w.url().startsWith('chrome-extension://'));
+  if (!sw) sw = await context.waitForEvent('serviceworker', { predicate: (w) => w.url().startsWith('chrome-extension://') });
+  // Extension APIs are bound shortly after the worker starts evaluating.
+  for (let i = 0; i < 50; i++) {
+    if (await sw.evaluate(() => typeof chrome !== 'undefined' && Boolean(chrome.storage?.local)).catch(() => false)) break;
+    await new Promise((r) => setTimeout(r, 100));
+  }
   return sw;
 }
 
@@ -70,3 +75,37 @@ export const expect = test.expect;
 
 /** State attribute Veil sets on a media element (null while unseen). */
 export const veilState = (selector: string) => `document.querySelector(${JSON.stringify(selector)})?.getAttribute('data-veil')`;
+
+type Page = import('@playwright/test').Page;
+type Frame = import('@playwright/test').Frame;
+
+/** Waits until `selector` carries one of the expected Veil states. */
+export async function waitForVeil(target: Page | Frame, selector: string, expected: string | string[], timeout = 15_000): Promise<void> {
+  const wanted = Array.isArray(expected) ? expected : [expected];
+  await target.waitForFunction(
+    ([sel, states]) => {
+      const el = document.querySelector(sel as string);
+      return Boolean(el && (states as string[]).includes(el.getAttribute('data-veil') ?? ''));
+    },
+    [selector, wanted] as const,
+    { timeout },
+  );
+}
+
+export async function veilStateOf(target: Page | Frame, selector: string): Promise<string | null> {
+  return target.evaluate((sel) => document.querySelector(sel)?.getAttribute('data-veil') ?? null, selector);
+}
+
+/** Tab id of the first tab whose URL starts with `prefix` (resolved in the background). */
+export async function tabIdFor(context: BrowserContext, prefix: string): Promise<number> {
+  const sw = await backgroundWorker(context);
+  return sw.evaluate(async (p) => (await chrome.tabs.query({})).find((t) => t.url?.startsWith(p))?.id ?? -1, prefix);
+}
+
+/** Sends a message from the background to a tab, like a keyboard command or context menu would. */
+export async function sendToTab(context: BrowserContext, tabId: number, message: unknown): Promise<void> {
+  const sw = await backgroundWorker(context);
+  await sw.evaluate(async ([id, m]) => {
+    await chrome.tabs.sendMessage(id as number, m).catch(() => undefined);
+  }, [tabId, message] as const);
+}

@@ -38,8 +38,40 @@ export const MARKERS = {
   face: [0, 200, 0],
 };
 
+/** RGBA pixels for a fixture (shared by the PNG and JPEG encoders). */
+export function fixturePixels(width, height, marker = 'neutral', seed = 0) {
+  const png = fixtureRaw(width, height, marker, seed);
+  const rgba = Buffer.alloc(width * height * 4);
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const src = y * (width * 3 + 1) + 1 + x * 3;
+      const dst = (y * width + x) * 4;
+      rgba[dst] = png[src];
+      rgba[dst + 1] = png[src + 1];
+      rgba[dst + 2] = png[src + 2];
+      rgba[dst + 3] = 255;
+    }
+  }
+  return rgba;
+}
+
 /** Renders a width×height RGB image: soft neutral gradient, marker block top-left, optional hue seed. */
 export function fixturePng(width, height, marker = 'neutral', seed = 0) {
+  const raw = fixtureRaw(width, height, marker, seed);
+  const header = Buffer.alloc(13);
+  header.writeUInt32BE(width, 0);
+  header.writeUInt32BE(height, 4);
+  header[8] = 8; // bit depth
+  header[9] = 2; // colour type: RGB
+  return Buffer.concat([
+    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    chunk('IHDR', header),
+    chunk('IDAT', deflateSync(raw)),
+    chunk('IEND', Buffer.alloc(0)),
+  ]);
+}
+
+function fixtureRaw(width, height, marker, seed) {
   const color = MARKERS[marker] ?? null;
   const markerSize = Math.max(16, Math.round(Math.min(width, height) / 4));
   const raw = Buffer.alloc((width * 3 + 1) * height);
@@ -61,15 +93,5 @@ export function fixturePng(width, height, marker = 'neutral', seed = 0) {
       }
     }
   }
-  const header = Buffer.alloc(13);
-  header.writeUInt32BE(width, 0);
-  header.writeUInt32BE(height, 4);
-  header[8] = 8; // bit depth
-  header[9] = 2; // colour type: RGB
-  return Buffer.concat([
-    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
-    chunk('IHDR', header),
-    chunk('IDAT', deflateSync(raw)),
-    chunk('IEND', Buffer.alloc(0)),
-  ]);
+  return raw;
 }

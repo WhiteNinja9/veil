@@ -93,7 +93,8 @@ export function Onboarding(): JSX.Element {
     document.querySelector<HTMLElement>('.onboarding__title')?.focus();
     if (step === 'tune' && bench.state === 'idle') {
       setBench({ state: 'running' });
-      void sendToBackground<{ results: BenchmarkResult[]; best: string | null }>({ type: 'engine/benchmark' }).then((reply) => {
+      const deadline = new Promise<null>((resolve) => setTimeout(() => resolve(null), 45_000));
+      void Promise.race([sendToBackground<{ results: BenchmarkResult[]; best: string | null }>({ type: 'engine/benchmark' }), deadline]).then((reply) => {
         const best = reply?.results.find((r) => r.backend === reply.best);
         setBench(best ? { state: 'done', best } : { state: 'failed' });
       });

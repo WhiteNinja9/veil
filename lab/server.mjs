@@ -11,11 +11,12 @@
  *   /video/<pattern>.webm    pattern: neutral | switch (neutral → explicit after 2 s)
  */
 import http from 'node:http';
-import { readFile, mkdir, writeFile, stat } from 'node:fs/promises';
+import { readFile, readdir, mkdir, writeFile, stat } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { fixturePng } from './png.mjs';
+import jpeg from 'jpeg-js';
+import { fixturePixels, fixturePng } from './png.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const cacheDir = path.join(here, '..', '.cache', 'lab');
@@ -32,17 +33,21 @@ async function ensureVideo(pattern) {
   await mkdir(cacheDir, { recursive: true });
   const fps = 10;
   const seconds = 6;
+  // JPEG frames concatenated into one MJPEG stream on disk: the minimal
+  // ffmpeg bundled with Playwright has neither a PNG decoder nor stdin input.
+  const framesFile = path.join(cacheDir, `${pattern}.mjpeg`);
+  const frames = [];
+  for (let i = 0; i < fps * seconds; i++) {
+    const marker = pattern === 'switch' && i >= fps * 2 ? 'explicit' : 'neutral';
+    frames.push(jpeg.encode({ data: fixturePixels(320, 180, marker, i % 5), width: 320, height: 180 }, 92).data);
+  }
+  await writeFile(framesFile, Buffer.concat(frames));
   await new Promise((resolve, reject) => {
-    const ff = spawn(FFMPEG, ['-y', '-f', 'image2pipe', '-framerate', String(fps), '-i', '-', '-c:v', 'libvpx', '-b:v', '400k', '-pix_fmt', 'yuv420p', '-auto-alt-ref', '0', file], { stdio: ['pipe', 'ignore', 'pipe'] });
+    const ff = spawn(FFMPEG, ['-y', '-f', 'image2pipe', '-c:v', 'mjpeg', '-framerate', String(fps), '-i', framesFile, '-c:v', 'libvpx', '-b:v', '400k', '-pix_fmt', 'yuv420p', '-auto-alt-ref', '0', file], { stdio: ['ignore', 'ignore', 'pipe'] });
     let err = '';
     ff.stderr.on('data', (d) => (err += d));
     ff.on('error', reject);
     ff.on('close', (code) => (code === 0 ? resolve() : reject(new Error(`ffmpeg failed: ${err.slice(-400)}`))));
-    for (let i = 0; i < fps * seconds; i++) {
-      const marker = pattern === 'switch' && i >= fps * 2 ? 'explicit' : 'neutral';
-      ff.stdin.write(fixturePng(320, 180, marker, i % 5));
-    }
-    ff.stdin.end();
   });
   return file;
 }
@@ -70,6 +75,19 @@ export function createLabServer({ otherOrigin }) {
         const file = await ensureVideo(video[1]);
         const headers = url.searchParams.get('cors') ? { 'access-control-allow-origin': '*' } : {};
         send(res, 200, 'video/webm', await readFile(file), { ...headers, 'accept-ranges': 'none' });
+        return;
+      }
+      // Real-model smoke test: safe sample images fetched by scripts/fetch-eval-images.mjs.
+      const evalFile = /^\/eval\/([\w.-]+\.(?:jpe?g|png))$/.exec(url.pathname);
+      if (evalFile) {
+        const body = await readFile(path.join(here, '..', '.cache', 'eval', evalFile[1]));
+        send(res, 200, evalFile[1].endsWith('.png') ? 'image/png' : 'image/jpeg', body);
+        return;
+      }
+      if (url.pathname === '/eval.html') {
+        const files = (await readdir(path.join(here, '..', '.cache', 'eval')).catch(() => [])).filter((f) => /\.(jpe?g|png)$/.test(f));
+        const cards = files.map((f) => `<div class="card"><img id="${f.replace(/\W/g, '-')}" src="/eval/${f}" alt=""><div class="meta">${f}</div></div>`).join('');
+        send(res, 200, 'text/html; charset=utf-8', `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Eval</title><link rel="stylesheet" href="/lab.css"></head><body><h1>Evaluation images</h1><div class="grid">${cards}</div></body></html>`);
         return;
       }
       const page = url.pathname === '/' ? 'index.html' : url.pathname.slice(1);

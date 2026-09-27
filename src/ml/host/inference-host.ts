@@ -50,6 +50,10 @@ export class InferenceHost {
   private backendInfo = { name: '', detail: '' };
   private consecutiveTimeouts = 0;
   private requestSeq = 0;
+  /** Backend the worker is initialising right now (reported by the worker). */
+  private attempting: HardwareBackend | null = null;
+  /** Backends that crashed the worker this session: skipped from now on. */
+  private readonly excluded = new Set<HardwareBackend>();
 
   constructor(private readonly options: HostOptions) {}
 
@@ -68,7 +72,12 @@ export class InferenceHost {
       const readyPromise = new Promise<void>((resolve, reject) => {
         const onMessage = (event: MessageEvent<FromWorker>) => {
           const message = event.data;
+          if (message.type === 'trying') {
+            this.attempting = message.backend as HardwareBackend;
+            return;
+          }
           if (message.type === 'ready') {
+            this.attempting = null;
             this.backendInfo = { name: message.backend, detail: message.detail };
             worker.removeEventListener('message', onMessage);
             resolve();
@@ -88,6 +97,7 @@ export class InferenceHost {
         ...(prefs.profileBest ? { profileBest: prefs.profileBest } : {}),
         testModel: this.options.testModel,
         animatedFrames: 3,
+        exclude: [...this.excluded],
       };
       this.post({ type: 'init', config });
       await readyPromise;
@@ -115,6 +125,12 @@ export class InferenceHost {
 
   private onCrash(reason: string): void {
     log.warn('Inference worker crashed:', reason);
+    // A crash while initialising a backend (typically a GPU driver problem)
+    // excludes that backend, so the restart falls back instead of looping.
+    if (this.attempting) {
+      this.excluded.add(this.attempting);
+      this.attempting = null;
+    }
     this.recordCrash();
     this.teardown();
   }
@@ -250,33 +266,42 @@ export class InferenceHost {
     return { ...message.status, detail: this.backendInfo.detail, running: true };
   }
 
-  /** Benchmarks backends in a separate, short-lived worker. */
-  async benchmark(backends: HardwareBackend[], iterations = 8): Promise<BenchmarkResult[]> {
+  /**
+   * Benchmarks each backend in its own short-lived worker, so a backend that
+   * hangs or crashes (GPU drivers do) cannot take the others down with it.
+   */
+  async benchmark(backends: HardwareBackend[], iterations = 8, perBackendTimeoutMs = 45_000): Promise<BenchmarkResult[]> {
+    const results: BenchmarkResult[] = [];
+    for (const backend of backends) results.push(await this.benchmarkOne(backend, iterations, perBackendTimeoutMs));
+    return results;
+  }
+
+  private async benchmarkOne(backend: HardwareBackend, iterations: number, timeoutMs: number): Promise<BenchmarkResult> {
     const worker = this.spawn(this.options.workerUrl);
     try {
       const requestId = `bench-${++this.requestSeq}`;
-      const result = new Promise<BenchmarkResult[]>((resolve, reject) => {
-        const timer = setTimeout(() => reject(new Error('benchmark timed out')), 120_000);
+      return await new Promise<BenchmarkResult>((resolve) => {
+        const timer = setTimeout(() => resolve({ backend, ok: false, error: 'timed out' }), timeoutMs);
         worker.addEventListener('message', (event: MessageEvent<FromWorker>) => {
           if (event.data.type === 'benchmark' && event.data.requestId === requestId) {
             clearTimeout(timer);
-            resolve(event.data.results);
+            resolve(event.data.results[0] ?? { backend, ok: false, error: 'no result' });
           }
         });
         worker.addEventListener('error', (event) => {
+          event.preventDefault();
           clearTimeout(timer);
-          reject(new Error(event.message || 'benchmark worker crashed'));
+          resolve({ backend, ok: false, error: `crashed: ${event.message || 'worker error'}` });
         });
+        const config: WorkerConfig = {
+          modelBaseUrl: this.options.modelBaseUrl,
+          wasmBaseUrl: this.options.wasmBaseUrl,
+          backend: 'auto',
+          testModel: this.options.testModel,
+          animatedFrames: 1,
+        };
+        worker.postMessage({ type: 'benchmark', requestId, config, backends: [backend], iterations } satisfies ToWorker);
       });
-      const config: WorkerConfig = {
-        modelBaseUrl: this.options.modelBaseUrl,
-        wasmBaseUrl: this.options.wasmBaseUrl,
-        backend: 'auto',
-        testModel: this.options.testModel,
-        animatedFrames: 1,
-      };
-      worker.postMessage({ type: 'benchmark', requestId, config, backends, iterations } satisfies ToWorker);
-      return await result;
     } finally {
       worker.terminate();
     }

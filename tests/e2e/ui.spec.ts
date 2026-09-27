@@ -166,7 +166,7 @@ test.describe('onboarding & interstitial', () => {
         onboardingComplete: true,
         peopleFilter: { who: 'women', unsure: 'protect' },
         categories: { faces: { enabled: true }, people: { enabled: true } },
-        video: { regionsProtectWhole: true },
+        video: { peopleInVideos: true },
       });
   });
 

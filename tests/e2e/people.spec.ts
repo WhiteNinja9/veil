@@ -62,11 +62,14 @@ test.describe('people filter', () => {
     await waitForVeil(page, '#woman', 'ok');
   });
 
-  test('hides a video while a matching person is on screen', async ({ context, lab }) => {
+  test('with "whole image" chosen, hides a video while a matching person is on screen', async ({
+    context,
+    lab,
+  }) => {
     await setSettings(context, {
-      ...regions,
+      categories: { faces: { enabled: true, scope: 'whole' } },
       peopleFilter: { who: 'women', unsure: 'reveal' },
-      video: { regionsProtectWhole: true },
+      video: { peopleInVideos: true },
     });
     const page = await context.newPage();
     await page.goto(`${lab.originA}/people.html`);

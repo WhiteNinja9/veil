@@ -215,9 +215,9 @@ export const appEn = {
   'videos.sampling.thorough': 'Thorough',
   'videos.autoRestore': 'Show again when safe',
   'videos.autoRestore.desc': 'Lift protection after several consecutive safe frames.',
-  'videos.regionsWhole': 'Hide videos with people or faces',
-  'videos.regionsWhole.desc':
-    'When Faces or People is on, protect the whole video. Regions can’t be blurred inside video.',
+  'videos.regions': 'Blur people and faces in videos',
+  'videos.regions.desc':
+    'When Faces or People blurs regions, blur them in playing video too, following them as they move. Fullscreen video and picture-in-picture protect the whole video instead.',
   'videos.limit':
     'Some sites serve video in a way that doesn’t allow frame access. Those videos can’t be checked and follow your “When media can’t be checked” setting.',
 
@@ -490,7 +490,7 @@ export const appEn = {
   'people.unsure.protect': 'Blur',
   'people.unsure.reveal': 'Show',
   'people.videos': 'Also in videos',
-  'people.videos.desc': 'Hides the whole video while a matching person is on screen.',
+  'people.videos.desc': 'Blurs matching people as the video plays, following them as they move.',
   'people.accuracy':
     'Apparent gender is estimated from faces and can be wrong: in our small test it misjudged 1 face in 60 and was unsure about 1 in 10, more often with children, older people and small faces.',
   'people.choice.off': 'Off',

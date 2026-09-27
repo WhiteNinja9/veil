@@ -28,7 +28,8 @@ logged or shared, and there is no Veil server.
   - a content classifier (explicit, illustrated, suggestive);
   - optional face and person detectors that can blur just those regions;
   - an optional **people filter**: blur everyone, or only people who appear to be **women** or
-    **men**, in images and videos. The estimate comes from each face, on your device.
+    **men**, in images and videos. The estimate comes from each face, on your device. In video,
+    the blur follows each matching person as they move; the rest of the video stays visible.
 
   Inference runs on WebGPU, WebGL, WebAssembly or CPU, whichever is fastest on your machine.
 
@@ -153,9 +154,14 @@ unwanted media will be missed, and some safe media will be hidden.
   test it misjudged 1 face in 60 and was unsure about 1 in 10 (unsure faces follow your "When
   unsure" choice). People with no visible face count as unsure. See
   [docs/ML.md](docs/ML.md#people-filter-women-men-or-everyone).
-- **Region blurring** (faces, people) works on images. On video, those categories can only protect
-  the whole video (while a matching person is on screen). On sites whose Content Security Policy forbids `data:` images, region
-  protection falls back to protecting the whole image.
+- **Region blurring in video follows people by prediction.** Frames are analysed a few times a
+  second, and in between each blur moves with the person's recent motion, with a margin that grows
+  until the next analysis. Very fast motion, someone stepping into the frame, or a scene cut the
+  frame check doesn't notice can leave a person visible for a fraction of a second. When the video
+  element itself is fullscreen or in picture-in-picture, nothing can be drawn over it, so the whole
+  video is protected instead. See [docs/ML.md](docs/ML.md#people-filter-women-men-or-everyone).
+- On sites whose Content Security Policy forbids `data:` images, region protection for images
+  falls back to protecting the whole image.
 - **Pages built to evade filters** (serving different images to the analyser, drawing to canvas,
   overriding CSS) can get around any extension ([docs/SECURITY.md](docs/SECURITY.md)).
 - **The lock is a deterrent, not a barrier.** Anyone who can manage extensions can remove Veil, and

@@ -246,8 +246,8 @@ export const SETTINGS_INDEX: SettingEntry[] = [
   {
     id: 'regionswhole',
     section: 'videos',
-    label: 'videos.regionsWhole',
-    description: 'videos.regionsWhole.desc',
+    label: 'videos.regions',
+    description: 'videos.regions.desc',
   },
   {
     id: 'sites',

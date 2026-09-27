@@ -109,3 +109,45 @@ function fixtureRaw(width, height, marker, seed) {
   }
   return raw;
 }
+
+/**
+ * The "pair" lab clip: a woman's face moving left to right while a man's
+ * face stays put (normalised coordinates, looping every `seconds`).
+ * Shared with tests/e2e/video-regions.spec.ts.
+ */
+export const PAIR_SCENE = {
+  seconds: 6,
+  face: { w: 0.14, h: 0.3, y: 0.3 },
+  woman: { x0: 0.04, x1: 0.5 },
+  man: { x: 0.74 },
+};
+
+export function pairFaces(t) {
+  const { seconds, face, woman, man } = PAIR_SCENE;
+  const progress = (t % seconds) / seconds;
+  return [
+    { marker: 'woman', x: woman.x0 + (woman.x1 - woman.x0) * progress, y: face.y, w: face.w, h: face.h },
+    { marker: 'man', x: man.x, y: face.y, w: face.w, h: face.h },
+  ];
+}
+
+/** RGBA pixels: neutral gradient with painted face boxes (no corner marker). */
+export function scenePixels(width, height, faces, seed = 0) {
+  const rgba = fixturePixels(width, height, 'neutral', seed);
+  for (const face of faces) {
+    const color = MARKERS[face.marker];
+    const x0 = Math.round(face.x * width);
+    const y0 = Math.round(face.y * height);
+    const x1 = Math.round((face.x + face.w) * width);
+    const y1 = Math.round((face.y + face.h) * height);
+    for (let y = Math.max(0, y0); y < Math.min(height, y1); y++) {
+      for (let x = Math.max(0, x0); x < Math.min(width, x1); x++) {
+        const i = (y * width + x) * 4;
+        rgba[i] = color[0];
+        rgba[i + 1] = color[1];
+        rgba[i + 2] = color[2];
+      }
+    }
+  }
+  return rgba;
+}

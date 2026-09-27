@@ -90,7 +90,7 @@ export interface EffectivePolicy {
     minSize: number;
     stricterAds: boolean;
   };
-  video: { baseIntervalMs: number; autoRestore: boolean; regionsProtectWhole: boolean };
+  video: { baseIntervalMs: number; autoRestore: boolean; peopleInVideos: boolean };
   /** Context-aware score adjustments (see engine.ts). */
   contextAware: boolean;
   peopleFilter: PeopleFilter;

@@ -41,7 +41,7 @@ export function peoplePatch(choice: PeopleChoice): DeepPartial<Settings> {
   return {
     categories: { faces: { enabled: true }, people: { enabled: true } },
     peopleFilter: { who: choice },
-    video: { regionsProtectWhole: true },
+    video: { peopleInVideos: true },
   };
 }
 

@@ -114,16 +114,43 @@ a gender estimate per face.
 Images stay hidden until decided, so on a CPU-only machine, pages with many people take noticeably
 longer with the filter on. Accuracy is in [ML.md](ML.md#people-filter-women-men-or-everyone).
 
-## 6. Package size
+## 6. People in video
+
+`node scripts/bench/video-regions.mjs` plays the lab's _pair_ clip (320 × 180, 10 fps, shown
+letterboxed at 428 × 321: a woman walking across the frame, a man standing still) with the people
+filter on _women_. Inside animation frames, after the overlay has painted, it compares the drawn
+ovals with where her face is in the frame on screen: 121 points across her face, each inside an
+oval or not.
+
+It uses the **test build**, whose face detector finds the painted faces exactly and at once. So
+this measures the tracking and drawing (pacing, messaging, prediction between analyses), **not
+detection accuracy or real-model speed**. With the real models each analysis takes longer and the
+prediction bridges a longer gap, with larger margins.
+
+| 60 s of playback                        | 1× speed    | 2× speed    |
+| --------------------------------------- | ----------- | ----------- |
+| Readings                                | 909         | 911         |
+| Her face fully covered                  | 909 (100 %) | 911 (100 %) |
+| …of which the whole frame (loop / seek) | 2           | 2           |
+| Readings with the man blurred           | 0           | 0           |
+| Oval area ÷ face area, median           | 2.55        | 2.93        |
+
+Analyses reached the overlay about 300 ms of media time apart (1×: median 301 ms, 90th percentile
+402 ms, at most 700 ms over 20 s). The lab page plays two other videos at the same time, and all
+three share the page's region budget of 10 analyses per second.
+Her speed is 0.08 frame widths per second at 1× (0.15 at 2×): a slow walk. Faster motion, people
+entering the frame and real detection misses are not covered by this measurement.
+
+## 7. Package size
 
 Production Chrome build (`npm run build:chrome`):
 
 | File                                   | Size            | gzip    |
 | -------------------------------------- | --------------- | ------- |
-| `content.js` (runs in every frame)     | 72.5 KB         | 23.8 KB |
+| `content.js` (runs in every frame)     | 89.8 KB         | 29.7 KB |
 | `content.css`                          | 3.3 KB          | 1.0 KB  |
-| `background.js`                        | 23.6 KB         | 8.5 KB  |
-| `engine-worker.js` (TF.js + providers) | 1.24 MB         | 305 KB  |
+| `background.js`                        | 24.3 KB         | 8.8 KB  |
+| `engine-worker.js` (TF.js + providers) | 1.24 MB         | 309 KB  |
 | Models (4, loaded only when needed)    | 16.1 MB         | —       |
 | WASM kernels (SIMD + baseline)         | 724 KB          | —       |
 | **Store upload** (`npm run package`)   | **13.4 MB** zip |         |
@@ -142,6 +169,7 @@ npm run build:chrome
 node scripts/bench/latency.mjs --runs=5   # §3
 npm run test:e2e                       # includes the real-model smoke tests (§4)
 npm run models && node scripts/fetch-eval-images.mjs   # people photos for §5 land in .cache/eval/people
+npm run build:test && node scripts/bench/video-regions.mjs --seconds=60 [--rate=2]   # §6
 ```
 
 `npm run bench -- --out=bench-results/local/<name>.json` saves a machine-readable report.

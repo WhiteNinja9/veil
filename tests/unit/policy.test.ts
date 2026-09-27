@@ -153,7 +153,7 @@ describe('evaluate', () => {
     const face = [{ x: 0.4, y: 0.3, w: 0.2, h: 0.2, score: 0.9 }];
     const video: PolicyContext = { kind: 'video', renderedSize: 400, isAd: false };
     expect(evaluate(signals({}, { faces: face }), video, policyFor(settings)).action).toBe('allow');
-    settings.video.regionsProtectWhole = true;
+    settings.video.peopleInVideos = true;
     expect(evaluate(signals({}, { faces: face }), video, policyFor(settings)).action).toBe('protect');
   });
 

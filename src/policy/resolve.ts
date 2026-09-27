@@ -61,7 +61,7 @@ export function resolvePolicy(settings: Settings, hostname: string, now: number 
     video: {
       baseIntervalMs: usesUserValues ? settings.video.baseIntervalMs : preset.videoIntervalMs,
       autoRestore: settings.video.autoRestore && !strict,
-      regionsProtectWhole: settings.video.regionsProtectWhole,
+      peopleInVideos: settings.video.peopleInVideos,
     },
     contextAware: settings.contextAware,
     peopleFilter: { ...settings.peopleFilter },

@@ -209,9 +209,9 @@ export const appFr: Catalog<AppKey> = {
   'videos.sampling.thorough': 'Approfondie',
   'videos.autoRestore': 'Réafficher quand c’est sûr',
   'videos.autoRestore.desc': 'Lever la protection après plusieurs images sûres consécutives.',
-  'videos.regionsWhole': 'Masquer les vidéos avec des personnes ou des visages',
-  'videos.regionsWhole.desc':
-    'Si Visages ou Personnes est activé, protéger la vidéo entière : on ne peut pas flouter une zone dans une vidéo.',
+  'videos.regions': 'Flouter les personnes et visages dans les vidéos',
+  'videos.regions.desc':
+    'Si Visages ou Personnes floute des zones, les flouter aussi dans la vidéo en lecture, en suivant leurs mouvements. En plein écran vidéo et en image dans l’image, toute la vidéo est protégée à la place.',
   'videos.limit':
     'Certains sites diffusent la vidéo d’une manière qui interdit l’accès aux images. Ces vidéos ne peuvent pas être vérifiées et suivent votre réglage « Quand un média ne peut pas être vérifié ».',
 
@@ -490,7 +490,7 @@ export const appFr: Catalog<AppKey> = {
   'people.unsure.protect': 'Flouter',
   'people.unsure.reveal': 'Afficher',
   'people.videos': 'Aussi dans les vidéos',
-  'people.videos.desc': 'Masque toute la vidéo tant qu’une personne concernée est à l’écran.',
+  'people.videos.desc': 'Floute les personnes concernées pendant la lecture, en suivant leurs mouvements.',
   'people.accuracy':
     'Le genre apparent est estimé à partir des visages et peut se tromper : dans notre petit test, il s’est trompé sur un visage sur soixante et a hésité sur environ un sur dix, plus souvent chez les enfants, les personnes âgées et les petits visages.',
   'people.choice.off': 'Non',

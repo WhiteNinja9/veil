@@ -1,0 +1,34 @@
+{
+  "voice": "Fola",
+  "model": "gemini-3.8-flash-lite-tts",
+  "direction": "# Audio profile\nA calm, assured narrator for a premium technology film. Warm, clear and unhurried, with quiet confidence. Never salesy.\n\n## Director's notes\nMeasured pace, about 140 words per minute. Natural short pauses at commas and full stops. Land gently on the last word of each sentence, with no upward inflection. No excitement spikes. Read only the transcript.",
+  "scenes": [
+    {
+      "id": "hook",
+      "text": "Every day, the web shows you | thousands of images. | You never chose | most of them."
+    },
+    { "id": "meet", "text": "Meet *Veil.*" },
+    { "id": "gate", "text": "Veil hides unwanted images and video | *before* they appear | on your screen." },
+    {
+      "id": "scan",
+      "text": "The moment a page loads, | it checks each image, | and each video | as it plays."
+    },
+    {
+      "id": "private",
+      "text": "And it all happens | *on your device.* | Nothing is uploaded. | No servers. | No accounts. | No tracking."
+    },
+    { "id": "levels", "text": "You decide how strict it is. | Minimal. | Balanced. | Strict. | Or Maximum." },
+    { "id": "people", "text": "Choose to blur faces and people. | Everyone, | only women, | or only men." },
+    { "id": "video", "text": "Even in video, | the blur *follows* them | as they move." },
+    {
+      "id": "styles",
+      "text": "Soft blur. | Pixelate. | Or hide it completely. | Shown only when *you* choose."
+    },
+    {
+      "id": "sites",
+      "text": "Pause a site, | make it stricter, | or block it. | Strict Browsing | enforces SafeSearch | on major search engines."
+    },
+    { "id": "lock", "text": "Lock your settings with a passcode, | so protection *stays on.*" },
+    { "id": "outro", "text": "Veil. | See what you *choose* to see. | For Chrome and Firefox." }
+  ]
+}

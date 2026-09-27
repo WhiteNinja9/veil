@@ -4,7 +4,7 @@
  */
 import { ext } from '../browser/api';
 import { categoriesForLevel, PRESETS } from '../policy/presets';
-import type { StrictnessLevel } from '../policy/types';
+import type { PeopleTarget, StrictnessLevel } from '../policy/types';
 import { isUnlocked, readLock } from '../security/lock';
 import { requiresUnlock } from '../security/weakening';
 import { type DeepPartial, defaultSettings, sanitizeSettings, type Settings } from '../storage/schema';
@@ -19,6 +19,29 @@ export function levelPatch(level: StrictnessLevel, current: Settings): DeepParti
     reveal: { mode: preset.reveal.mode, confirm: preset.reveal.confirm },
     fallback: preset.fallback,
     video: { baseIntervalMs: preset.videoIntervalMs },
+  };
+}
+
+/** The one-tap people choice offered in the popup and onboarding. */
+export type PeopleChoice = 'off' | PeopleTarget;
+export const PEOPLE_CHOICES: readonly PeopleChoice[] = ['off', 'women', 'men', 'everyone'];
+
+export function peopleChoice(settings: Settings): PeopleChoice {
+  const { faces, people } = settings.categories;
+  return faces.enabled || people.enabled ? settings.peopleFilter.who : 'off';
+}
+
+/**
+ * Turning a people choice on blurs faces and bodies (keeping each
+ * category's scope) in images, and hides videos while a matching person
+ * is on screen — frame-accurate region blur isn't possible for video.
+ */
+export function peoplePatch(choice: PeopleChoice): DeepPartial<Settings> {
+  if (choice === 'off') return { categories: { faces: { enabled: false }, people: { enabled: false } } };
+  return {
+    categories: { faces: { enabled: true }, people: { enabled: true } },
+    peopleFilter: { who: choice },
+    video: { regionsProtectWhole: true },
   };
 }
 

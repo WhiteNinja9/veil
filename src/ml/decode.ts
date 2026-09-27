@@ -110,6 +110,66 @@ export function rasterize(bitmap: ImageBitmap, maxSide: number): ImageData {
   return ctx.getImageData(0, 0, width, height);
 }
 
+/**
+ * Square `size`×`size` crop of `bitmap` from a source rectangle in pixels
+ * (which may extend past the image; the outside is black, as face models
+ * expect for faces at the edge of a picture).
+ */
+export function cropSquare(
+  bitmap: ImageBitmap,
+  box: { sx: number; sy: number; side: number },
+  size: number,
+): ImageData {
+  const canvas = new OffscreenCanvas(size, size);
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  if (!ctx) throw new DecodeError('2D canvas unavailable');
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, size, size);
+  ctx.imageSmoothingQuality = 'high';
+  // Clip the source rectangle to the bitmap and map it proportionally, so
+  // behaviour doesn't depend on how a browser treats out-of-bounds sources.
+  const x0 = Math.max(0, box.sx);
+  const y0 = Math.max(0, box.sy);
+  const x1 = Math.min(bitmap.width, box.sx + box.side);
+  const y1 = Math.min(bitmap.height, box.sy + box.side);
+  if (x1 > x0 && y1 > y0) {
+    const k = size / box.side;
+    ctx.drawImage(
+      bitmap,
+      x0,
+      y0,
+      x1 - x0,
+      y1 - y0,
+      (x0 - box.sx) * k,
+      (y0 - box.sy) * k,
+      (x1 - x0) * k,
+      (y1 - y0) * k,
+    );
+  }
+  return ctx.getImageData(0, 0, size, size);
+}
+
+/** A normalised sub-rectangle of `bitmap`, rasterised with its long side at most `maxSide`. */
+export function rasterizeRegion(
+  bitmap: ImageBitmap,
+  rect: { x: number; y: number; w: number; h: number },
+  maxSide: number,
+): ImageData {
+  const sw = rect.w * bitmap.width;
+  const sh = rect.h * bitmap.height;
+  const scale = Math.min(1, maxSide / Math.max(sw, sh));
+  const width = Math.max(1, Math.round(sw * scale));
+  const height = Math.max(1, Math.round(sh * scale));
+  const canvas = new OffscreenCanvas(width, height);
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  if (!ctx) throw new DecodeError('2D canvas unavailable');
+  ctx.fillStyle = '#808080';
+  ctx.fillRect(0, 0, width, height);
+  ctx.imageSmoothingQuality = 'medium';
+  ctx.drawImage(bitmap, rect.x * bitmap.width, rect.y * bitmap.height, sw, sh, 0, 0, width, height);
+  return ctx.getImageData(0, 0, width, height);
+}
+
 /** Decodes a `data:` URL into a Blob without going through fetch. */
 export function dataUrlToBlob(dataUrl: string): Blob {
   const match = /^data:([^;,]+)?(;base64)?,(.*)$/s.exec(dataUrl);

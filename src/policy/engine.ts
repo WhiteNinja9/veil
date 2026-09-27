@@ -1,5 +1,5 @@
-import type { Region, Signals } from '../ml/types';
-import type { Decision, EffectivePolicy, PolicyContext, Reason } from './types';
+import type { Region, SignalKind, Signals } from '../ml/types';
+import type { Decision, EffectivePolicy, PeopleFilter, PolicyContext, Reason } from './types';
 
 /** Thresholds are scaled by this factor for media that looks like an advertisement. */
 export const AD_THRESHOLD_FACTOR = 0.8;
@@ -7,6 +7,76 @@ export const AD_THRESHOLD_FACTOR = 0.8;
 export const NO_PERSON_DAMPING = 0.8;
 /** Scores above this are never damped by context. */
 export const DAMPING_CEILING = 0.9;
+/**
+ * Apparent-gender cut-offs on the model's "appears female" probability,
+ * chosen from labelled faces (docs/ML.md): women mostly score high, men
+ * mostly very low, and the band between is treated as unsure.
+ */
+export const APPEARS_FEMALE_FROM = 0.45;
+export const APPEARS_MALE_UNTIL = 0.3;
+/** Share of a person box (from the top) where their face is expected. */
+const FACE_ZONE = 0.6;
+
+export type ApparentGender = 'female' | 'male' | 'unsure';
+
+export function apparentGender(female: number | undefined): ApparentGender {
+  if (female === undefined || Number.isNaN(female)) return 'unsure';
+  if (female >= APPEARS_FEMALE_FROM) return 'female';
+  if (female <= APPEARS_MALE_UNTIL) return 'male';
+  return 'unsure';
+}
+
+/** Whether a face or person with this apparent gender should be blurred. */
+export function selectedBy(filter: PeopleFilter, gender: ApparentGender): boolean {
+  if (filter.who === 'everyone') return true;
+  if (gender === 'unsure') return filter.unsure === 'protect';
+  return filter.who === 'women' ? gender === 'female' : gender === 'male';
+}
+
+/**
+ * Apparent gender of a detected person, from the largest face whose centre
+ * lies in the upper part of their box. No visible face: unsure.
+ */
+export function personGender(person: Region, faces: readonly Region[]): ApparentGender {
+  let best: Region | null = null;
+  for (const face of faces) {
+    const cx = face.x + face.w / 2;
+    const cy = face.y + face.h / 2;
+    const inside =
+      cx >= person.x && cx <= person.x + person.w && cy >= person.y && cy <= person.y + person.h * FACE_ZONE;
+    if (inside && (!best || face.w * face.h > best.w * best.h)) best = face;
+  }
+  return best ? apparentGender(best.female) : 'unsure';
+}
+
+/**
+ * Detected faces or people that the policy selects, or null when the
+ * signals needed were not computed.
+ */
+export function selectRegions(
+  id: 'faces' | 'people',
+  signals: Signals,
+  policy: EffectivePolicy,
+): Region[] | null {
+  const filter = policy.peopleFilter;
+  const faceThreshold = policy.categories.faces.threshold;
+  if (id === 'faces') {
+    if (filter.who === 'everyone') {
+      const faces = signals.faces ?? signals.gender;
+      return faces ? faces.filter((r) => r.score >= faceThreshold) : null;
+    }
+    if (!signals.gender) return null;
+    return signals.gender.filter(
+      (r) => r.score >= faceThreshold && selectedBy(filter, apparentGender(r.female)),
+    );
+  }
+  if (!signals.people) return null;
+  const people = signals.people.filter((r) => r.score >= policy.categories.people.threshold);
+  if (filter.who === 'everyone') return people;
+  if (!signals.gender) return null;
+  const faces = signals.gender.filter((r) => r.score >= faceThreshold);
+  return people.filter((person) => selectedBy(filter, personGender(person, faces)));
+}
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
 
@@ -34,7 +104,8 @@ export function scoreCategories(signals: Signals, contextAware: boolean): Catego
     // the suggestive score. Explicit scores are never damped: close-up
     // explicit content often contains no detectable person or face.
     const detectorsRan = signals.people !== undefined;
-    const nobody = detectorsRan && signals.people!.length === 0 && (signals.faces?.length ?? 0) === 0;
+    const nobody =
+      detectorsRan && signals.people!.length === 0 && ((signals.faces ?? signals.gender)?.length ?? 0) === 0;
     if (nobody) suggestive *= NO_PERSON_DAMPING;
   }
   return { explicit, illustrated, suggestive };
@@ -84,10 +155,9 @@ export function evaluate(signals: Signals, context: PolicyContext, policy: Effec
   const regionsRenderable = context.kind === 'image';
   for (const id of ['faces', 'people'] as const) {
     const setting = policy.categories[id];
-    const detected = signals[id];
-    if (!setting.enabled || !detected) continue;
-    const hits = detected.filter((r) => r.score >= setting.threshold);
-    if (!hits.length) continue;
+    if (!setting.enabled) continue;
+    const hits = selectRegions(id, signals, policy);
+    if (!hits || !hits.length) continue;
     const best = Math.max(...hits.map((r) => r.score));
     if (setting.scope === 'whole' || (!regionsRenderable && context.kind === 'background')) {
       reasons.push({ category: id, score: best, threshold: setting.threshold });
@@ -137,17 +207,21 @@ export function fallbackDecision(policy: EffectivePolicy): Decision {
 }
 
 /** Signals a policy needs from the engine; unused detectors are never loaded. */
-export function requiredSignals(
-  policy: EffectivePolicy,
-  kind: PolicyContext['kind'],
-): ('classifier' | 'faces' | 'people')[] {
-  const kinds: ('classifier' | 'faces' | 'people')[] = [];
+export function requiredSignals(policy: EffectivePolicy, kind: PolicyContext['kind']): SignalKind[] {
+  const kinds: SignalKind[] = [];
   const c = policy.categories;
   if (c.explicit.enabled || c.illustrated.enabled || c.suggestive.enabled) kinds.push('classifier');
   const regionsUseful = kind === 'image' || kind === 'background' || policy.video.regionsProtectWhole;
-  if (c.faces.enabled && regionsUseful) kinds.push('faces');
+  if (!regionsUseful) return kinds;
+  // Filtering by apparent gender needs faces with gender estimates, for the
+  // Faces category and to tell who a detected person is.
+  const gendered = policy.peopleFilter.who !== 'everyone';
+  if (c.faces.enabled) kinds.push(gendered ? 'gender' : 'faces');
   // When enabled, people detection also serves as the corroboration signal
   // for context-aware scoring (see scoreCategories).
-  if (c.people.enabled && regionsUseful) kinds.push('people');
+  if (c.people.enabled) {
+    kinds.push('people');
+    if (gendered && !kinds.includes('gender')) kinds.push('gender');
+  }
   return kinds;
 }

@@ -31,9 +31,35 @@ const FILES = [
     'butterfly.jpg',
   ].map((f) => [SAMPLES + f, f]),
   ...['class57.png', 'karen-and-rob.png'].map((f) => [CASCADE + f, f]),
+  // People photos for the apparent-gender check (scripts/bench/people.mjs).
+  ...['mona-lisa.png', 'audrybt1.png', 'addams-family.png', 'karen-and-rob.png', 'class57.png'].map((f) => [
+    CASCADE + f,
+    `people/${f}`,
+  ]),
+  ...['messi5.jpg', 'basketball1.png'].map((f) => [SAMPLES + f, `people/${f}`]),
+  [
+    'https://raw.githubusercontent.com/tensorflow/tensorflow/master/tensorflow/examples/label_image/data/grace_hopper.jpg',
+    'people/grace-hopper.jpg',
+  ],
+  ...['biden.jpg', 'obama.jpg', 'two_people.jpg'].map((f) => [
+    `https://raw.githubusercontent.com/ageitgey/face_recognition/master/examples/${f}`,
+    `people/${f.replace('_', '-')}`,
+  ]),
+  ...[
+    '2008_002470',
+    '2009_004587',
+    '2008_001322',
+    '2008_001009',
+    '2008_004176',
+    '2007_007763',
+    'bald_guys',
+  ].map((f) => [
+    `https://raw.githubusercontent.com/davisking/dlib/master/examples/faces/${f}.jpg`,
+    `people/${f.startsWith('20') ? `voc-${f.replace('_', '-')}` : f.replace('_', '-')}.jpg`,
+  ]),
 ];
 
-await mkdir(out, { recursive: true });
+await mkdir(path.join(out, 'people'), { recursive: true });
 for (const [url, name] of FILES) {
   const target = path.join(out, name);
   try {

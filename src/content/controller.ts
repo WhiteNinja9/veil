@@ -504,7 +504,7 @@ export class ProtectionController {
     const src = item.src;
     item.state = 'analyzing';
     const needed = requiredSignals(this.policy, item.kind);
-    const regionsWanted = needed.includes('faces') || needed.includes('people');
+    const regionsWanted = needed.includes('faces') || needed.includes('people') || needed.includes('gender');
     if (item.key && this.capturesPixels(item)) {
       // Capturing and encoding pixels is the costly part of a cache hit;
       // ask the background first.

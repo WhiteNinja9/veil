@@ -3,6 +3,16 @@ import type { Page } from '@playwright/test';
 import { backgroundWorker, expect, setSettings, tabIdFor, test, waitForVeil } from './fixtures';
 
 async function axe(page: Page) {
+  // Measure the settled page: entrance fades and transitions blend colours
+  // while they run, which slow machines (CI) otherwise catch mid-way.
+  await page.evaluate(() =>
+    Promise.all(
+      document
+        .getAnimations()
+        .filter((a) => a.effect?.getComputedTiming().iterations !== Infinity)
+        .map((a) => a.finished.catch(() => undefined)),
+    ),
+  );
   const results = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'])
     .analyze();
@@ -130,6 +140,11 @@ test.describe('onboarding & interstitial', () => {
     await page.getByRole('button', { name: 'Continue' }).click();
     await page.getByRole('radio', { name: /Strict/ }).click();
     await page.getByRole('button', { name: 'Continue' }).click();
+    await expect(page.getByRole('heading', { name: 'Blur people too?' })).toBeVisible();
+    await page.getByRole('radio', { name: /^Women/ }).click();
+    await expect(page.getByText(/can be wrong/)).toBeVisible();
+    expect(await axe(page)).toEqual([]);
+    await page.getByRole('button', { name: 'Continue' }).click();
     await expect(page.getByRole('status')).toContainText(/Ready|didn’t finish/, { timeout: 60_000 });
     await page.getByRole('button', { name: 'Continue' }).click();
     await expect(page.getByRole('heading', { name: 'You’re set.' })).toBeVisible();
@@ -146,7 +161,13 @@ test.describe('onboarding & interstitial', () => {
             },
         ),
       )
-      .toMatchObject({ strictness: 'strict', onboardingComplete: true });
+      .toMatchObject({
+        strictness: 'strict',
+        onboardingComplete: true,
+        peopleFilter: { who: 'women', unsure: 'protect' },
+        categories: { faces: { enabled: true }, people: { enabled: true } },
+        video: { regionsProtectWhole: true },
+      });
   });
 
   test('interstitial is accessible and rejects non-http targets', async ({ context, extensionId }) => {

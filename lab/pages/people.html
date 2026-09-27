@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>People filter</title>
+    <link rel="stylesheet" href="/lab.css" />
+  </head>
+  <body>
+    <h1>People filter</h1>
+    <p class="lede">
+      Faces the test model reads as a woman (teal), a man (blue) or undecided (green), in images and video.
+    </p>
+    <div class="grid">
+      <div class="card">
+        <img id="woman" src="/img/woman/400x300.png" alt="woman fixture" />
+        <div class="meta">woman · same-origin</div>
+      </div>
+      <div class="card">
+        <img id="man" src="/img/man/400x300.png" alt="man fixture" />
+        <div class="meta">man · same-origin</div>
+      </div>
+      <div class="card">
+        <img id="woman-xo" src="__OTHER_ORIGIN__/img/woman/400x300.png?seed=2" alt="woman fixture" />
+        <div class="meta">woman · cross-origin</div>
+      </div>
+      <div class="card">
+        <img id="man-xo" src="__OTHER_ORIGIN__/img/man/400x300.png?seed=3" alt="man fixture" />
+        <div class="meta">man · cross-origin</div>
+      </div>
+      <div class="card">
+        <img id="unsure" src="/img/face/400x300.png?seed=4" alt="face fixture" />
+        <div class="meta">face · apparent gender unsure</div>
+      </div>
+      <div class="card">
+        <img id="nobody" src="/img/neutral/400x300.png?seed=5" alt="neutral" />
+        <div class="meta">no one</div>
+      </div>
+    </div>
+    <h2>Video</h2>
+    <div class="grid">
+      <div class="card">
+        <video
+          id="video-woman"
+          src="/video/woman.webm"
+          muted
+          loop
+          playsinline
+          autoplay
+          width="320"
+          height="180"
+        ></video>
+        <div class="meta">neutral, then a woman after 2 s</div>
+      </div>
+      <div class="card">
+        <video
+          id="video-man"
+          src="/video/man.webm"
+          muted
+          loop
+          playsinline
+          autoplay
+          width="320"
+          height="180"
+        ></video>
+        <div class="meta">neutral, then a man after 2 s</div>
+      </div>
+    </div>
+  </body>
+</html>

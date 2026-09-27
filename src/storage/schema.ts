@@ -2,6 +2,8 @@ import { categoriesForLevel, PRESETS } from '../policy/presets';
 import {
   type CategorySettings,
   type FallbackAction,
+  PEOPLE_TARGETS,
+  type PeopleFilter,
   type ProtectionStyle,
   type RevealMode,
   type StrictnessLevel,
@@ -76,6 +78,8 @@ export interface Settings {
     unloadAfterMin: number;
   };
   contextAware: boolean;
+  /** Blur everyone, or only people who appear to be women / men (Faces and People categories). */
+  peopleFilter: PeopleFilter;
   stats: { enabled: boolean; /** Show the protected count on the toolbar icon. */ badge: boolean };
   language: Language;
   onboardingComplete: boolean;
@@ -105,6 +109,7 @@ export function defaultSettings(): Settings {
     sites: [],
     performance: { backend: 'auto', unloadAfterMin: 10 },
     contextAware: true,
+    peopleFilter: { who: 'everyone', unsure: 'protect' },
     stats: { enabled: true, badge: false },
     language: 'auto',
     onboardingComplete: false,
@@ -244,6 +249,10 @@ export function sanitizeSettings(raw: unknown): Settings {
       unloadAfterMin: Math.round(num(perf.unloadAfterMin, d.performance.unloadAfterMin, 1, 240)),
     },
     contextAware: bool(input.contextAware, d.contextAware),
+    peopleFilter: {
+      who: oneOf(obj(input.peopleFilter).who, PEOPLE_TARGETS, d.peopleFilter.who),
+      unsure: oneOf(obj(input.peopleFilter).unsure, ['protect', 'reveal'] as const, d.peopleFilter.unsure),
+    },
     stats: {
       enabled: bool(obj(input.stats).enabled, d.stats.enabled),
       badge: bool(obj(input.stats).badge, d.stats.badge),

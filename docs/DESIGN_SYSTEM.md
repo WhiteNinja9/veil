@@ -108,8 +108,8 @@ live in `components.css`. Pages add layout only (`popup.css`, `options.css`, …
   Settings. It answers "is this page protected, and how do I change that?" in one glance.
 - **Settings:** a sidebar with 11 sections, a search field that deep-links to any setting, and
   export, import and reset.
-- **Onboarding:** 6 short steps: welcome, _on-device_ promise, permissions explained, level,
-  optional tuning, done. The level step starts on Balanced (the default), the performance check in
+- **Onboarding:** 7 short steps: welcome, _on-device_ promise, permissions explained, level,
+  _blur people?_ (off, women, men or everyone), optional tuning, done. The level step starts on Balanced (the default), the performance check in
   the tuning step can be skipped, and _Back_ is always available.
 - **Interstitial:** a centred card, a clear title, the host, and _Go back_ as the primary action.
   On warned sites, _Continue_ is a secondary action with explicit durations.

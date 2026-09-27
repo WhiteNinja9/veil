@@ -135,6 +135,39 @@ async function buildBlazeFace() {
   });
 }
 
+async function buildGender() {
+  const tarball = readTarGz(await download(SOURCES.human.url, SOURCES.human.integrity));
+  const modelJson = JSON.parse(tarball.get('package/models/faceres.json').toString('utf8'));
+  // The network ends in global pooling, so it accepts smaller crops. Veil
+  // feeds 160 px (half the cost of 224, same accuracy on our checks: see
+  // docs/ML.md); relax the declared spatial size so TF.js allows it.
+  const anySize = [{ size: '-1' }, { size: '-1' }, { size: '-1' }, { size: '3' }];
+  for (const node of modelJson.modelTopology.node) {
+    if (node.op === 'Placeholder') node.attr.shape.shape.dim = anySize;
+  }
+  for (const input of Object.values(modelJson.signature.inputs)) input.tensorShape.dim = anySize;
+  // Weights stay float16 as published: uint8 quantisation measurably hurt
+  // accuracy (AUC 0.977 → 0.959 on our labelled faces).
+  const weights = Buffer.from(tarball.get('package/models/faceres.bin'));
+  return writeModel('face-gender-hse', modelJson, [weights], {
+    task: 'face-attributes',
+    inputSize: 160,
+    outputs: { gender: 'sigmoid, probability the face appears male' },
+    license: 'Apache-2.0 (HSE-FaceRes, A. Savchenko); converted by @vladmandic/human (MIT)',
+    source: '@vladmandic/human@3.3.6 models/faceres (HSE_FaceRec_tf), float16 weights',
+  });
+}
+
+/** IEEE 754 half precision → single precision. */
+function float16ToFloat32(bits) {
+  const sign = bits & 0x8000 ? -1 : 1;
+  const exponent = (bits >> 10) & 0x1f;
+  const fraction = bits & 0x3ff;
+  if (exponent === 0) return sign * 2 ** -14 * (fraction / 1024);
+  if (exponent === 0x1f) return fraction ? Number.NaN : sign * Infinity;
+  return sign * 2 ** (exponent - 15) * (1 + fraction / 1024);
+}
+
 /**
  * Affine uint8 quantisation of float32 weights, the same scheme the
  * TensorFlow.js converter uses for `--quantize_uint8`. Cuts the person
@@ -147,16 +180,25 @@ function quantizeUint8(modelJson, buffer) {
   for (const group of modelJson.weightsManifest) {
     for (const entry of group.weights) {
       const count = entry.shape.reduce((a, b) => a * b, 1);
-      const elementBytes = entry.dtype === 'float32' || entry.dtype === 'int32' ? 4 : 1;
+      const half = entry.dtype === 'float32' && entry.quantization?.dtype === 'float16';
+      const elementBytes = half
+        ? 2
+        : entry.quantization
+          ? 1
+          : entry.dtype === 'float32' || entry.dtype === 'int32'
+            ? 4
+            : 1;
       const byteLength = count * elementBytes;
       const slice = buffer.subarray(offset, offset + byteLength);
       offset += byteLength;
-      if (entry.dtype !== 'float32' || entry.quantization) {
+      if (entry.dtype !== 'float32' || (entry.quantization && !half)) {
         out.push(Buffer.from(slice));
         weights.push(entry);
         continue;
       }
-      const values = new Float32Array(slice.buffer.slice(slice.byteOffset, slice.byteOffset + byteLength));
+      const values = half
+        ? Float32Array.from({ length: count }, (_, i) => float16ToFloat32(slice.readUInt16LE(i * 2)))
+        : new Float32Array(slice.buffer.slice(slice.byteOffset, slice.byteOffset + byteLength));
       let min = Infinity;
       let max = -Infinity;
       for (const v of values) {
@@ -170,7 +212,7 @@ function quantizeUint8(modelJson, buffer) {
       weights.push({ ...entry, quantization: { dtype: 'uint8', min, scale } });
     }
   }
-  if (offset !== buffer.length) throw new Error('SSD weight manifest does not match buffer size');
+  if (offset !== buffer.length) throw new Error('weight manifest does not match buffer size');
   modelJson.weightsManifest = [{ paths: [], weights }];
   return Buffer.concat(out);
 }
@@ -194,7 +236,7 @@ async function main() {
   console.log('Veil · preparing on-device models');
   await mkdir(outDir, { recursive: true });
   const models = [];
-  for (const build of [buildNsfw, buildBlazeFace, buildPersonDetector]) {
+  for (const build of [buildNsfw, buildBlazeFace, buildPersonDetector, buildGender]) {
     const model = await build();
     console.log(`  ✓ ${model.id.padEnd(30)} ${(model.bytes / 1024 / 1024).toFixed(2)} MB`);
     models.push(model);

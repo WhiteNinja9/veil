@@ -6,13 +6,25 @@ import {
   preferredBatchSize,
   selectBackend,
 } from '../backend';
-import { type DecodedMedia, decodeImage, rasterize } from '../decode';
-import { aggregateFrames } from '../postprocess';
+import { cropSquare, type DecodedMedia, decodeImage, rasterize, rasterizeRegion } from '../decode';
+import { aggregateFrames, faceCropBox, faceTiles, fromTile, mergeDetections } from '../postprocess';
 import { FaceDetector } from '../providers/face-detector';
+import { GenderClassifier } from '../providers/gender-classifier';
 import { NsfwClassifier } from '../providers/nsfw-classifier';
 import { PersonDetector } from '../providers/person-detector';
-import type { AnyProvider, ClassifierProvider, DetectorProvider, PreparedImage } from '../providers/provider';
-import { TestClassifier, TestFaceDetector, TestPersonDetector } from '../providers/test-providers';
+import type {
+  AnyProvider,
+  ClassifierProvider,
+  DetectorProvider,
+  FaceAttributeProvider,
+  PreparedImage,
+} from '../providers/provider';
+import {
+  TestClassifier,
+  TestFaceDetector,
+  TestGenderClassifier,
+  TestPersonDetector,
+} from '../providers/test-providers';
 import { blobToDataUrl, RENDER_MAX_SIDE, renderConcealed } from '../render';
 import type { EngineStatus, Region, SignalKind, Signals } from '../types';
 import type { BenchmarkResult, DetectJob, RenderJob, WorkerConfig } from './protocol';
@@ -21,6 +33,23 @@ import type { BenchmarkResult, DetectJob, RenderJob, WorkerConfig } from './prot
 const MODEL_MAX_SIDE = 320;
 const MAX_RETAINED = 8;
 const TIMING_WINDOW = 200;
+/** Face-attribute crops: this many times the detected face box, centred on it. */
+export const FACE_CROP_SCALE = 1.5;
+/** Faces smaller than this (source pixels) are too small to judge; `female` stays unset. */
+export const MIN_FACE_SIDE = 24;
+/** Faces the detector is less sure of than this are not worth a gender estimate. */
+export const GENDER_MIN_FACE_SCORE = 0.7;
+/** Per image, only the largest faces get a gender estimate; the rest count as unsure. */
+export const MAX_GENDER_FACES = 20;
+/** Source pixels per tile in the second face-detection pass on large images. */
+export const FACE_TILE_SIDE = 384;
+
+/** Providers a signal needs: `gender` builds on the face detector. */
+export function providersFor(kinds: readonly SignalKind[]): SignalKind[] {
+  const out = new Set(kinds);
+  if (out.has('gender')) out.add('faces');
+  return [...out];
+}
 
 export class EngineJobError extends Error {
   constructor(
@@ -96,19 +125,24 @@ export class DetectionEngine {
   }
 
   private createProvider(kind: SignalKind): AnyProvider {
-    if (this.config.testModel) {
-      if (kind === 'classifier') return new TestClassifier();
-      return kind === 'faces' ? new TestFaceDetector() : new TestPersonDetector();
+    const test = this.config.testModel;
+    switch (kind) {
+      case 'classifier':
+        return test ? new TestClassifier() : new NsfwClassifier();
+      case 'faces':
+        return test ? new TestFaceDetector() : new FaceDetector();
+      case 'people':
+        return test ? new TestPersonDetector() : new PersonDetector();
+      case 'gender':
+        return test ? new TestGenderClassifier() : new GenderClassifier();
     }
-    if (kind === 'classifier') return new NsfwClassifier();
-    return kind === 'faces' ? new FaceDetector() : new PersonDetector();
   }
 
   /** Loads and warms the providers for `kinds` (idempotent, deduplicated). */
   async ensure(kinds: readonly SignalKind[]): Promise<void> {
     await this.init();
     await Promise.all(
-      kinds.map((kind) => {
+      providersFor(kinds).map((kind) => {
         if (this.providers.get(kind)?.loaded) return Promise.resolve();
         let pending = this.loading.get(kind);
         if (!pending) {
@@ -219,7 +253,7 @@ export class DetectionEngine {
     work: { entry: QueuedJob; media: DecodedMedia; images: PreparedImage[] }[],
     started: number,
   ): Promise<void> {
-    const results = work.map(() => ({}) as Pick<Signals, 'classifier' | 'faces' | 'people'>);
+    const results = work.map(() => ({}) as Pick<Signals, 'classifier' | 'faces' | 'people' | 'gender'>);
     const classifier = this.providers.get('classifier') as ClassifierProvider | undefined;
 
     // 1. Classifier, batched across every frame of every job that wants it.
@@ -247,8 +281,44 @@ export class DetectionEngine {
       const detector = this.providers.get(kind) as DetectorProvider | undefined;
       if (!detector) continue;
       for (let i = 0; i < work.length; i++) {
-        if (!work[i]!.entry.job.signals.includes(kind)) continue;
-        results[i]![kind] = await detector.detect(work[i]!.images[0]!);
+        const { entry, media, images } = work[i]!;
+        if (!entry.job.signals.includes(kind)) continue;
+        results[i]![kind] =
+          kind === 'faces'
+            ? await this.detectFaces(detector, media.frames[0]!, images[0]!)
+            : await detector.detect(images[0]!);
+      }
+    }
+
+    // 3. Apparent gender per face, from crops of the full-resolution frame.
+    const gender = this.providers.get('gender') as FaceAttributeProvider | undefined;
+    const faceDetector = this.providers.get('faces') as DetectorProvider | undefined;
+    if (gender && faceDetector) {
+      const crops: { workIndex: number; faceIndex: number; crop: ImageData }[] = [];
+      for (let i = 0; i < work.length; i++) {
+        const { entry, media, images } = work[i]!;
+        if (!entry.job.signals.includes('gender')) continue;
+        const faces = (
+          results[i]!.faces ?? (await this.detectFaces(faceDetector, media.frames[0]!, images[0]!))
+        ).map((f) => ({ ...f }));
+        results[i]!.gender = faces;
+        const frame = media.frames[0]!;
+        faces
+          .map((face, faceIndex) => ({ face, faceIndex }))
+          .filter(({ face }) => face.score >= GENDER_MIN_FACE_SCORE)
+          .sort((a, b) => b.face.w * b.face.h - a.face.w * a.face.h)
+          .slice(0, MAX_GENDER_FACES)
+          .forEach(({ face, faceIndex }) => {
+            const box = faceCropBox(face, frame.width, frame.height, FACE_CROP_SCALE, MIN_FACE_SIDE);
+            if (box) crops.push({ workIndex: i, faceIndex, crop: cropSquare(frame, box, gender.inputSize) });
+          });
+      }
+      for (let c = 0; c < crops.length; c += gender.maxBatch) {
+        const chunk = crops.slice(c, c + gender.maxBatch);
+        const female = await gender.female(chunk.map((item) => item.crop));
+        chunk.forEach((item, j) => {
+          results[item.workIndex]!.gender![item.faceIndex]!.female = female[j];
+        });
       }
     }
 
@@ -267,6 +337,31 @@ export class DetectionEngine {
         frames: media.frames.length,
       });
     });
+  }
+
+  /**
+   * Faces in the whole (downscaled) image, plus — for large images — a tiled
+   * pass at higher resolution, so small faces in group photos are found too.
+   */
+  private async detectFaces(
+    detector: DetectorProvider,
+    frame: ImageBitmap,
+    prepared: PreparedImage,
+  ): Promise<Region[]> {
+    const whole = await detector.detect(prepared);
+    const tiles = faceTiles(frame.width, frame.height, FACE_TILE_SIDE);
+    if (!tiles.length) return whole;
+    const found = [...whole];
+    for (const tile of tiles) {
+      const pixels = tf.browser.fromPixels(rasterizeRegion(frame, tile, MODEL_MAX_SIDE)) as tf.Tensor3D;
+      try {
+        const regions = await detector.detect({ pixels, width: prepared.width, height: prepared.height });
+        found.push(...regions.map((r) => fromTile(r, tile)));
+      } finally {
+        pixels.dispose();
+      }
+    }
+    return mergeDetections(found);
   }
 
   private recordTiming(ms: number): void {

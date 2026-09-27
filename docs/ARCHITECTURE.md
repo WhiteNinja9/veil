@@ -19,7 +19,7 @@ or kept protected according to the user's policy.
 ┌───────────────▼───────────────────────────────────────────────────────────┐
 │ InferenceHost: guarded media fetch, timeouts, crash cooldown             │
 │   └─ dedicated Worker: TF.js (WebGPU → WebGL → WASM SIMD → CPU)          │
-│      classifier · face detector · person detector · region renderer      │
+│      classifier · faces · people · apparent gender · region renderer    │
 └───────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -66,8 +66,10 @@ out of the Firefox bundle (`__BROWSER__` constant, dead-code elimination).
    memory only) and de-duplicates identical in-flight requests across tabs. The worker decodes the
    media: `ImageDecoder` samples several frames of animated images; otherwise `createImageBitmap`.
    It batches concurrent requests and runs only the models the policy needs.
-7. **Signals → decision.** The worker returns raw **signals**: classifier scores, face boxes and
-   person boxes. The content script turns signals into a **decision** with the pure policy engine
+7. **Signals → decision.** The worker returns raw **signals**: classifier scores, face boxes (with
+   an apparent-gender estimate when the people filter needs one) and person boxes. Large images get
+   an extra tiled face-detection pass so small faces are found
+   ([ML.md](ML.md#faces-and-people-region-protection)). The content script turns signals into a **decision** with the pure policy engine
    (`src/policy/engine.ts`). Signals are cached separately from decisions, so changing the level
    re-decides every item on the page instantly, with no re-inference.
 8. **Render.** The element's `data-veil` attribute becomes `ok` (shown), `x` (protected), `rg`

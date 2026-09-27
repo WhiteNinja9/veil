@@ -36,7 +36,15 @@ export const MARKERS = {
   suggestive: [255, 140, 0],
   borderline: [255, 255, 0],
   face: [0, 200, 0],
+  // Faces whose apparent gender the test model reads from the face area
+  // itself (painted in the same colour), exercising the real cropping path.
+  woman: [0, 200, 120],
+  man: [0, 110, 200],
 };
+
+/** Face area used by the test face detector (normalised x, y, w, h). */
+const FACE_AREA = [0.35, 0.3, 0.3, 0.35];
+const PAINTED_FACES = new Set(['woman', 'man']);
 
 /** RGBA pixels for a fixture (shared by the PNG and JPEG encoders). */
 export function fixturePixels(width, height, marker = 'neutral', seed = 0) {
@@ -80,7 +88,13 @@ function fixtureRaw(width, height, marker, seed) {
     raw[row] = 0;
     for (let x = 0; x < width; x++) {
       const i = row + 1 + x * 3;
-      if (color && x < markerSize && y < markerSize) {
+      const inFace =
+        PAINTED_FACES.has(marker) &&
+        x >= FACE_AREA[0] * width &&
+        x < (FACE_AREA[0] + FACE_AREA[2]) * width &&
+        y >= FACE_AREA[1] * height &&
+        y < (FACE_AREA[1] + FACE_AREA[3]) * height;
+      if (color && ((x < markerSize && y < markerSize) || inFace)) {
         raw[i] = color[0];
         raw[i + 1] = color[1];
         raw[i + 2] = color[2];

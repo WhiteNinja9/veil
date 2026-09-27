@@ -119,6 +119,27 @@ export const SETTINGS_INDEX: SettingEntry[] = [
     keywords: 'people person body modesty',
   },
   {
+    id: 'people-who',
+    section: 'protection',
+    label: 'people.who',
+    description: 'people.who.desc',
+    keywords: 'women woman female men man male gender modesty lower gaze',
+  },
+  {
+    id: 'people-unsure',
+    section: 'protection',
+    label: 'people.unsure',
+    description: 'people.unsure.desc',
+    keywords: 'gender uncertain unsure women men',
+  },
+  {
+    id: 'people-videos',
+    section: 'protection',
+    label: 'people.videos',
+    description: 'people.videos.desc',
+    keywords: 'video women men people faces gender',
+  },
+  {
     id: 'context',
     section: 'protection',
     label: 'protection.contextAware',

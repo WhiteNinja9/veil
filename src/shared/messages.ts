@@ -48,7 +48,7 @@ export const detectRequest = v.object({
   id,
   key,
   source: mediaSource,
-  signals: v.array(v.enum(SIGNAL_KINDS), { max: 3 }),
+  signals: v.array(v.enum(SIGNAL_KINDS), { max: SIGNAL_KINDS.length }),
   priority,
   initiator: v.optional(url),
 });
@@ -80,7 +80,10 @@ export type FrameStats = Infer<typeof frameStats>;
 
 /** Port messages: content → background ("veil-engine" port). */
 export const portInbound = v.tagged('type', {
-  hello: v.object({ type: v.literal('hello'), signals: v.array(v.enum(SIGNAL_KINDS), { max: 3 }) }),
+  hello: v.object({
+    type: v.literal('hello'),
+    signals: v.array(v.enum(SIGNAL_KINDS), { max: SIGNAL_KINDS.length }),
+  }),
   detect: v.object({ type: v.literal('detect'), request: detectRequest }),
   // Cache-only lookup: lets the page skip capturing pixels for media the
   // background has already analysed. Answered at once; never runs a model.
@@ -88,7 +91,7 @@ export const portInbound = v.tagged('type', {
     type: v.literal('probe'),
     id,
     key,
-    signals: v.array(v.enum(SIGNAL_KINDS), { max: 3 }),
+    signals: v.array(v.enum(SIGNAL_KINDS), { max: SIGNAL_KINDS.length }),
   }),
   render: v.object({ type: v.literal('render'), request: renderRequest }),
   cancel: v.object({ type: v.literal('cancel'), id }),

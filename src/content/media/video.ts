@@ -19,7 +19,7 @@
  * frames whose smoothed scores are also safe (hysteresis), so rapid cuts
  * cannot flicker content into view.
  */
-import { evaluate } from '../../policy/engine';
+import { evaluate, requiredSignals } from '../../policy/engine';
 import type { Decision, EffectivePolicy } from '../../policy/types';
 import type { ClassifierScores, DetectResponse, Signals } from '../../ml/types';
 import { emaScores } from '../../ml/postprocess';
@@ -40,6 +40,11 @@ export const MIN_PROTECTED_MS = 2000;
 export const MIN_GAP_MS = 250;
 const TOKENS_PER_SECOND = 4;
 const FRAME_MAX_SIDE = 256;
+/**
+ * Frames for face / person / gender analysis need more detail. 480 px keeps
+ * each frame to a single face-detection pass (the worker tiles above that).
+ */
+const FRAME_MAX_SIDE_REGIONS = 480;
 
 export interface VideoHost {
   policy(): EffectivePolicy;
@@ -263,7 +268,8 @@ export class VideoProtectionManager {
     if (!force && this.tokens < 1) return;
     this.tokens = Math.max(0, this.tokens - 1);
 
-    const capture = await captureElement(video, FRAME_MAX_SIDE, 0.8);
+    const regions = requiredSignals(this.host.policy(), 'video').some((kind) => kind !== 'classifier');
+    const capture = await captureElement(video, regions ? FRAME_MAX_SIDE_REGIONS : FRAME_MAX_SIDE, 0.8);
     if (capture === 'tainted') {
       this.onTainted(state);
       return;

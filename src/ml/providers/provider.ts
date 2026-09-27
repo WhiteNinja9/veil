@@ -44,7 +44,17 @@ export interface DetectorProvider extends ModelProvider {
   detect(image: PreparedImage): Promise<Region[]>;
 }
 
-export type AnyProvider = ClassifierProvider | DetectorProvider;
+/** Per-face attributes, computed on face crops taken from the full-resolution frame. */
+export interface FaceAttributeProvider extends ModelProvider {
+  readonly signal: 'gender';
+  /** Crop side in pixels the model expects. */
+  readonly inputSize: number;
+  readonly maxBatch: number;
+  /** For square RGB crops of `inputSize`: probability that each face appears female. */
+  female(crops: ImageData[]): Promise<number[]>;
+}
+
+export type AnyProvider = ClassifierProvider | DetectorProvider | FaceAttributeProvider;
 
 export function isClassifier(provider: AnyProvider): provider is ClassifierProvider {
   return provider.signal === 'classifier';

@@ -68,6 +68,9 @@ export function weakenedScopes(current: Settings, next: Settings, now = Date.now
       next.appearance.style === 'blur-soft' &&
       current.appearance.style !== 'blur-soft') ||
     (current.video.regionsProtectWhole && !next.video.regionsProtectWhole) ||
+    // Blurring fewer people: from everyone to one group, or switching groups.
+    (current.peopleFilter.who !== next.peopleFilter.who && next.peopleFilter.who !== 'everyone') ||
+    (current.peopleFilter.unsure === 'protect' && next.peopleFilter.unsure === 'reveal') ||
     (!current.video.autoRestore && next.video.autoRestore);
   if (weaker) scopes.add('settings');
   return scopes;

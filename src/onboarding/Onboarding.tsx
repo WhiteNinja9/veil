@@ -3,7 +3,7 @@ import { useEffect, useState } from 'preact/hooks';
 import { ext } from '../browser/api';
 import type { BenchmarkResult } from '../ml/worker/protocol';
 import { STRICTNESS_LEVELS } from '../policy/types';
-import { levelPatch, readShortcuts } from '../ui/actions';
+import { levelPatch, PEOPLE_CHOICES, peopleChoice, peoplePatch, readShortcuts } from '../ui/actions';
 import { sendToBackground, useApp } from '../ui/app-context';
 import { Button } from '../ui/components/controls';
 import { Choice } from '../ui/components/layout';
@@ -11,7 +11,7 @@ import { Icon, Mark } from '../ui/icons';
 import { LevelMeter } from '../options/sections/General';
 import { BACKEND_NAMES } from '../options/sections/Performance';
 
-const STEPS = ['welcome', 'local', 'permissions', 'level', 'tune', 'done'] as const;
+const STEPS = ['welcome', 'local', 'permissions', 'level', 'people', 'tune', 'done'] as const;
 type Step = (typeof STEPS)[number];
 
 async function hasHostAccess(): Promise<boolean> {
@@ -228,6 +228,29 @@ export function Onboarding(): JSX.Element {
                 />
               ))}
             </div>
+          </section>
+        )}
+
+        {step === 'people' && (
+          <section class="panel">
+            <h1 class="onboarding__title" tabIndex={-1}>
+              {t.t('onb.people.title')}
+            </h1>
+            <p class="onboarding__body">{t.t('onb.people.body')}</p>
+            <div class="choices choices--2" role="radiogroup" aria-label={t.t('onb.people.title')}>
+              {PEOPLE_CHOICES.map((choice) => (
+                <Choice
+                  key={choice}
+                  checked={peopleChoice(settings) === choice}
+                  title={t.t(`people.choice.${choice}`)}
+                  description={t.t(`onb.people.${choice}.desc`)}
+                  onSelect={() => void update(peoplePatch(choice))}
+                />
+              ))}
+            </div>
+            {peopleChoice(settings) !== 'off' && peopleChoice(settings) !== 'everyone' && (
+              <p class="subtle small">{t.t('people.accuracy')}</p>
+            )}
           </section>
         )}
 

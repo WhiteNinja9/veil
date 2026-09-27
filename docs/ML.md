@@ -1,14 +1,15 @@
 # Models and detection
 
-Veil runs three small models entirely in the browser with TensorFlow.js. They are fetched at
-build time from pinned sources and verified against fixed digests; the extension never downloads
-anything at runtime.
+Veil runs up to four small models entirely in the browser with TensorFlow.js. Each loads only when
+a setting needs it. They are fetched at build time from pinned sources and verified against fixed
+digests; the extension never downloads anything at runtime.
 
-| Model                         | Architecture                    | Input                                               | Output                                              | Size   | License    | Source                                                                                                                                |
-| ----------------------------- | ------------------------------- | --------------------------------------------------- | --------------------------------------------------- | ------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `nsfw-mobilenet-v2-mid`       | MobileNetV2 image classifier    | 224 × 224 RGB, `/255`                               | softmax over _drawing, hentai, neutral, porn, sexy_ | 4.4 MB | MIT        | [NSFWJS](https://github.com/infinitered/nsfwjs) 4.4.0, "mid" graph model                                                              |
-| `face-blazeface-back`         | BlazeFace (back-camera variant) | 256 × 256, letterboxed, `[-1, 1]`                   | face boxes and scores (896 anchors, 2 heads)        | 0.6 MB | Apache-2.0 | MediaPipe BlazeFace, TF.js conversion from [@vladmandic/human](https://github.com/vladmandic/human) 3.3.6                             |
-| `person-ssdlite-mobilenet-v2` | SSDLite MobileNetV2 (COCO)      | aspect-preserving, long side ≤ 320 px, uint8 pixels | boxes; class 0 (_person_) kept                      | 4.8 MB | Apache-2.0 | TF.js [COCO-SSD](https://github.com/tensorflow/tfjs-models/tree/master/coco-ssd) SavedModel, weights quantised to uint8 at build time |
+| Model                         | Architecture                                                  | Input                                               | Output                                                        | Size   | License    | Source                                                                                                                                 |
+| ----------------------------- | ------------------------------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------- | ------ | ---------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `nsfw-mobilenet-v2-mid`       | MobileNetV2 image classifier                                  | 224 × 224 RGB, `/255`                               | softmax over _drawing, hentai, neutral, porn, sexy_           | 4.4 MB | MIT        | [NSFWJS](https://github.com/infinitered/nsfwjs) 4.4.0, "mid" graph model                                                               |
+| `face-blazeface-back`         | BlazeFace (back-camera variant)                               | 256 × 256, letterboxed, `[-1, 1]`                   | face boxes and scores (896 anchors, 2 heads)                  | 0.6 MB | Apache-2.0 | MediaPipe BlazeFace, TF.js conversion from [@vladmandic/human](https://github.com/vladmandic/human) 3.3.6                              |
+| `person-ssdlite-mobilenet-v2` | SSDLite MobileNetV2 (COCO)                                    | aspect-preserving, long side ≤ 320 px, uint8 pixels | boxes; class 0 (_person_) kept                                | 4.8 MB | Apache-2.0 | TF.js [COCO-SSD](https://github.com/tensorflow/tfjs-models/tree/master/coco-ssd) SavedModel, weights quantised to uint8 at build time  |
+| `face-gender-hse`             | HSE-FaceRes (MobileNet backbone, age/gender/descriptor heads) | square face crop, 160 × 160 RGB, 0–255              | sigmoid: probability the face appears male (gender head only) | 6.7 MB | Apache-2.0 | [HSE-FaceRes](https://github.com/HSE-asavchenko/HSE_FaceRec_tf) (A. Savchenko), TF.js conversion from @vladmandic/human 3.3.6, float16 |
 
 `scripts/fetch-models.mjs` normalises each model to `model.json` + `weights-1.bin` and writes
 `assets/models/models.json` with the SHA-256 of every file. Release packaging re-checks these
@@ -58,20 +59,94 @@ effect only while person detection runs.
 
 Face candidates below 0.5 and person candidates below 0.3 are discarded inside the detectors,
 before non-maximum suppression (IoU 0.3 for faces, 0.5 for people). The policy threshold then
-applies. On the eval images (see [BENCHMARKS.md](BENCHMARKS.md)), real faces scored 0.85–0.90,
-while the false detections on objects scored 0.54–0.63, below the default 0.75.
+applies. On the eval images (see [BENCHMARKS.md](BENCHMARKS.md)), real faces scored 0.81 and above,
+while false detections on objects scored 0.51–0.65, below the default 0.75.
+
+**Small faces.** Face detection runs on the image scaled to 320 px, which makes faces in group
+photos too small to find. For images larger than 480 px, the worker also runs the detector on
+overlapping tiles at higher resolution (384 source pixels per tile, up to 4 × 4). It then merges
+the results, dropping duplicates and faces cut in half by a tile edge. On a 56-person class photo,
+this took detections from 0 to 56.
 
 Each category can protect only the detected **regions**, or the **whole** image when any are found.
 Regions are concealed by a worker-rendered copy of the image, so the rest stays visible.
 
-### Why there is no gender filter
+### People filter: women, men or everyone
 
-Veil deliberately does not infer gender. Classifying gender from appearance is unreliable, with
-documented higher error rates for darker-skinned people and systematic misclassification of
-trans and non-binary people. It also means inferring a sensitive attribute about everyone
-on screen. _Faces_ and _People_ protection cover the underlying need (not seeing people you'd
-rather not see) without guessing who anyone is. The provider architecture would technically
-allow such a model; including one would be a product decision this project does not make.
+_Faces_ and _People_ protection can apply to **everyone**, or only to people who **appear to be
+women** or **appear to be men** (Settings → Protection → _Who to blur_; also in the popup and
+onboarding).
+
+How it works:
+
+1. The face detector finds faces as above. Faces the detector is at least 0.7 sure of get an
+   apparent-gender estimate, up to the 20 largest per image.
+2. Each face is cropped from the **full-resolution** frame: a square 1.5 × the face box, resized to
+   160 px. Faces smaller than 24 source pixels are not judged.
+3. The gender model returns p = probability the face _appears female_. Veil reads it with
+   asymmetric cut-offs chosen from labelled faces:
+
+   | p                       | Reading        |
+   | ----------------------- | -------------- |
+   | ≥ 0.45                  | appears female |
+   | ≤ 0.30                  | appears male   |
+   | between, or no estimate | **unsure**     |
+
+4. **Unsure** faces follow the user's _When unsure_ choice: _Blur_ (default) or _Show_.
+5. A detected **person** takes the reading of the largest face whose centre lies in the upper 60 %
+   of their box. People with no visible face (turned away, too far) are **unsure**.
+6. **Video:** frames are analysed at up to 480 px. When _Also in videos_ is on, the whole video is
+   hidden while a matching person is on screen, and restored after several frames without one.
+   Frame-accurate blurring of individual people in moving video isn't possible at the rates an
+   extension can sample; hiding the whole video is the reliable option.
+
+The estimate is computed in memory for the current page and never stored or sent anywhere, like
+every other signal ([PRIVACY.md](PRIVACY.md)).
+
+**Measured accuracy.** `node scripts/bench/people.mjs` runs the shipped worker on 16 hand-labelled
+public sample photos (from OpenCV, dlib and face_recognition; fetched by
+`scripts/fetch-eval-images.mjs`, labels in `scripts/bench/people-labels.json`). The photos contain
+67 labelled faces in colour and greyscale, ages from about 8 to 80, several ethnicities, and 1 to
+24 people each. At the default face threshold (0.75), 66 were detected and 62 got an estimate
+(20 women, 46 men). The other 4 were beyond the 20-face cap in the 24-person photo, so they count
+as unsure.
+
+At a single 0.5 cut-off the model was right on 59 of 62 (95 %, ROC AUC 0.981). With Veil's
+cut-offs:
+
+| Setting              | Target faces blurred | Other faces blurred |
+| -------------------- | -------------------- | ------------------- |
+| Women, unsure → Blur | 19 / 20 women        | 7 / 46 men          |
+| Women, unsure → Show | 17 / 20 women        | 0 / 46 men          |
+| Men, unsure → Blur   | 46 / 46 men          | 3 / 20 women        |
+| Men, unsure → Show   | 39 / 46 men          | 1 / 20 women        |
+
+One face was misjudged outright: an elderly woman in a military uniform and cap, read as male
+(0.07). Five fell in the unsure band: three men (a boy and two faces under 50 px) and two women (a
+36 px face, and a bride with glasses at 0.45). The rest of the "unsure" count comes from the cap.
+
+**This sample is small**: treat it as a sanity check, not a benchmark. Known weaknesses of
+appearance-based gender estimation apply:
+
+- errors are more common for children, older people, and people whose presentation doesn't match
+  the model's training data (make-up, hair, headwear, uniforms);
+- error rates are known to vary across skin tones and ethnicities in models of this kind;
+- the model estimates **apparent** gender from a face. It says nothing about who a person is.
+
+The filter blurs what a user chose not to see on their own screen. It is not an identification
+tool, and Veil records nothing about anyone.
+
+**Choices made while building it.** Compared on the same faces:
+
+_(These comparisons used an earlier harness with whole-image face detection, 63 faces.)_
+
+- **HSE-FaceRes at 224 px:** 98 %, AUC 0.981, 170 ms per face on WASM.
+- **HSE-FaceRes at 160 px:** 97 %, AUC 0.977, 88 ms per face. **Chosen.**
+- **HSE-FaceRes at 128 px:** 89 %.
+- **uint8-quantised weights:** AUC 0.959. Rejected; float16 kept.
+- **GEAR, SSR-Net and Oarriaga gender models:** they collapsed to one answer or were erratic with
+  our crops. Rejected.
+- **1.5 × face-box crop:** best of 1.0–2.4.
 
 ## Thresholds and calibration
 

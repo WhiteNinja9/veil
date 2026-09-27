@@ -1,11 +1,18 @@
 import type { JSX } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import { PRESETS, sensitivityToThreshold, thresholdToSensitivity } from '../../policy/presets';
-import { type CategoryId, type FallbackAction, REVEAL_MODES, type RevealMode } from '../../policy/types';
+import {
+  type CategoryId,
+  type FallbackAction,
+  PEOPLE_TARGETS,
+  type PeopleTarget,
+  REVEAL_MODES,
+  type RevealMode,
+} from '../../policy/types';
 import { levelPatch, openShortcutSettings, readShortcuts } from '../../ui/actions';
 import { useApp } from '../../ui/app-context';
 import { Button, Segmented, Select, Slider, Switch } from '../../ui/components/controls';
-import { Card, Choice, Row } from '../../ui/components/layout';
+import { Banner, Card, Choice, Row } from '../../ui/components/layout';
 
 function ContentCategory({ id }: { id: 'explicit' | 'illustrated' | 'suggestive' }): JSX.Element {
   const { settings, t, update } = useApp();
@@ -95,6 +102,70 @@ function RegionCategory({ id }: { id: 'faces' | 'people' }): JSX.Element {
   );
 }
 
+/** Who the Faces and People categories blur: everyone, or people who appear to be women / men. */
+function PeopleFilterControls(): JSX.Element {
+  const { settings, t, update } = useApp();
+  const filter = settings.peopleFilter;
+  const regionsOn = settings.categories.faces.enabled || settings.categories.people.enabled;
+  const choose = (who: PeopleTarget) =>
+    void update({
+      peopleFilter: { who },
+      // Picking a group with both categories off means "start blurring them".
+      ...(who !== 'everyone' && !regionsOn
+        ? { categories: { faces: { enabled: true }, people: { enabled: true } } }
+        : {}),
+    });
+  return (
+    <>
+      <div class="row row--stack" id="people-who">
+        <div class="row__text">
+          <div class="row__label" id="people-who-label">
+            {t.t('people.who')}
+          </div>
+          <div class="row__desc">{t.t('people.who.desc')}</div>
+        </div>
+        <Segmented<PeopleTarget>
+          value={filter.who}
+          label={t.t('people.who')}
+          options={PEOPLE_TARGETS.map((who) => ({ value: who, label: t.t(`people.who.${who}`) }))}
+          onChange={choose}
+        />
+      </div>
+      <Row
+        id="people-unsure"
+        label={t.t('people.unsure')}
+        description={t.t('people.unsure.desc')}
+        disabled={filter.who === 'everyone'}
+      >
+        <Select<FallbackAction>
+          inline
+          label={t.t('people.unsure')}
+          value={filter.unsure}
+          disabled={filter.who === 'everyone'}
+          options={[
+            { value: 'protect', label: t.t('people.unsure.protect') },
+            { value: 'reveal', label: t.t('people.unsure.reveal') },
+          ]}
+          onChange={(unsure) => void update({ peopleFilter: { unsure } })}
+        />
+      </Row>
+      <Row
+        id="people-videos"
+        label={t.t('people.videos')}
+        description={t.t('people.videos.desc')}
+        disabled={!regionsOn || !settings.media.videos}
+      >
+        <Switch
+          checked={settings.video.regionsProtectWhole}
+          disabled={!regionsOn || !settings.media.videos}
+          label={t.t('people.videos')}
+          onChange={(regionsProtectWhole) => void update({ video: { regionsProtectWhole } })}
+        />
+      </Row>
+    </>
+  );
+}
+
 export function ProtectionSection(): JSX.Element {
   const { settings, t, update } = useApp();
   const [shortcut, setShortcut] = useState('');
@@ -129,7 +200,13 @@ export function ProtectionSection(): JSX.Element {
           {(['faces', 'people'] as CategoryId[]).map((id) => (
             <RegionCategory key={id} id={id as 'faces' | 'people'} />
           ))}
+          <PeopleFilterControls />
         </div>
+        {settings.peopleFilter.who !== 'everyone' && (
+          <div class="card__body">
+            <Banner icon="info">{t.t('people.accuracy')}</Banner>
+          </div>
+        )}
       </Card>
 
       <Card title={t.t('protection.reveal')}>

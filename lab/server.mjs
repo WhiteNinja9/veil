@@ -9,10 +9,13 @@
  * Fixture media:
  *   /img/<marker>/<w>x<h>.png[?seed=n][&cors=1][&delay=ms]
  *   /video/<pattern>.webm    pattern: neutral | switch (neutral → explicit after 2 s)
+ *                            | woman | man (neutral → a face of that apparent gender after 2 s)
  */
 import http from 'node:http';
-import { readFile, readdir, mkdir, writeFile, stat } from 'node:fs/promises';
+import { readFile, readdir, mkdir, rename, writeFile, stat } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
+import { existsSync, readdirSync } from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import jpeg from 'jpeg-js';
@@ -20,9 +23,59 @@ import { fixturePixels, fixturePng } from './png.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const cacheDir = path.join(here, '..', '.cache', 'lab');
-const FFMPEG = process.env.VEIL_FFMPEG ?? '/opt/pw-browsers/ffmpeg-1011/ffmpeg-linux';
+/**
+ * The ffmpeg Playwright downloads next to its browsers (`npx playwright
+ * install chromium`), wherever that is on this machine; VEIL_FFMPEG
+ * overrides, and a system `ffmpeg` is the last resort.
+ */
+function findFfmpeg() {
+  if (process.env.VEIL_FFMPEG) return process.env.VEIL_FFMPEG;
+  const roots = [
+    process.env.PLAYWRIGHT_BROWSERS_PATH,
+    path.join(os.homedir(), '.cache', 'ms-playwright'),
+    path.join(os.homedir(), 'Library', 'Caches', 'ms-playwright'),
+    process.env.LOCALAPPDATA && path.join(process.env.LOCALAPPDATA, 'ms-playwright'),
+  ].filter(Boolean);
+  const binaries = ['ffmpeg-linux', 'ffmpeg-mac', 'ffmpeg-win64.exe'];
+  for (const dir of roots) {
+    let entries = [];
+    try {
+      entries = readdirSync(dir)
+        .filter((name) => /^ffmpeg-\d+$/.test(name))
+        .sort()
+        .reverse();
+    } catch {
+      continue;
+    }
+    for (const entry of entries) {
+      for (const binary of binaries) {
+        const candidate = path.join(dir, entry, binary);
+        if (existsSync(candidate)) return candidate;
+      }
+    }
+  }
+  return 'ffmpeg';
+}
 
-async function ensureVideo(pattern) {
+const FFMPEG = findFfmpeg();
+
+const VIDEO_PATTERNS = ['neutral', 'switch', 'woman', 'man'];
+const generating = new Map();
+
+/** Generates each clip once, even when several requests (or both origins) ask at the same time. */
+function ensureVideo(pattern) {
+  let pending = generating.get(pattern);
+  if (!pending) {
+    pending = generateVideo(pattern).catch((error) => {
+      generating.delete(pattern);
+      throw error;
+    });
+    generating.set(pattern, pending);
+  }
+  return pending;
+}
+
+async function generateVideo(pattern) {
   const file = path.join(cacheDir, `${pattern}.webm`);
   try {
     await stat(file);
@@ -31,14 +84,17 @@ async function ensureVideo(pattern) {
     // generate below
   }
   await mkdir(cacheDir, { recursive: true });
+  // Written under a temporary name and renamed, so a reader never sees half a file.
+  const partial = path.join(cacheDir, `${pattern}.${process.pid}.partial.webm`);
   const fps = 10;
   const seconds = 6;
   // JPEG frames concatenated into one MJPEG stream on disk: the minimal
   // ffmpeg bundled with Playwright has neither a PNG decoder nor stdin input.
-  const framesFile = path.join(cacheDir, `${pattern}.mjpeg`);
+  const framesFile = path.join(cacheDir, `${pattern}.${process.pid}.mjpeg`);
   const frames = [];
   for (let i = 0; i < fps * seconds; i++) {
-    const marker = pattern === 'switch' && i >= fps * 2 ? 'explicit' : 'neutral';
+    const later = { switch: 'explicit', woman: 'woman', man: 'man' }[pattern] ?? 'neutral';
+    const marker = i >= fps * 2 ? later : 'neutral';
     frames.push(
       jpeg.encode({ data: fixturePixels(320, 180, marker, i % 5), width: 320, height: 180 }, 92).data,
     );
@@ -65,17 +121,24 @@ async function ensureVideo(pattern) {
         'yuv420p',
         '-auto-alt-ref',
         '0',
-        file,
+        partial,
       ],
       { stdio: ['ignore', 'ignore', 'pipe'] },
     );
     let err = '';
     ff.stderr.on('data', (d) => (err += d));
-    ff.on('error', reject);
+    ff.on('error', (error) =>
+      reject(
+        new Error(
+          `cannot run ffmpeg (${FFMPEG}): ${error.message}. Run \`npx playwright install chromium\` or set VEIL_FFMPEG.`,
+        ),
+      ),
+    );
     ff.on('close', (code) =>
       code === 0 ? resolve() : reject(new Error(`ffmpeg failed: ${err.slice(-400)}`)),
     );
   });
+  await rename(partial, file);
   return file;
 }
 
@@ -108,7 +171,7 @@ export function createLabServer({ otherOrigin }) {
         );
         return;
       }
-      const video = /^\/video\/(neutral|switch)\.webm$/.exec(url.pathname);
+      const video = new RegExp(`^/video/(${VIDEO_PATTERNS.join('|')})\\.webm$`).exec(url.pathname);
       if (video) {
         const file = await ensureVideo(video[1]);
         const headers = url.searchParams.get('cors') ? { 'access-control-allow-origin': '*' } : {};
@@ -160,6 +223,8 @@ export function createLabServer({ otherOrigin }) {
 }
 
 export async function startLab(portA = 4700, portB = 4701) {
+  // Clips are generated up front, so no test waits on ffmpeg.
+  await Promise.all(VIDEO_PATTERNS.map(ensureVideo));
   const a = createLabServer({ otherOrigin: `http://localhost:${portB}` });
   const b = createLabServer({ otherOrigin: `http://127.0.0.1:${portA}` });
   await new Promise((r) => a.listen(portA, '127.0.0.1', r));

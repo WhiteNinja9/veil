@@ -16,7 +16,7 @@ import { hostnameOf } from '../shared/url';
 import { createRuleId, findRule } from '../sites/rules';
 import type { Settings } from '../storage/schema';
 import { settingsStore, syncManagedPolicy } from '../storage/settings-store';
-import { grantAllowance, pruneAllowances, syncDynamicRules } from './dnr';
+import { grantAllowance, pruneAllowances, SITE_RULES_ALARM, syncDynamicRules } from './dnr';
 import { EngineService } from './engine-service';
 import { createInferenceClient } from './inference-client';
 import { registerRouter } from './router';
@@ -299,6 +299,11 @@ ext().runtime.onStartup.addListener(() => {
 
 ext().alarms?.onAlarm.addListener((alarm) => {
   if (alarm.name.startsWith('veil-allowance-')) void pruneAllowances();
+  if (alarm.name === SITE_RULES_ALARM) {
+    // A temporary block/warn rule expired: rebuild so the browser stops enforcing it.
+    lastRulesKey = '';
+    void settingsStore.get().then((settings) => applySettings(settings));
+  }
 });
 
 ext().tabs.onRemoved.addListener((tabId) => tabStats.removeTab(tabId));

@@ -1,3 +1,4 @@
+import type { SiteRule } from '../../src/sites/rules';
 import { describe, expect, it } from 'vitest';
 import { categoriesForLevel } from '../../src/policy/presets';
 import { requiresUnlock, weakenedScopes } from '../../src/security/weakening';
@@ -76,6 +77,28 @@ describe('weakenedScopes', () => {
       sites: [{ id: 'bbbbbbbb', pattern: 'b.com', mode: 'block', createdAt: 0, expiresAt: null }],
     });
     expect(weakenedScopes(blocked, mergeSettings(blocked, { sites: [] }), NOW).has('sites')).toBe(true);
+  });
+
+  it('treats a new site level below the global level as weakening', () => {
+    const strict = mergeSettings(base(), { strictness: 'strict', categories: categoriesForLevel('strict') });
+    const site = (pattern: string, mode: SiteRule['mode']): SiteRule => ({
+      id: 'cccccccc',
+      pattern,
+      mode,
+      createdAt: 0,
+      expiresAt: null,
+    });
+    const withRule = (rule: SiteRule) => mergeSettings(strict, { sites: [rule] });
+    expect(weakenedScopes(strict, withRule(site('a.com', 'minimal')), NOW).has('sites')).toBe(true);
+    expect(weakenedScopes(strict, withRule(site('a.com', 'strict')), NOW).size).toBe(0);
+    expect(weakenedScopes(strict, withRule(site('a.com', 'maximum')), NOW).size).toBe(0);
+    expect(weakenedScopes(strict, withRule(site('a.com', 'warn')), NOW).size).toBe(0);
+    // Changing an existing rule to anything but "block" may relax it.
+    const warned = withRule(site('a.com', 'warn'));
+    expect(weakenedScopes(warned, withRule(site('a.com', 'maximum')), NOW).has('sites')).toBe(true);
+    expect(weakenedScopes(warned, withRule(site('a.com', 'block')), NOW).size).toBe(0);
+    const temporaryBlock = { ...site('a.com', 'block'), expiresAt: NOW + 60_000 };
+    expect(weakenedScopes(warned, withRule(temporaryBlock), NOW).has('sites')).toBe(true);
   });
 
   it('requiresUnlock honours the lock scope', () => {

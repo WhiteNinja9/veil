@@ -73,6 +73,20 @@ export function buildSiteRules(sites: readonly SiteRule[], now: number): Rule[] 
   return rules;
 }
 
+/**
+ * When the next temporary block/warn rule expires, or null. Dynamic rules
+ * don't expire on their own, so the background re-syncs at that moment.
+ */
+export function nextSiteRuleExpiry(sites: readonly SiteRule[], now: number): number | null {
+  let next: number | null = null;
+  for (const site of sites) {
+    if (site.mode !== 'block' && site.mode !== 'warn') continue;
+    if (site.expiresAt === null || site.expiresAt <= now) continue;
+    if (next === null || site.expiresAt < next) next = site.expiresAt;
+  }
+  return next;
+}
+
 function addParam(key: string, value: string): RuleAction {
   return {
     type: 'redirect' as chrome.declarativeNetRequest.RuleActionType,
@@ -158,7 +172,13 @@ export async function syncDynamicRules(settings: Settings, now = Date.now()): Pr
   ];
   const existing = await dnr.getDynamicRules();
   await dnr.updateDynamicRules({ removeRuleIds: existing.map((r) => r.id), addRules: next });
+
+  const expiry = settings.enabled ? nextSiteRuleExpiry(settings.sites, now) : null;
+  await ext().alarms?.clear(SITE_RULES_ALARM);
+  if (expiry !== null) ext().alarms?.create(SITE_RULES_ALARM, { when: expiry });
 }
+
+export const SITE_RULES_ALARM = 'veil-site-rules';
 
 // ── Temporary allowances ("Continue anyway" on warned sites) ─────────────
 

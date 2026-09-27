@@ -78,7 +78,16 @@ export class SettingsStore {
       patch.strictness = policy.minimumStrictness;
       patch.categories = categoriesForLevel(policy.minimumStrictness, settings.categories);
     }
-    if (policy.strictBrowsing) patch.strictBrowsing = { enabled: true };
+    if (policy.strictBrowsing) {
+      // Enforced Strict Browsing is all of it: the sub-options cannot be
+      // switched off underneath an administrator's policy.
+      patch.strictBrowsing = {
+        enabled: true,
+        safeSearch: true,
+        youtubeRestricted: true,
+        ignoreSiteExceptions: true,
+      };
+    }
     if (policy.revealMode) patch.reveal = { mode: policy.revealMode };
     return Object.keys(patch).length ? mergeSettings(settings, patch) : settings;
   }

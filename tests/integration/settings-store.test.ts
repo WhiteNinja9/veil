@@ -48,9 +48,19 @@ describe('SettingsStore', () => {
     expect(settings.strictness).toBe('strict');
     expect(settings.strictBrowsing.enabled).toBe(true);
     expect(settings.reveal.mode).toBe('disabled');
-    const after = await store.update({ enabled: false, strictness: 'balanced' });
+    const after = await store.update({
+      enabled: false,
+      strictness: 'balanced',
+      strictBrowsing: { safeSearch: false, youtubeRestricted: false, ignoreSiteExceptions: false },
+    });
     expect(after.enabled).toBe(true);
     expect(after.strictness).toBe('strict');
+    expect(after.strictBrowsing).toEqual({
+      enabled: true,
+      safeSearch: true,
+      youtubeRestricted: true,
+      ignoreSiteExceptions: true,
+    });
     expect(store.managedPolicy()).toMatchObject({ minimumStrictness: 'strict' });
   });
 

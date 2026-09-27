@@ -44,10 +44,12 @@ export function StrictSection(): JSX.Element {
             label={t.t('strict.safeSearch')}
             description={t.t('strict.safeSearch.desc')}
             disabled={!strict.enabled}
+            managed={enforced}
+            managedLabel={t.t('common.managed')}
           >
             <Switch
               checked={strict.safeSearch}
-              disabled={!strict.enabled}
+              disabled={!strict.enabled || enforced}
               label={t.t('strict.safeSearch')}
               onChange={(safeSearch) => void update({ strictBrowsing: { safeSearch } })}
             />
@@ -57,10 +59,12 @@ export function StrictSection(): JSX.Element {
             label={t.t('strict.youtube')}
             description={t.t('strict.youtube.desc')}
             disabled={!strict.enabled}
+            managed={enforced}
+            managedLabel={t.t('common.managed')}
           >
             <Switch
               checked={strict.youtubeRestricted}
-              disabled={!strict.enabled}
+              disabled={!strict.enabled || enforced}
               label={t.t('strict.youtube')}
               onChange={(youtubeRestricted) => void update({ strictBrowsing: { youtubeRestricted } })}
             />
@@ -70,10 +74,12 @@ export function StrictSection(): JSX.Element {
             label={t.t('strict.siteExceptions')}
             description={t.t('strict.siteExceptions.desc')}
             disabled={!strict.enabled}
+            managed={enforced}
+            managedLabel={t.t('common.managed')}
           >
             <Switch
               checked={strict.ignoreSiteExceptions}
-              disabled={!strict.enabled}
+              disabled={!strict.enabled || enforced}
               label={t.t('strict.siteExceptions')}
               onChange={(ignoreSiteExceptions) => void update({ strictBrowsing: { ignoreSiteExceptions } })}
             />

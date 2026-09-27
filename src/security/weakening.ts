@@ -28,12 +28,21 @@ export function weakenedScopes(current: Settings, next: Settings, now = Date.now
     const onlyStricter = next.sites.every((rule) => {
       const prior = before.get(rule.pattern);
       if (prior && JSON.stringify(prior) === JSON.stringify(rule)) return true;
+      if (rule.mode === 'block') {
+        // …unless it swaps a longer-lived rule for one that expires sooner.
+        if (!prior || rule.expiresAt === null) return true;
+        return prior.expiresAt !== null && rule.expiresAt >= prior.expiresAt;
+      }
+      // Any other change to an existing rule may relax it.
+      if (prior) return false;
+      // A new rule is stricter only if it blocks, warns, or sets a level at
+      // least as strict as the global one.
+      if (rule.mode === 'warn') return true;
       if (rule.mode === 'off') return false;
-      return !prior || rule.mode === 'block';
+      return LEVEL_RANK[rule.mode] >= LEVEL_RANK[next.strictness];
     });
-    const removedAny = current.sites.some(
-      (r) => !next.sites.some((n) => n.pattern === r.pattern && n.mode === r.mode),
-    );
+    // Mode changes are judged above; here, a pattern that disappeared.
+    const removedAny = current.sites.some((r) => !next.sites.some((n) => n.pattern === r.pattern));
     if (!onlyStricter || removedAny) scopes.add('sites');
   }
 

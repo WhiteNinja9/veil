@@ -5,98 +5,24 @@
  *   npm run bench                              # all backends, eval images
  *   npm run bench -- --backends=wasm,cpu --iterations=20
  *   npm run bench -- --webgpu                  # enable Chromium's WebGPU (software adapter in CI)
+ *   npm run bench -- --swiftshader             # software WebGL (code-path check, not a GPU timing)
+ *   npm run bench -- --csp                     # serve with the extension's CSP
  *   npm run bench -- --out=bench-results/local/run.json
  *
  * Eval images are fetched by scripts/fetch-eval-images.mjs into .cache/eval
  * (they are not committed). Numbers are only meaningful relative to the
  * machine they were measured on — record hardware alongside results.
  */
-import http from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
-import { mkdir, readFile, writeFile, readdir } from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
-import * as esbuild from 'esbuild';
+import { mkdir, writeFile, readdir } from 'node:fs/promises';
 import { chromium } from '@playwright/test';
+import { buildWorker, IMAGE_FILE, parseArgs, root, serve } from './common.mjs';
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
-const args = Object.fromEntries(
-  process.argv.slice(2).map((a) => {
-    const [k, v] = a.replace(/^--/, '').split('=');
-    return [k, v ?? true];
-  }),
-);
+const args = parseArgs();
 const backends = String(args.backends ?? 'webgpu,webgl,wasm,cpu').split(',');
 const iterations = Number(args.iterations ?? 10);
-const outDir = path.join(root, '.cache', 'bench');
-
-const TYPES = {
-  '.html': 'text/html',
-  '.js': 'text/javascript',
-  '.json': 'application/json',
-  '.wasm': 'application/wasm',
-  '.bin': 'application/octet-stream',
-  '.jpg': 'image/jpeg',
-  '.png': 'image/png',
-  '.gif': 'image/gif',
-  '.webp': 'image/webp',
-};
-
-async function buildWorker() {
-  await mkdir(outDir, { recursive: true });
-  await esbuild.build({
-    entryPoints: [path.join(root, 'src/ml/worker/index.ts')],
-    bundle: true,
-    format: 'iife',
-    minify: true,
-    outfile: path.join(outDir, 'engine-worker.js'),
-    target: ['chrome116'],
-    define: {
-      __BROWSER__: '"chrome"',
-      __DEV__: 'false',
-      __TEST_MODEL__: 'false',
-      __VERSION__: '"bench"',
-      'process.env.NODE_ENV': '"production"',
-    },
-    logLevel: 'warning',
-  });
-}
-
-function serve() {
-  const routes = [
-    ['/models/', path.join(root, 'assets/models')],
-    ['/wasm/', path.join(root, 'node_modules/@tensorflow/tfjs-backend-wasm/dist')],
-    ['/eval/', path.join(root, '.cache/eval')],
-  ];
-  const server = http.createServer(async (req, res) => {
-    const url = new URL(req.url, 'http://localhost');
-    let file;
-    if (url.pathname === '/' || url.pathname === '/harness.html')
-      file = path.join(root, 'scripts/bench/harness.html');
-    else if (url.pathname === '/harness.js') file = path.join(root, 'scripts/bench/harness.js');
-    else if (url.pathname === '/engine-worker.js') file = path.join(outDir, 'engine-worker.js');
-    else {
-      const route = routes.find(([prefix]) => url.pathname.startsWith(prefix));
-      if (route) file = path.join(route[1], decodeURIComponent(url.pathname.slice(route[0].length)));
-    }
-    if (!file || !file.startsWith(root)) {
-      res.writeHead(404).end();
-      return;
-    }
-    try {
-      const body = await readFile(file);
-      const headers = { 'content-type': TYPES[path.extname(file)] ?? 'application/octet-stream' };
-      // --csp reproduces the extension-page policy (manifest content_security_policy).
-      if (args.csp && /\.(html|js)$/.test(file))
-        headers['content-security-policy'] =
-          "script-src 'self' 'wasm-unsafe-eval'; object-src 'none'; base-uri 'none'";
-      res.writeHead(200, headers).end(body);
-    } catch {
-      res.writeHead(404).end();
-    }
-  });
-  return new Promise((resolve) => server.listen(0, '127.0.0.1', () => resolve(server)));
-}
+const evalDir = path.join(root, '.cache', 'eval');
 
 function fmt(n) {
   return n === undefined ? '—' : `${n.toFixed(1)} ms`;
@@ -104,16 +30,17 @@ function fmt(n) {
 
 async function main() {
   await buildWorker();
-  const evalImages = (await readdir(path.join(root, '.cache/eval')).catch(() => [])).filter((f) =>
-    /\.(jpe?g|png|gif|webp)$/i.test(f),
-  );
+  const evalImages = (await readdir(evalDir).catch(() => [])).filter((f) => IMAGE_FILE.test(f));
   if (!evalImages.length)
     console.warn('No eval images in .cache/eval — run `node scripts/fetch-eval-images.mjs`.');
-  const server = await serve();
+  const server = await serve({ imagesDir: evalDir, csp: Boolean(args.csp) });
   const origin = `http://127.0.0.1:${server.address().port}`;
-  const launchArgs = args.webgpu
-    ? ['--enable-unsafe-webgpu', '--enable-features=Vulkan', '--use-webgpu-adapter=swiftshader']
-    : [];
+  // Software adapters exercise the WebGPU/WebGL code paths on GPU-less
+  // machines; their timings say nothing about real GPUs.
+  const launchArgs = [];
+  if (args.webgpu)
+    launchArgs.push('--enable-unsafe-webgpu', '--enable-features=Vulkan', '--use-webgpu-adapter=swiftshader');
+  if (args.swiftshader) launchArgs.push('--use-angle=swiftshader', '--enable-unsafe-swiftshader');
   const browser = await chromium.launch({ headless: true, args: launchArgs });
   const page = await browser.newPage();
   page.on('console', (m) => (m.type() === 'error' ? console.error('  [page]', m.text()) : undefined));

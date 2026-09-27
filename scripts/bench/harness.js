@@ -77,4 +77,59 @@ window.runBenchmark = async ({ backends, iterations, testModel = false }) => {
   return message.results;
 };
 
+/**
+ * Classifies many images with bounded concurrency (as the extension's
+ * scheduler does, so the worker batches across requests). Used by
+ * scripts/calibrate.mjs. Paths are relative to /eval/.
+ */
+window.classify = async ({ backend, images, signals, concurrency = 8 }) => {
+  const worker = new Worker('/engine-worker.js');
+  worker.postMessage({ type: 'init', config: config(backend, false) });
+  const ready = await waitFor(worker, (m) => m.type === 'ready' || m.type === 'fatal');
+  if (ready.type === 'fatal') {
+    worker.terminate();
+    throw new Error(`engine failed to start: ${ready.message ?? 'unknown error'}`);
+  }
+  const pending = new Map();
+  worker.addEventListener('message', (event) => {
+    const m = event.data;
+    if (m.type === 'detected' && pending.has(m.id)) {
+      pending.get(m.id)(m);
+      pending.delete(m.id);
+    }
+  });
+  const results = new Array(images.length);
+  let next = 0;
+  let done = 0;
+  async function lane() {
+    while (next < images.length) {
+      const index = next++;
+      const name = images[index];
+      try {
+        const response = await fetch(`/eval/${name.split('/').map(encodeURIComponent).join('/')}`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const blob = await response.blob();
+        const id = `c${index}`;
+        const message = await new Promise((resolve) => {
+          pending.set(id, resolve);
+          worker.postMessage({
+            type: 'detect',
+            job: { id, key: id, blob, signals, priority: 0, retainForRender: false },
+          });
+        });
+        results[index] = message.ok
+          ? { name, ok: true, signals: message.signals }
+          : { name, ok: false, error: message.error ?? 'failed' };
+      } catch (error) {
+        results[index] = { name, ok: false, error: String(error?.message ?? error) };
+      }
+      done++;
+      if (done % 25 === 0 || done === images.length) console.log(`progress ${done}/${images.length}`);
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(concurrency, images.length) }, lane));
+  worker.terminate();
+  return { backend: ready.backend, results };
+};
+
 window.harnessReady = true;

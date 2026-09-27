@@ -365,7 +365,7 @@ export async function benchmarkBackends(
     try {
       const selection = await selectBackend([backend], {
         wasmBaseUrl: config.wasmBaseUrl,
-        allowSoftwareGl: true,
+        allowSoftwareGpu: true,
       });
       result.initMs = round(selection.initMs);
       result.detail = selection.detail;

@@ -4,9 +4,10 @@
  * Order of preference: WebGPU → WebGL (hardware only) → WASM (SIMD) → CPU.
  * Each candidate must initialise *and* pass a numeric smoke test before it
  * is accepted, so a driver that "works" but returns garbage is skipped.
- * A software-rasterised WebGL context (SwiftShader, llvmpipe, WARP) is
- * slower than WASM SIMD on every machine we measured, so it is only used
- * when nothing else is available. See docs/BENCHMARKS.md.
+ * A software-rasterised WebGL context or CPU-emulated WebGPU adapter
+ * (SwiftShader, llvmpipe, WARP) is far slower than WASM SIMD, so it is
+ * tried only after WASM, though still before the plain-JS CPU backend.
+ * See docs/BENCHMARKS.md.
  */
 import * as tf from '@tensorflow/tfjs-core';
 import '@tensorflow/tfjs-backend-cpu';
@@ -35,12 +36,9 @@ export function configureWasm(baseUrl: string): void {
   // the extension CSP (rightly) forbids, crashing the worker. Single-threaded
   // SIMD it is.
   tf.env().set('WASM_HAS_MULTITHREAD_SUPPORT', false);
-  // Explicit paths for every flavour: never fetched from a CDN.
-  setWasmPaths({
-    'tfjs-backend-wasm.wasm': `${baseUrl}tfjs-backend-wasm.wasm`,
-    'tfjs-backend-wasm-simd.wasm': `${baseUrl}tfjs-backend-wasm-simd.wasm`,
-    'tfjs-backend-wasm-threaded-simd.wasm': `${baseUrl}tfjs-backend-wasm-threaded-simd.wasm`,
-  });
+  // Binaries are packaged with the extension and never fetched from a CDN.
+  // Only the SIMD and baseline builds ship; the threaded one is unreachable.
+  setWasmPaths(baseUrl);
   wasmConfigured = true;
 }
 
@@ -76,24 +74,72 @@ async function smokeTest(): Promise<boolean> {
  * Asks for a WebGPU adapter with a deadline. On some headless/virtualised
  * systems requestAdapter() never settles; TF.js would then wait forever.
  */
-export async function probeWebGpu(timeoutMs = 2500): Promise<boolean> {
+export async function probeWebGpu(timeoutMs = 2500): Promise<GpuAdapterSummary | null> {
   const gpu = (navigator as Navigator & { gpu?: { requestAdapter(): Promise<unknown> } }).gpu;
-  if (!gpu) return false;
+  if (!gpu) return null;
   try {
-    const adapter = await Promise.race([
+    const adapter = (await Promise.race([
       gpu.requestAdapter(),
       new Promise<null>((r) => setTimeout(() => r(null), timeoutMs)),
-    ]);
-    return Boolean(adapter);
+    ])) as WebGpuAdapterLike | null;
+    if (!adapter) return null;
+    const info = adapter.info ?? {};
+    const description = [info.vendor, info.architecture, info.device, info.description]
+      .filter(Boolean)
+      .join(' ')
+      .trim();
+    return {
+      description: description || 'WebGPU',
+      software:
+        Boolean(adapter.isFallbackAdapter || info.isFallbackAdapter) || isSoftwareRenderer(description),
+    };
   } catch {
-    return false;
+    return null;
   }
+}
+
+interface WebGpuAdapterLike {
+  isFallbackAdapter?: boolean;
+  info?: {
+    vendor?: string;
+    architecture?: string;
+    device?: string;
+    description?: string;
+    isFallbackAdapter?: boolean;
+  };
+}
+
+export interface GpuAdapterSummary {
+  description: string;
+  /** A CPU-emulated adapter (e.g. SwiftShader): slower than WASM SIMD. */
+  software: boolean;
+}
+
+/**
+ * Pre-flight for GPU backends: why to skip one, and whether it is merely
+ * software (deferred behind WASM) rather than absent.
+ */
+async function gpuPreflight(name: HardwareBackend): Promise<{ reason: string; defer: boolean } | null> {
+  if (name === 'webgl') {
+    const renderer = webglRenderer();
+    if (!renderer) return { reason: 'WebGL2 unavailable', defer: false };
+    if (isSoftwareRenderer(renderer)) {
+      return { reason: `software renderer (${renderer.slice(0, 60)})`, defer: true };
+    }
+  }
+  if (name === 'webgpu') {
+    const adapter = await probeWebGpu();
+    if (!adapter) return { reason: 'no WebGPU adapter', defer: false };
+    if (adapter.software)
+      return { reason: `software adapter (${adapter.description.slice(0, 60)})`, defer: true };
+  }
+  return null;
 }
 
 const INIT_TIMEOUT_MS = 10_000;
 
-async function tryBackend(name: HardwareBackend): Promise<string | null> {
-  if (name === 'webgpu' && !(await probeWebGpu())) return 'no WebGPU adapter';
+async function tryBackend(name: HardwareBackend, probed = false): Promise<string | null> {
+  if (name === 'webgpu' && !probed && !(await probeWebGpu())) return 'no WebGPU adapter';
   return Promise.race([
     tryBackendUnbounded(name),
     new Promise<string>((resolve) => setTimeout(() => resolve('initialisation timed out'), INIT_TIMEOUT_MS)),
@@ -114,39 +160,50 @@ async function tryBackendUnbounded(name: HardwareBackend): Promise<string | null
 
 /**
  * Selects the first working backend from `candidates`.
- * With `allowSoftwareGl` false, a software WebGL is deferred behind WASM.
+ * With `allowSoftwareGpu` false, a software WebGL or WebGPU implementation
+ * is deferred behind WASM (and CPU is still the very last resort).
  */
 export async function selectBackend(
   candidates: readonly HardwareBackend[],
-  options: { wasmBaseUrl: string; allowSoftwareGl?: boolean; onAttempt?: (name: HardwareBackend) => void },
+  options: { wasmBaseUrl: string; allowSoftwareGpu?: boolean; onAttempt?: (name: HardwareBackend) => void },
 ): Promise<BackendSelection> {
   configureWasm(options.wasmBaseUrl);
   const skipped: BackendSelection['skipped'] = [];
   const started = performance.now();
   const deferred: HardwareBackend[] = [];
+  const tried = new Set<HardwareBackend>();
+  const attempt = async (name: HardwareBackend, probed: boolean) => {
+    tried.add(name);
+    options.onAttempt?.(name);
+    const failure = await tryBackend(name, probed);
+    if (failure) skipped.push({ name, reason: failure });
+    return failure === null;
+  };
+  const selected = (name: HardwareBackend): BackendSelection => ({
+    name,
+    detail: describe(name),
+    initMs: performance.now() - started,
+    skipped,
+  });
 
   for (const name of candidates) {
-    if (name === 'webgl' && !options.allowSoftwareGl) {
-      const renderer = webglRenderer();
-      if (!renderer) {
-        skipped.push({ name, reason: 'WebGL2 unavailable' });
+    // Plain JS waits until deferred software GPUs have had their turn.
+    if (name === 'cpu' && deferred.length) continue;
+    let probed = false;
+    if (!options.allowSoftwareGpu && (name === 'webgl' || name === 'webgpu')) {
+      const preflight = await gpuPreflight(name);
+      if (preflight) {
+        skipped.push({ name, reason: preflight.reason });
+        if (preflight.defer) deferred.push(name);
         continue;
       }
-      if (isSoftwareRenderer(renderer)) {
-        skipped.push({ name, reason: `software renderer (${renderer.slice(0, 60)})` });
-        deferred.push(name);
-        continue;
-      }
+      probed = name === 'webgpu';
     }
-    options.onAttempt?.(name);
-    const failure = await tryBackend(name);
-    if (!failure) return { name, detail: describe(name), initMs: performance.now() - started, skipped };
-    skipped.push({ name, reason: failure });
+    if (await attempt(name, probed)) return selected(name);
   }
-  for (const name of deferred) {
-    options.onAttempt?.(name);
-    const failure = await tryBackend(name);
-    if (!failure) return { name, detail: describe(name), initMs: performance.now() - started, skipped };
+  for (const name of [...deferred, 'cpu'] as HardwareBackend[]) {
+    if (!candidates.includes(name) || tried.has(name)) continue;
+    if (await attempt(name, false)) return selected(name);
   }
   throw new Error(
     `No inference backend available: ${skipped.map((s) => `${s.name} (${s.reason})`).join('; ')}`,

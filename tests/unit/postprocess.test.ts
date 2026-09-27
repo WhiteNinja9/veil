@@ -25,7 +25,11 @@ describe('geometry', () => {
   });
 
   it('suppresses overlapping detections, keeping the best', () => {
-    const kept = nonMaxSuppression([box(0, 0, 1, 1, 0.6), box(0.05, 0.05, 1, 1, 0.9), box(3, 3, 1, 1, 0.5)], 0.3, 10);
+    const kept = nonMaxSuppression(
+      [box(0, 0, 1, 1, 0.6), box(0.05, 0.05, 1, 1, 0.9), box(3, 3, 1, 1, 0.5)],
+      0.3,
+      10,
+    );
     expect(kept.map((r) => r.score)).toEqual([0.9, 0.5]);
     expect(nonMaxSuppression([box(0, 0, 1, 1), box(5, 5, 1, 1)], 0.3, 1)).toHaveLength(1);
   });
@@ -82,7 +86,13 @@ describe('COCO-SSD person extraction', () => {
 
 describe('classifier aggregation', () => {
   it('maps model rows', () => {
-    expect(toClassifierScores([0.1, 0.2, 0.3, 0.4, 0.5])).toEqual({ drawing: 0.1, hentai: 0.2, neutral: 0.3, porn: 0.4, sexy: 0.5 });
+    expect(toClassifierScores([0.1, 0.2, 0.3, 0.4, 0.5])).toEqual({
+      drawing: 0.1,
+      hentai: 0.2,
+      neutral: 0.3,
+      porn: 0.4,
+      sexy: 0.5,
+    });
   });
 
   it('takes the worst case across animation frames', () => {

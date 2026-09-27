@@ -23,7 +23,19 @@ export interface TabStats {
 }
 
 export function emptyTabStats(): TabStats {
-  return { scanned: 0, images: 0, videos: 0, protected: 0, revealed: 0, unverified: 0, pending: 0, pageMs: 0, engineMs: 0, frames: 0, updatedAt: 0 };
+  return {
+    scanned: 0,
+    images: 0,
+    videos: 0,
+    protected: 0,
+    revealed: 0,
+    unverified: 0,
+    pending: 0,
+    pageMs: 0,
+    engineMs: 0,
+    frames: 0,
+    updatedAt: 0,
+  };
 }
 
 export class TabStatsStore {
@@ -39,7 +51,8 @@ export class TabStatsStore {
     const session = (ext().storage as Partial<typeof chrome.storage>).session;
     if (!session) return;
     try {
-      const stored = (await session.get(SESSION_KEY))[SESSION_KEY] as Record<string, Record<string, FrameStats>> | undefined;
+      const stored = (await session.get(SESSION_KEY))[SESSION_KEY] as
+        Record<string, Record<string, FrameStats>> | undefined;
       for (const [tabId, frames] of Object.entries(stored ?? {})) {
         const map = new Map<number, FrameStats>();
         for (const [frameId, stats] of Object.entries(frames)) map.set(Number(frameId), stats);

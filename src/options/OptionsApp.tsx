@@ -48,7 +48,10 @@ export function OptionsApp(): JSX.Element {
     const timer = setTimeout(() => {
       const el = document.getElementById(route.setting!);
       if (!el) return;
-      el.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+      el.scrollIntoView({
+        block: 'center',
+        behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+      });
       el.classList.remove('row--highlight');
       void el.offsetWidth;
       el.classList.add('row--highlight');
@@ -114,7 +117,9 @@ export function OptionsApp(): JSX.Element {
             <header class="page__header">
               <h1 class="page__title">{t.t('search.placeholder')}</h1>
               <p class="page__desc" aria-live="polite">
-                {results.length ? t.t('search.results', { count: results.length }) : t.t('search.noResults', { query })}
+                {results.length
+                  ? t.t('search.results', { count: results.length })
+                  : t.t('search.noResults', { query })}
               </p>
             </header>
             <div class="card list">

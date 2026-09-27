@@ -12,7 +12,11 @@ import type { Region, RenderStyle } from './types';
 export const RENDER_MAX_SIDE = 1024;
 const NEUTRAL = '#8e9199';
 
-export async function renderConcealed(bitmap: ImageBitmap, regions: Region[], style: RenderStyle): Promise<Blob> {
+export async function renderConcealed(
+  bitmap: ImageBitmap,
+  regions: Region[],
+  style: RenderStyle,
+): Promise<Blob> {
   const scale = Math.min(1, RENDER_MAX_SIDE / Math.max(bitmap.width, bitmap.height));
   const width = Math.max(1, Math.round(bitmap.width * scale));
   const height = Math.max(1, Math.round(bitmap.height * scale));

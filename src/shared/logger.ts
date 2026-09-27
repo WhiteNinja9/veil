@@ -18,7 +18,6 @@ export function createLogger(scope: string): Logger {
   const prefix = `[veil:${scope}]`;
   const emit = (level: Level, args: unknown[]) => {
     if (!isDev && (level === 'debug' || level === 'info')) return;
-    // eslint-disable-next-line no-console
     console[level === 'debug' ? 'log' : level](prefix, ...args);
   };
   return {

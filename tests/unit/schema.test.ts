@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { defaultSettings, mergeSettings, sanitizeSettings, sanitizeSiteRules } from '../../src/storage/schema';
+import {
+  defaultSettings,
+  mergeSettings,
+  sanitizeSettings,
+  sanitizeSiteRules,
+} from '../../src/storage/schema';
 
 describe('sanitizeSettings', () => {
   it('returns defaults for garbage', () => {
@@ -13,7 +18,10 @@ describe('sanitizeSettings', () => {
   it('clamps numbers and rejects unknown enum values field by field', () => {
     const s = sanitizeSettings({
       strictness: 'strict',
-      categories: { explicit: { enabled: true, threshold: 7 }, suggestive: { enabled: 'no', threshold: 0.5 } },
+      categories: {
+        explicit: { enabled: true, threshold: 7 },
+        suggestive: { enabled: 'no', threshold: 0.5 },
+      },
       media: { minSize: -10 },
       appearance: { style: 'glitter', theme: 'dark' },
       reveal: { mode: 'telepathy', reprotectAfterSec: 1e9 },

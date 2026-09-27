@@ -1,8 +1,20 @@
 {
-  "extName": { "message": "Veil — Private Content Protection", "description": "Extension name (store listing)" },
-  "extDescription": { "message": "Hides explicit and unwanted images and video before you see them. On-device AI; nothing leaves your browser.", "description": "Extension description (max 132 chars)" },
+  "extName": {
+    "message": "Veil — Private Content Protection",
+    "description": "Extension name (store listing)"
+  },
+  "extDescription": {
+    "message": "Hides explicit and unwanted images and video before you see them. On-device AI; nothing leaves your browser.",
+    "description": "Extension description (max 132 chars)"
+  },
   "actionTitle": { "message": "Veil", "description": "Toolbar button tooltip" },
   "commandOpenPopup": { "message": "Open Veil", "description": "Keyboard shortcut: open popup" },
-  "commandToggleSite": { "message": "Pause or resume protection on this site", "description": "Keyboard shortcut" },
-  "commandReveal": { "message": "Show or hide the protected media under the pointer or focus", "description": "Keyboard shortcut" }
+  "commandToggleSite": {
+    "message": "Pause or resume protection on this site",
+    "description": "Keyboard shortcut"
+  },
+  "commandReveal": {
+    "message": "Show or hide the protected media under the pointer or focus",
+    "description": "Keyboard shortcut"
+  }
 }

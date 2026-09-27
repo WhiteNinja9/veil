@@ -47,11 +47,35 @@ describe('AnalysisScheduler', () => {
     const scheduler = new AnalysisScheduler(1);
     const order: number[] = [];
     let block!: () => void;
-    scheduler.enqueue({ id: 0, priority: 0, seq: 0, isValid: () => true, run: () => new Promise<void>((r) => (block = r)).then(() => void order.push(0)) });
+    scheduler.enqueue({
+      id: 0,
+      priority: 0,
+      seq: 0,
+      isValid: () => true,
+      run: () => new Promise<void>((r) => (block = r)).then(() => void order.push(0)),
+    });
     await flush();
-    scheduler.enqueue({ id: 1, priority: 2, seq: 1, isValid: () => true, run: async () => void order.push(1) });
-    scheduler.enqueue({ id: 2, priority: 1, seq: 2, isValid: () => false, run: async () => void order.push(2) });
-    scheduler.enqueue({ id: 3, priority: 1, seq: 3, isValid: () => true, run: async () => void order.push(3) });
+    scheduler.enqueue({
+      id: 1,
+      priority: 2,
+      seq: 1,
+      isValid: () => true,
+      run: async () => void order.push(1),
+    });
+    scheduler.enqueue({
+      id: 2,
+      priority: 1,
+      seq: 2,
+      isValid: () => false,
+      run: async () => void order.push(2),
+    });
+    scheduler.enqueue({
+      id: 3,
+      priority: 1,
+      seq: 3,
+      isValid: () => true,
+      run: async () => void order.push(3),
+    });
     scheduler.reprioritize(1, 0);
     block();
     for (let i = 0; i < 6; i++) await flush();

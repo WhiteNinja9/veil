@@ -21,7 +21,11 @@ function ContentCategory({ id }: { id: 'explicit' | 'illustrated' | 'suggestive'
           <div class="row__label">{t.t(`category.${id}`)}</div>
           <div class="row__desc">{t.t(`category.${id}.desc`)}</div>
         </div>
-        <Switch checked={setting.enabled} label={t.t(`category.${id}`)} onChange={(enabled) => void update({ categories: { [id]: { enabled } } })} />
+        <Switch
+          checked={setting.enabled}
+          label={t.t(`category.${id}`)}
+          onChange={(enabled) => void update({ categories: { [id]: { enabled } } })}
+        />
       </div>
       {setting.enabled && (
         <div class="sensitivity">
@@ -29,7 +33,9 @@ function ContentCategory({ id }: { id: 'explicit' | 'illustrated' | 'suggestive'
             <label class="field__label" for={`sens-${id}`}>
               {t.t('category.sensitivity')}
             </label>
-            <span class="subtle num small">{t.t('category.threshold', { value: t.number(threshold, { minimumFractionDigits: 2 }) })}</span>
+            <span class="subtle num small">
+              {t.t('category.threshold', { value: t.number(threshold, { minimumFractionDigits: 2 }) })}
+            </span>
           </div>
           <Slider
             id={`sens-${id}`}
@@ -64,7 +70,11 @@ function RegionCategory({ id }: { id: 'faces' | 'people' }): JSX.Element {
           <div class="row__label">{t.t(`category.${id}`)}</div>
           <div class="row__desc">{t.t(`category.${id}.desc`)}</div>
         </div>
-        <Switch checked={setting.enabled} label={t.t(`category.${id}`)} onChange={(enabled) => void update({ categories: { [id]: { enabled } } })} />
+        <Switch
+          checked={setting.enabled}
+          label={t.t(`category.${id}`)}
+          onChange={(enabled) => void update({ categories: { [id]: { enabled } } })}
+        />
       </div>
       {setting.enabled && (
         <div class="row__inline row__inline--sub">
@@ -95,7 +105,12 @@ export function ProtectionSection(): JSX.Element {
   const preset = PRESETS[settings.strictness];
   const reprotectOptions = [0, 10, 30, 60, 300].map((sec) => ({
     value: sec,
-    label: sec === 0 ? t.t('common.never') : sec < 60 ? t.t('common.seconds', { count: sec }) : t.t('common.minutes', { count: sec / 60 }),
+    label:
+      sec === 0
+        ? t.t('common.never')
+        : sec < 60
+          ? t.t('common.seconds', { count: sec })
+          : t.t('common.minutes', { count: sec / 60 }),
   }));
 
   return (
@@ -132,7 +147,12 @@ export function ProtectionSection(): JSX.Element {
           </div>
         </div>
         <div class="list">
-          <Row id="confirm" label={t.t('protection.reveal.confirm')} description={t.t('protection.reveal.confirm.desc')} disabled={settings.reveal.mode === 'disabled'}>
+          <Row
+            id="confirm"
+            label={t.t('protection.reveal.confirm')}
+            description={t.t('protection.reveal.confirm.desc')}
+            disabled={settings.reveal.mode === 'disabled'}
+          >
             <Switch
               checked={settings.reveal.confirm}
               disabled={settings.reveal.mode === 'disabled' || settings.reveal.mode === 'hover'}
@@ -140,7 +160,11 @@ export function ProtectionSection(): JSX.Element {
               onChange={(confirm) => void update({ reveal: { confirm } })}
             />
           </Row>
-          <Row id="reprotect" label={t.t('protection.reveal.reprotect')} description={t.t('protection.reveal.reprotect.desc')}>
+          <Row
+            id="reprotect"
+            label={t.t('protection.reveal.reprotect')}
+            description={t.t('protection.reveal.reprotect.desc')}
+          >
             <Select<number>
               inline
               label={t.t('protection.reveal.reprotect')}
@@ -150,7 +174,11 @@ export function ProtectionSection(): JSX.Element {
             />
           </Row>
           <Row id="shortcut" label={t.t('protection.shortcut')} description={t.t('protection.shortcut.desc')}>
-            {shortcut ? <kbd>{shortcut}</kbd> : <span class="subtle small">{t.t('a11y.shortcut.unset')}</span>}
+            {shortcut ? (
+              <kbd>{shortcut}</kbd>
+            ) : (
+              <span class="subtle small">{t.t('a11y.shortcut.unset')}</span>
+            )}
             <Button size="sm" variant="ghost" onClick={() => void openShortcutSettings()}>
               {t.t('protection.shortcut.change')}
             </Button>
@@ -160,8 +188,16 @@ export function ProtectionSection(): JSX.Element {
 
       <Card title={t.t('protection.advanced')}>
         <div class="list">
-          <Row id="context" label={t.t('protection.contextAware')} description={t.t('protection.contextAware.desc')}>
-            <Switch checked={settings.contextAware} label={t.t('protection.contextAware')} onChange={(contextAware) => void update({ contextAware })} />
+          <Row
+            id="context"
+            label={t.t('protection.contextAware')}
+            description={t.t('protection.contextAware.desc')}
+          >
+            <Switch
+              checked={settings.contextAware}
+              label={t.t('protection.contextAware')}
+              onChange={(contextAware) => void update({ contextAware })}
+            />
           </Row>
           <Row id="fallback" label={t.t('protection.fallback')} description={t.t('protection.fallback.desc')}>
             <div style={{ width: '240px' }}>
@@ -178,7 +214,11 @@ export function ProtectionSection(): JSX.Element {
           </Row>
         </div>
         <div class="card__footer">
-          <Button variant="ghost" icon="refresh" onClick={() => void update(levelPatch(preset.level, settings))}>
+          <Button
+            variant="ghost"
+            icon="refresh"
+            onClick={() => void update(levelPatch(preset.level, settings))}
+          >
             {t.t('protection.restoreDefaults', { level: t.t(`level.${settings.strictness}`) })}
           </Button>
         </div>

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* global chrome */
 /**
  * Captures the extension UI (popup, settings, onboarding, interstitial, and
  * in-page protection) in light, dark and Arabic/RTL for design review and
@@ -40,7 +41,11 @@ async function main() {
       const cur = (await chrome.storage.local.get(key))[key] ?? {};
       const merge = (a, b) => {
         const o = { ...a };
-        for (const [k, v] of Object.entries(b)) o[k] = v && typeof v === 'object' && !Array.isArray(v) && a[k] && typeof a[k] === 'object' ? merge(a[k], v) : v;
+        for (const [k, v] of Object.entries(b))
+          o[k] =
+            v && typeof v === 'object' && !Array.isArray(v) && a[k] && typeof a[k] === 'object'
+              ? merge(a[k], v)
+              : v;
         return o;
       };
       await chrome.storage.local.set({ [key]: merge(cur, { onboardingComplete: true, ...p }) });
@@ -50,7 +55,10 @@ async function main() {
   const site = await context.newPage();
   await site.goto(`${lab.originA}/static.html`);
   await site.waitForTimeout(2500);
-  const tabId = await sw.evaluate(async (url) => (await chrome.tabs.query({})).find((t) => t.url?.startsWith(url))?.id, lab.originA);
+  const tabId = await sw.evaluate(
+    async (url) => (await chrome.tabs.query({})).find((t) => t.url?.startsWith(url))?.id,
+    lab.originA,
+  );
 
   const variants = [
     { name: 'light', scheme: 'light', language: 'en' },
@@ -73,7 +81,15 @@ async function main() {
       const page = await context.newPage();
       await page.emulateMedia({ colorScheme: v.scheme });
       await page.setViewportSize({ width: 1280, height: 900 });
-      for (const section of ['general', 'protection', 'images', 'sites', 'privacy', 'performance', 'advanced']) {
+      for (const section of [
+        'general',
+        'protection',
+        'images',
+        'sites',
+        'privacy',
+        'performance',
+        'advanced',
+      ]) {
         await page.goto(`${base}/options.html#${section}`);
         await page.waitForTimeout(500);
         await page.screenshot({ path: path.join(out, `options-${section}-${v.name}.png`) });

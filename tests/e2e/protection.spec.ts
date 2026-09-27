@@ -4,7 +4,8 @@ test.describe('images', () => {
   test('protects unsafe fixtures and leaves safe media alone (balanced)', async ({ context, lab }) => {
     const page = await context.newPage();
     await page.goto(`${lab.originA}/static.html`);
-    for (const id of ['explicit', 'explicit-xo', 'suggestive', 'illustrated', 'slow']) await waitForVeil(page, `#${id}`, 'x');
+    for (const id of ['explicit', 'explicit-xo', 'suggestive', 'illustrated', 'slow'])
+      await waitForVeil(page, `#${id}`, 'x');
     for (const id of ['neutral', 'borderline', 'face']) await waitForVeil(page, `#${id}`, 'ok');
     // Below-threshold sizes are never analysed.
     await waitForVeil(page, '#tiny', 'ok');
@@ -89,7 +90,9 @@ test.describe('dynamic pages', () => {
     await page.goto(`${lab.originA}/spa.html`);
     const expectPage = async () =>
       page.waitForFunction(() =>
-        [...document.querySelectorAll<HTMLImageElement>('#pool img')].every((img) => img.getAttribute('data-veil') === (img.dataset.marker === 'explicit' ? 'x' : 'ok')),
+        [...document.querySelectorAll<HTMLImageElement>('#pool img')].every(
+          (img) => img.getAttribute('data-veil') === (img.dataset.marker === 'explicit' ? 'x' : 'ok'),
+        ),
       );
     await expectPage();
     for (let i = 0; i < 3; i++) {
@@ -101,15 +104,20 @@ test.describe('dynamic pages', () => {
   test('protects media inside open, closed and late shadow roots', async ({ context, lab }) => {
     const page = await context.newPage();
     await page.goto(`${lab.originA}/shadow.html`);
-    await page.waitForFunction(() => {
-      const state = (root: ShadowRoot | null | undefined) => root?.querySelector('img')?.getAttribute('data-veil');
-      const w = window as unknown as { closedRoot?: ShadowRoot };
-      return (
-        state(document.querySelector('#open')?.shadowRoot) === 'x' &&
-        state(w.closedRoot) === 'x' &&
-        state(document.querySelector('#late')?.shadowRoot) === 'x'
-      );
-    }, undefined, { timeout: 15_000 });
+    await page.waitForFunction(
+      () => {
+        const state = (root: ShadowRoot | null | undefined) =>
+          root?.querySelector('img')?.getAttribute('data-veil');
+        const w = window as unknown as { closedRoot?: ShadowRoot };
+        return (
+          state(document.querySelector('#open')?.shadowRoot) === 'x' &&
+          state(w.closedRoot) === 'x' &&
+          state(document.querySelector('#late')?.shadowRoot) === 'x'
+        );
+      },
+      undefined,
+      { timeout: 15_000 },
+    );
   });
 
   test('protects media inside cross-origin iframes', async ({ context, lab }) => {
@@ -126,15 +134,27 @@ test.describe('dynamic pages', () => {
     const page = await context.newPage();
     await page.goto(`${lab.originA}/stress.html`);
     const started = Date.now();
-    await page.waitForFunction(() => {
-      const visible = [...document.querySelectorAll('#grid img')].filter((img) => img.getBoundingClientRect().top < innerHeight);
-      return visible.length > 0 && visible.every((img) => ['ok', 'x'].includes(img.getAttribute('data-veil') ?? ''));
-    }, undefined, { timeout: 30_000 });
+    await page.waitForFunction(
+      () => {
+        const visible = [...document.querySelectorAll('#grid img')].filter(
+          (img) => img.getBoundingClientRect().top < innerHeight,
+        );
+        return (
+          visible.length > 0 &&
+          visible.every((img) => ['ok', 'x'].includes(img.getAttribute('data-veil') ?? ''))
+        );
+      },
+      undefined,
+      { timeout: 30_000 },
+    );
     const visibleMs = Date.now() - started;
     test.info().annotations.push({ type: 'visible-resolved-ms', description: String(visibleMs) });
     // Every explicit fixture that is visible is protected.
-    const leaks = await page.evaluate(() =>
-      [...document.querySelectorAll<HTMLImageElement>('#grid img')].filter((img) => img.src.includes('/explicit/') && img.getAttribute('data-veil') === 'ok').length,
+    const leaks = await page.evaluate(
+      () =>
+        [...document.querySelectorAll<HTMLImageElement>('#grid img')].filter(
+          (img) => img.src.includes('/explicit/') && img.getAttribute('data-veil') === 'ok',
+        ).length,
     );
     expect(leaks).toBe(0);
   });

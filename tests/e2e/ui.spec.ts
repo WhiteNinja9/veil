@@ -1,9 +1,14 @@
 import AxeBuilder from '@axe-core/playwright';
+import type { Page } from '@playwright/test';
 import { backgroundWorker, expect, setSettings, tabIdFor, test, waitForVeil } from './fixtures';
 
-async function axe(page: import('@playwright/test').Page) {
-  const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
-  return results.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical').map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`);
+async function axe(page: Page) {
+  const results = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'])
+    .analyze();
+  return results.violations
+    .filter((v) => v.impact === 'serious' || v.impact === 'critical')
+    .map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`);
 }
 
 test.describe('popup', () => {
@@ -17,7 +22,9 @@ test.describe('popup', () => {
     await popup.setViewportSize({ width: 360, height: 640 });
     await popup.goto(`chrome-extension://${extensionId}/popup.html?tabId=${tabId}`);
     await expect(popup.getByText('Protection is on')).toBeVisible();
-    await expect(popup.locator('.stat').nth(1).locator('.stat__value')).not.toHaveText('0', { timeout: 10_000 });
+    await expect(popup.locator('.stat').nth(1).locator('.stat__value')).not.toHaveText('0', {
+      timeout: 10_000,
+    });
     await popup.getByRole('button', { name: 'Pause on this site' }).click();
     await popup.getByRole('button', { name: 'For 1 hour' }).click();
     await expect(popup.getByText('Paused on this site')).toBeVisible();
@@ -33,7 +40,15 @@ test.describe('popup', () => {
     await popup.goto(`chrome-extension://${extensionId}/popup.html`);
     await popup.getByRole('radio', { name: 'Strict' }).click();
     const sw = await backgroundWorker(context);
-    await expect.poll(() => sw.evaluate(async () => ((await chrome.storage.local.get('veil.settings'))['veil.settings'] as { strictness: string }).strictness)).toBe('strict');
+    await expect
+      .poll(() =>
+        sw.evaluate(
+          async () =>
+            ((await chrome.storage.local.get('veil.settings'))['veil.settings'] as { strictness: string })
+              .strictness,
+        ),
+      )
+      .toBe('strict');
   });
 });
 
@@ -47,7 +62,10 @@ test.describe('settings', () => {
     await expect(page.getByRole('heading', { name: 'Advanced' })).toBeVisible();
   });
 
-  test('the settings lock guards weakening changes but not strengthening ones', async ({ context, extensionId }) => {
+  test('the settings lock guards weakening changes but not strengthening ones', async ({
+    context,
+    extensionId,
+  }) => {
     const page = await context.newPage();
     await page.goto(`chrome-extension://${extensionId}/options.html#advanced`);
     await page.getByRole('button', { name: 'Set a passcode' }).click();
@@ -74,11 +92,23 @@ test.describe('settings', () => {
     await expect(page.getByRole('switch', { name: 'Protection' })).toHaveAttribute('aria-checked', 'false');
   });
 
-  test('pages have no serious accessibility violations (English and Arabic)', async ({ context, extensionId }) => {
+  test('pages have no serious accessibility violations (English and Arabic)', async ({
+    context,
+    extensionId,
+  }) => {
     for (const language of ['en', 'ar']) {
       await setSettings(context, { language });
       const page = await context.newPage();
-      for (const section of ['general', 'protection', 'images', 'sites', 'search', 'privacy', 'performance', 'advanced']) {
+      for (const section of [
+        'general',
+        'protection',
+        'images',
+        'sites',
+        'search',
+        'privacy',
+        'performance',
+        'advanced',
+      ]) {
         await page.goto(`chrome-extension://${extensionId}/options.html#${section}`);
         await page.waitForSelector('.page__title');
         expect(await axe(page), `${language}/${section}`).toEqual([]);
@@ -107,7 +137,15 @@ test.describe('onboarding & interstitial', () => {
     const sw = await backgroundWorker(context);
     await page.getByRole('button', { name: 'Review settings' }).click();
     await expect
-      .poll(() => sw.evaluate(async () => (await chrome.storage.local.get('veil.settings'))['veil.settings'] as { strictness: string; onboardingComplete: boolean }))
+      .poll(() =>
+        sw.evaluate(
+          async () =>
+            (await chrome.storage.local.get('veil.settings'))['veil.settings'] as {
+              strictness: string;
+              onboardingComplete: boolean;
+            },
+        ),
+      )
       .toMatchObject({ strictness: 'strict', onboardingComplete: true });
   });
 

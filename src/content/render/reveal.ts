@@ -65,7 +65,11 @@ export class RevealController {
     const opts = { capture: true, passive: true, signal: this.abort.signal };
     document.addEventListener('pointerover', (e) => this.onPointerOver(e), opts);
     document.addEventListener('pointerout', (e) => this.onPointerOut(e), opts);
-    document.addEventListener('pointermove', (e) => (this.lastPointer = { x: e.clientX, y: e.clientY }), opts);
+    document.addEventListener(
+      'pointermove',
+      (e) => (this.lastPointer = { x: e.clientX, y: e.clientY }),
+      opts,
+    );
     document.addEventListener('focusin', (e) => this.onFocus(e), opts);
     document.addEventListener('scroll', () => this.reposition(), opts);
     window.addEventListener('resize', () => this.reposition(), opts);
@@ -191,7 +195,9 @@ export class RevealController {
     this.announce(
       disabled
         ? this.t.t('announce.disabled')
-        : this.t.t(item.kind === 'video' ? 'announce.video' : 'announce.image', { shortcut: this.shortcut() }),
+        : this.t.t(item.kind === 'video' ? 'announce.video' : 'announce.image', {
+            shortcut: this.shortcut(),
+          }),
     );
     if (this.chipEnabled()) this.show(item, 'protected');
   }
@@ -201,7 +207,10 @@ export class RevealController {
   private ensureHost(): void {
     if (this.host?.isConnected) return;
     const host = document.createElement('veil-layer');
-    host.setAttribute('style', 'all:initial;position:fixed;top:0;left:0;width:0;height:0;z-index:2147483647;');
+    host.setAttribute(
+      'style',
+      'all:initial;position:fixed;top:0;left:0;width:0;height:0;z-index:2147483647;',
+    );
     // Closed in production so pages cannot inspect or restyle it; open in
     // development builds so tooling and tests can drive it.
     const shadow = host.attachShadow({ mode: __DEV__ ? 'open' : 'closed' });
@@ -260,11 +269,13 @@ export class RevealController {
 
     const { mode: revealMode, confirm } = this.policy().reveal;
     if (this.mode === 'revealed') {
-      chip.append(this.button(this.t.t('chip.hide'), () => {
-        this.callbacks.hide(item);
-        this.announce(this.t.t('announce.hidden'));
-        this.dismiss();
-      }));
+      chip.append(
+        this.button(this.t.t('chip.hide'), () => {
+          this.callbacks.hide(item);
+          this.announce(this.t.t('announce.hidden'));
+          this.dismiss();
+        }),
+      );
     } else if (this.mode === 'confirm') {
       chip.append(this.textBlock(this.t.t('chip.confirm'), null));
       const actions = document.createElement('span');
@@ -286,7 +297,9 @@ export class RevealController {
         chip.append(this.holdButton(item));
       } else {
         chip.append(
-          this.button(this.t.t('chip.show'), () => (confirm ? this.show(item, 'confirm') : this.doReveal(item))),
+          this.button(this.t.t('chip.show'), () =>
+            confirm ? this.show(item, 'confirm') : this.doReveal(item),
+          ),
         );
       }
     }

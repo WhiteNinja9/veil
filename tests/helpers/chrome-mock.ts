@@ -12,7 +12,8 @@ function area(name: string, listeners: Set<Listener>) {
   return {
     data,
     async get(keys?: string | string[] | null) {
-      if (keys === null || keys === undefined) return Object.fromEntries([...data].map(([k, v]) => [k, clone(v)]));
+      if (keys === null || keys === undefined)
+        return Object.fromEntries([...data].map(([k, v]) => [k, clone(v)]));
       const list = Array.isArray(keys) ? keys : [keys];
       return Object.fromEntries(list.filter((k) => data.has(k)).map((k) => [k, clone(data.get(k))]));
     },
@@ -40,12 +41,18 @@ export function installChromeMock(options: { managed?: Record<string, unknown> }
     },
   };
   const api = {
-    runtime: { id: 'test-extension', getURL: (p: string) => `chrome-extension://test-extension/${p.replace(/^\//, '')}` },
+    runtime: {
+      id: 'test-extension',
+      getURL: (p: string) => `chrome-extension://test-extension/${p.replace(/^\//, '')}`,
+    },
     storage: {
       local,
       session,
       managed,
-      onChanged: { addListener: (l: Listener) => listeners.add(l), removeListener: (l: Listener) => listeners.delete(l) },
+      onChanged: {
+        addListener: (l: Listener) => listeners.add(l),
+        removeListener: (l: Listener) => listeners.delete(l),
+      },
     },
     i18n: { getUILanguage: () => 'en-US' },
   };

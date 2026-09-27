@@ -10,7 +10,11 @@ function fakeClient(respond: (req: DetectRequest) => Partial<Signals>) {
     detect: vi.fn(async (req: DetectRequest): Promise<DetectResponse> => {
       calls.push(req);
       await new Promise((r) => setTimeout(r, 5));
-      return { id: req.id, ok: true, signals: { width: 10, height: 10, backend: 'test', models: ['m'], ms: 3, ...respond(req) } };
+      return {
+        id: req.id,
+        ok: true,
+        signals: { width: 10, height: 10, backend: 'test', models: ['m'], ms: 3, ...respond(req) },
+      };
     }),
     render: vi.fn(),
     cancel: vi.fn(),
@@ -45,13 +49,17 @@ describe('EngineService', () => {
   it('de-duplicates concurrent identical requests across tabs', async () => {
     const { client, calls } = fakeClient(() => ({ classifier }));
     const service = new EngineService(client);
-    const results = await Promise.all([1, 2, 3].map((n) => service.detect(request(String(n), 'same', ['classifier']))));
+    const results = await Promise.all(
+      [1, 2, 3].map((n) => service.detect(request(String(n), 'same', ['classifier']))),
+    );
     expect(calls).toHaveLength(1);
     expect(results.map((r) => r.id)).toEqual(['1', '2', '3']);
   });
 
   it('only runs missing detectors for partially cached media', async () => {
-    const { client, calls } = fakeClient((req) => (req.signals.includes('faces') ? { faces: [] } : { classifier }));
+    const { client, calls } = fakeClient((req) =>
+      req.signals.includes('faces') ? { faces: [] } : { classifier },
+    );
     const service = new EngineService(client);
     await service.detect(request('1', 'k', ['classifier']));
     const both = await service.detect(request('2', 'k', ['classifier', 'faces']));
@@ -62,8 +70,30 @@ describe('EngineService', () => {
   it('does not cache failures and reports hit rate', async () => {
     let fail = true;
     const client = fakeClient(() => ({ classifier })).client;
-    client.detect = vi.fn(async (req) => (fail ? { id: req.id, ok: false as const, error: 'fetch-failed' as const } : { id: req.id, ok: true as const, signals: { classifier, width: 1, height: 1, backend: 't', models: [], ms: 1 } }));
-    client.status = vi.fn(async () => ({ state: 'ready', backend: 'wasm', models: [], queue: 0, processed: 0, avgMs: 0, p95Ms: 0, cacheHitRate: 0, detail: '', running: true }) as never);
+    client.detect = vi.fn(async (req) =>
+      fail
+        ? { id: req.id, ok: false as const, error: 'fetch-failed' as const }
+        : {
+            id: req.id,
+            ok: true as const,
+            signals: { classifier, width: 1, height: 1, backend: 't', models: [], ms: 1 },
+          },
+    );
+    client.status = vi.fn(
+      async () =>
+        ({
+          state: 'ready',
+          backend: 'wasm',
+          models: [],
+          queue: 0,
+          processed: 0,
+          avgMs: 0,
+          p95Ms: 0,
+          cacheHitRate: 0,
+          detail: '',
+          running: true,
+        }) as never,
+    );
     const service = new EngineService(client);
     expect((await service.detect(request('1', 'k', ['classifier']))).ok).toBe(false);
     fail = false;

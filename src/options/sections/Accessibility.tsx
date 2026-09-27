@@ -32,12 +32,19 @@ export function AccessibilitySection(): JSX.Element {
             <Segmented<MotionPreference>
               label={t.t('a11y.motion')}
               value={settings.appearance.motion}
-              options={(['system', 'reduced', 'full'] as const).map((m) => ({ value: m, label: t.t(`a11y.motion.${m}`) }))}
+              options={(['system', 'reduced', 'full'] as const).map((m) => ({
+                value: m,
+                label: t.t(`a11y.motion.${m}`),
+              }))}
               onChange={(motion) => void update({ appearance: { motion } })}
             />
           </div>
           <Row id="chip-a11y" label={t.t('images.chip')} description={t.t('images.chip.desc')}>
-            <Switch checked={settings.appearance.showChip} label={t.t('images.chip')} onChange={(showChip) => void update({ appearance: { showChip } })} />
+            <Switch
+              checked={settings.appearance.showChip}
+              label={t.t('images.chip')}
+              onChange={(showChip) => void update({ appearance: { showChip } })}
+            />
           </Row>
         </div>
       </Card>
@@ -56,7 +63,11 @@ export function AccessibilitySection(): JSX.Element {
               <div class="row__text">
                 <div class="row__label">{t.t(c.label)}</div>
               </div>
-              {shortcuts[c.name] ? <kbd>{shortcuts[c.name]}</kbd> : <span class="subtle small">{t.t('a11y.shortcut.unset')}</span>}
+              {shortcuts[c.name] ? (
+                <kbd>{shortcuts[c.name]}</kbd>
+              ) : (
+                <span class="subtle small">{t.t('a11y.shortcut.unset')}</span>
+              )}
             </li>
           ))}
         </ul>

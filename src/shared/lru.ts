@@ -98,6 +98,11 @@ export class LruCache<K, V> {
 
   stats(): { size: number; hits: number; misses: number; hitRate: number } {
     const total = this.hits + this.misses;
-    return { size: this.map.size, hits: this.hits, misses: this.misses, hitRate: total ? this.hits / total : 0 };
+    return {
+      size: this.map.size,
+      hits: this.hits,
+      misses: this.misses,
+      hitRate: total ? this.hits / total : 0,
+    };
   }
 }

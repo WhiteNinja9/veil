@@ -18,7 +18,9 @@ let config: WorkerConfig | null = null;
 const post = (message: FromWorker) => self.postMessage(message);
 
 function isToWorker(value: unknown): value is ToWorker {
-  return typeof value === 'object' && value !== null && typeof (value as { type?: unknown }).type === 'string';
+  return (
+    typeof value === 'object' && value !== null && typeof (value as { type?: unknown }).type === 'string'
+  );
 }
 
 self.addEventListener('message', (event: MessageEvent<unknown>) => {
@@ -44,7 +46,13 @@ async function handle(message: ToWorker): Promise<void> {
     case 'detect': {
       const { job } = message;
       if (!engine) {
-        post({ type: 'detected', id: job.id, ok: false, error: 'engine-unavailable', message: 'not initialised' });
+        post({
+          type: 'detected',
+          id: job.id,
+          ok: false,
+          error: 'engine-unavailable',
+          message: 'not initialised',
+        });
         return;
       }
       try {
@@ -52,7 +60,13 @@ async function handle(message: ToWorker): Promise<void> {
         post({ type: 'detected', id: job.id, ok: true, signals });
       } catch (error) {
         const code = error instanceof EngineJobError ? error.code : 'engine-unavailable';
-        post({ type: 'detected', id: job.id, ok: false, error: code, message: error instanceof Error ? error.message : undefined });
+        post({
+          type: 'detected',
+          id: job.id,
+          ok: false,
+          error: code,
+          message: error instanceof Error ? error.message : undefined,
+        });
       }
       return;
     }
@@ -62,7 +76,12 @@ async function handle(message: ToWorker): Promise<void> {
         if (!engine) throw new Error('not initialised');
         post({ type: 'rendered', id: job.id, ok: true, dataUrl: await engine.render(job) });
       } catch (error) {
-        post({ type: 'rendered', id: job.id, ok: false, error: error instanceof Error ? error.message : 'render failed' });
+        post({
+          type: 'rendered',
+          id: job.id,
+          ok: false,
+          error: error instanceof Error ? error.message : 'render failed',
+        });
       }
       return;
     }

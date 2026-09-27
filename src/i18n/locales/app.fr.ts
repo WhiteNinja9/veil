@@ -37,7 +37,8 @@ export const appFr: Catalog<AppKey> = {
   'level.minimal.desc': 'Uniquement le contenu clairement explicite. Le moins d’interruptions.',
   'level.balanced.desc': 'Contenu explicite et nettement suggestif. Adapté à la plupart des gens.',
   'level.strict.desc': 'Inclut aussi le contenu limite. Ce que Veil ne peut pas vérifier reste masqué.',
-  'level.maximum.desc': 'Masque tout ce qui est douteux. Attendez-vous à ce que des images sans problème le soient aussi.',
+  'level.maximum.desc':
+    'Masque tout ce qui est douteux. Attendez-vous à ce que des images sans problème le soient aussi.',
 
   'category.explicit': 'Nudité et contenu sexuel',
   'category.explicit.desc': 'Nudité, images explicites et sexuelles.',
@@ -82,7 +83,8 @@ export const appFr: Catalog<AppKey> = {
   'popup.status.pausedAll': 'En pause partout',
   'popup.status.off': 'La protection est désactivée',
   'popup.status.unsupported': 'Indisponible sur cette page',
-  'popup.status.unsupported.desc': 'Les navigateurs n’autorisent pas les extensions sur leurs pages internes et boutiques.',
+  'popup.status.unsupported.desc':
+    'Les navigateurs n’autorisent pas les extensions sur leurs pages internes et boutiques.',
   'popup.status.detail': '{level} · sur cet appareil',
   'popup.status.resumes': 'Reprise {time}',
   'popup.status.strict': 'Navigation stricte',
@@ -100,7 +102,10 @@ export const appFr: Catalog<AppKey> = {
   'popup.engine.ready': '{backend} · {ms} par image',
   'popup.engine.idle': 'Moteur en veille : il se réveille au besoin',
   'popup.engine.loading': 'Démarrage du moteur local…',
-  'popup.engine.unverified': { one: '# élément n’a pas pu être vérifié', other: '# éléments n’ont pas pu être vérifiés' },
+  'popup.engine.unverified': {
+    one: '# élément n’a pas pu être vérifié',
+    other: '# éléments n’ont pas pu être vérifiés',
+  },
   'popup.level': 'Niveau pour ce site',
   'popup.level.global': 'Niveau de protection',
   'popup.protection': 'Protection',
@@ -126,7 +131,8 @@ export const appFr: Catalog<AppKey> = {
   'section.images.desc': 'Comment les images sont vérifiées et l’apparence des images protégées.',
   'section.videos.desc': 'Les images des vidéos sont analysées sur cet appareil pendant la lecture.',
   'section.sites.desc': 'Mettre en pause, renforcer, signaler ou bloquer des sites précis.',
-  'section.search.desc': 'Un mode renforcé qui impose aussi les filtres de sécurité des moteurs de recherche.',
+  'section.search.desc':
+    'Un mode renforcé qui impose aussi les filtres de sécurité des moteurs de recherche.',
   'section.privacy.desc': 'Ce que Veil sait de vous : le moins possible.',
   'section.performance.desc': 'Le moteur local et son usage de votre matériel.',
   'section.accessibility.desc': 'Animations, clavier et technologies d’assistance.',
@@ -158,12 +164,15 @@ export const appFr: Catalog<AppKey> = {
 
   'protection.categories': 'Ce qu’il faut masquer',
   'protection.modesty': 'Personnes et visages',
-  'protection.modesty.desc': 'Masquer les personnes ou les visages, quel que soit le contenu. Ces détecteurs ne se chargent que s’ils sont activés.',
+  'protection.modesty.desc':
+    'Masquer les personnes ou les visages, quel que soit le contenu. Ces détecteurs ne se chargent que s’ils sont activés.',
   'protection.advanced': 'Précision',
   'protection.contextAware': 'Évaluation selon le contexte',
-  'protection.contextAware.desc': 'Si la détection des personnes est active, le score « suggestif » baisse pour les images sans personne : moins de fausses alertes sur la nourriture, le sable ou le bois.',
+  'protection.contextAware.desc':
+    'Si la détection des personnes est active, le score « suggestif » baisse pour les images sans personne : moins de fausses alertes sur la nourriture, le sable ou le bois.',
   'protection.fallback': 'Quand un média ne peut pas être vérifié',
-  'protection.fallback.desc': 'Par exemple une vidéo d’une autre origine qui n’autorise pas l’accès aux images, ou une image que Veil ne parvient pas à charger.',
+  'protection.fallback.desc':
+    'Par exemple une vidéo d’une autre origine qui n’autorise pas l’accès aux images, ou une image que Veil ne parvient pas à charger.',
   'protection.reveal': 'Afficher un média masqué',
   'protection.reveal.mode': 'Mode d’affichage',
   'protection.reveal.confirm': 'Demander confirmation',
@@ -193,15 +202,18 @@ export const appFr: Catalog<AppKey> = {
   'videos.videos': 'Protéger les vidéos',
   'videos.videos.desc': 'Une vidéo reste masquée jusqu’à la vérification de sa première image.',
   'videos.sampling': 'Fréquence d’analyse',
-  'videos.sampling.desc': 'La fréquence de vérification pendant la lecture. Veil vérifie immédiatement à chaque changement de scène, et plus souvent si le contenu semble limite.',
+  'videos.sampling.desc':
+    'La fréquence de vérification pendant la lecture. Veil vérifie immédiatement à chaque changement de scène, et plus souvent si le contenu semble limite.',
   'videos.sampling.efficient': 'Économe',
   'videos.sampling.balanced': 'Équilibrée',
   'videos.sampling.thorough': 'Approfondie',
   'videos.autoRestore': 'Réafficher quand c’est sûr',
   'videos.autoRestore.desc': 'Lever la protection après plusieurs images sûres consécutives.',
   'videos.regionsWhole': 'Masquer les vidéos avec des personnes ou des visages',
-  'videos.regionsWhole.desc': 'Si Visages ou Personnes est activé, protéger la vidéo entière : on ne peut pas flouter une zone dans une vidéo.',
-  'videos.limit': 'Certains sites diffusent la vidéo d’une manière qui interdit l’accès aux images. Ces vidéos ne peuvent pas être vérifiées et suivent votre réglage « Quand un média ne peut pas être vérifié ».',
+  'videos.regionsWhole.desc':
+    'Si Visages ou Personnes est activé, protéger la vidéo entière : on ne peut pas flouter une zone dans une vidéo.',
+  'videos.limit':
+    'Certains sites diffusent la vidéo d’une manière qui interdit l’accès aux images. Ces vidéos ne peuvent pas être vérifiées et suivent votre réglage « Quand un média ne peut pas être vérifié ».',
 
   'sites.add': 'Ajouter une règle',
   'sites.pattern': 'Site web',
@@ -213,9 +225,11 @@ export const appFr: Catalog<AppKey> = {
   'sites.mode.block': 'Bloquer',
   'sites.mode.level': 'Niveau : {level}',
   'sites.empty.title': 'Aucune règle de site',
-  'sites.empty.desc': 'Tous les sites utilisent votre niveau par défaut. Ajoutez une règle pour mettre en pause, renforcer, signaler ou bloquer un site.',
+  'sites.empty.desc':
+    'Tous les sites utilisent votre niveau par défaut. Ajoutez une règle pour mettre en pause, renforcer, signaler ou bloquer un site.',
   'sites.filter': 'Filtrer les règles',
-  'sites.help': 'exemple.fr inclut ses sous-domaines · *.exemple.fr uniquement les sous-domaines · =exemple.fr uniquement cette adresse · * remplace n’importe quelle partie',
+  'sites.help':
+    'exemple.fr inclut ses sous-domaines · *.exemple.fr uniquement les sous-domaines · =exemple.fr uniquement cette adresse · * remplace n’importe quelle partie',
   'sites.error.empty': 'Saisissez un site.',
   'sites.error.invalid': 'Saisissez un domaine comme exemple.fr.',
   'sites.error.too-broad': 'Ce motif correspondrait à trop de sites.',
@@ -231,22 +245,29 @@ export const appFr: Catalog<AppKey> = {
   'duration.session': 'Jusqu’à la fermeture du navigateur',
 
   'strict.title': 'Navigation stricte',
-  'strict.desc': 'Un mode renforcé, plus difficile à désactiver sur un coup de tête — pour vous ou votre famille.',
+  'strict.desc':
+    'Un mode renforcé, plus difficile à désactiver sur un coup de tête — pour vous ou votre famille.',
   'strict.effect.level': 'Niveau au moins Strict sur tous les sites',
   'strict.effect.reveal': 'Afficher un média masqué demande un appui prolongé et une confirmation',
   'strict.effect.fallback': 'Les médias non vérifiables restent masqués',
   'strict.effect.pause': 'La mise en pause est désactivée',
   'strict.safeSearch': 'Imposer SafeSearch',
-  'strict.safeSearch.desc': 'Active les filtres de sécurité de Google, Bing, DuckDuckGo, Yahoo, Brave Search et Yandex.',
+  'strict.safeSearch.desc':
+    'Active les filtres de sécurité de Google, Bing, DuckDuckGo, Yahoo, Brave Search et Yandex.',
   'strict.youtube': 'Mode restreint YouTube',
-  'strict.youtube.desc': 'Demande à YouTube de masquer les vidéos potentiellement réservées aux adultes, avec le filtre de YouTube.',
+  'strict.youtube.desc':
+    'Demande à YouTube de masquer les vidéos potentiellement réservées aux adultes, avec le filtre de YouTube.',
   'strict.siteExceptions': 'Ignorer les règles « Protection désactivée »',
-  'strict.siteExceptions.desc': 'Les sites mis en pause restent protégés tant que la navigation stricte est active.',
-  'strict.lockHint': 'Ajoutez un code dans Avancé pour que la navigation stricte ne puisse pas être désactivée sur un coup de tête.',
-  'strict.limits': 'La navigation stricte réduit l’exposition sans pouvoir la garantir : les sites évoluent, les filtres se trompent, et toute personne qui gère les extensions du navigateur peut retirer Veil.',
+  'strict.siteExceptions.desc':
+    'Les sites mis en pause restent protégés tant que la navigation stricte est active.',
+  'strict.lockHint':
+    'Ajoutez un code dans Avancé pour que la navigation stricte ne puisse pas être désactivée sur un coup de tête.',
+  'strict.limits':
+    'La navigation stricte réduit l’exposition sans pouvoir la garantir : les sites évoluent, les filtres se trompent, et toute personne qui gère les extensions du navigateur peut retirer Veil.',
 
   'privacy.title': 'Centre de confidentialité',
-  'privacy.lede': 'Veil est conçu pour en savoir le moins possible sur vous. Chaque affirmation ici est vérifiable dans le code source.',
+  'privacy.lede':
+    'Veil est conçu pour en savoir le moins possible sur vous. Chaque affirmation ici est vérifiable dans le code source.',
   'privacy.item.protection': 'Protection',
   'privacy.item.local': 'Traitement sur l’appareil',
   'privacy.item.cloud': 'Traitement dans le cloud',
@@ -266,7 +287,8 @@ export const appFr: Catalog<AppKey> = {
   'privacy.stores.settings': 'Vos réglages et règles de sites',
   'privacy.stores.lock': 'Un vérificateur de code, si vous activez le verrouillage (jamais le code lui-même)',
   'privacy.stores.profile': 'L’accélérateur le plus rapide sur cet appareil',
-  'privacy.stores.memory': 'Pendant 30 minutes au plus, en mémoire uniquement : les résultats des médias récemment vérifiés, pour ne pas analyser deux fois la même image. Effacés à la fermeture du navigateur.',
+  'privacy.stores.memory':
+    'Pendant 30 minutes au plus, en mémoire uniquement : les résultats des médias récemment vérifiés, pour ne pas analyser deux fois la même image. Effacés à la fermeture du navigateur.',
   'privacy.never.title': 'Ce que Veil ne fait jamais',
   'privacy.never.upload': 'Envoyer des images, des vidéos ou le contenu des pages',
   'privacy.never.history': 'Enregistrer les pages que vous visitez',
@@ -278,17 +300,21 @@ export const appFr: Catalog<AppKey> = {
   'privacy.clearCache.desc': 'Oublier les résultats en mémoire des médias récemment vérifiés.',
   'privacy.cleared': 'Effacé',
   'privacy.stats': 'Statistiques de la page',
-  'privacy.stats.desc': 'Compter les médias vérifiés et masqués pour la fenêtre de l’extension. Des chiffres uniquement, en mémoire.',
+  'privacy.stats.desc':
+    'Compter les médias vérifiés et masqués pour la fenêtre de l’extension. Des chiffres uniquement, en mémoire.',
   'privacy.badge': 'Afficher le nombre sur l’icône',
   'privacy.badge.desc': 'Le nombre d’éléments masqués sur la page en cours.',
   'perm.hosts': 'Accès aux sites web',
-  'perm.hosts.desc': 'Nécessaire pour vérifier et masquer les images et vidéos des pages que vous visitez. Les médias ne sont lus que pour être classés sur cet appareil.',
+  'perm.hosts.desc':
+    'Nécessaire pour vérifier et masquer les images et vidéos des pages que vous visitez. Les médias ne sont lus que pour être classés sur cet appareil.',
   'perm.storage': 'Stockage',
   'perm.storage.desc': 'Enregistre vos réglages sur cet appareil.',
   'perm.dnr': 'Blocage de contenu',
-  'perm.dnr.desc': 'Applique vos règles de blocage et SafeSearch dans le navigateur, sans que Veil voie où vous naviguez.',
+  'perm.dnr.desc':
+    'Applique vos règles de blocage et SafeSearch dans le navigateur, sans que Veil voie où vous naviguez.',
   'perm.scripting': 'Scripts',
-  'perm.scripting.desc': 'Protège les onglets déjà ouverts lors de l’installation ou de la mise à jour de Veil.',
+  'perm.scripting.desc':
+    'Protège les onglets déjà ouverts lors de l’installation ou de la mise à jour de Veil.',
   'perm.menus': 'Menu contextuel',
   'perm.menus.desc': 'Ajoute « Masquer avec Veil » et « Afficher » au clic droit.',
   'perm.offscreen': 'Document en arrière-plan',
@@ -309,16 +335,19 @@ export const appFr: Catalog<AppKey> = {
   'perf.models': 'Modèles chargés',
   'perf.none': 'Aucun pour l’instant',
   'perf.backendPref': 'Accélérateur',
-  'perf.backendPref.desc': 'Le mode automatique choisit l’option fonctionnelle la plus rapide sur cet appareil.',
+  'perf.backendPref.desc':
+    'Le mode automatique choisit l’option fonctionnelle la plus rapide sur cet appareil.',
   'perf.backend.auto': 'Automatique',
   'perf.backend.webgpu': 'WebGPU',
   'perf.backend.webgl': 'WebGL',
   'perf.backend.wasm': 'WebAssembly',
   'perf.backend.cpu': 'Processeur (le plus lent)',
   'perf.unload': 'Libérer la mémoire en veille',
-  'perf.unload.desc': 'Décharger le moteur après cette durée d’inactivité. Il redémarre en une seconde environ.',
+  'perf.unload.desc':
+    'Décharger le moteur après cette durée d’inactivité. Il redémarre en une seconde environ.',
   'perf.benchmark': 'Mesurer cet appareil',
-  'perf.benchmark.desc': 'Exécute un court test sur chaque accélérateur disponible et retient le plus rapide.',
+  'perf.benchmark.desc':
+    'Exécute un court test sur chaque accélérateur disponible et retient le plus rapide.',
   'perf.benchmark.run': 'Lancer la mesure',
   'perf.benchmark.running': 'Mesure en cours…',
   'perf.benchmark.best': 'Le plus rapide ici : {backend}',
@@ -328,7 +357,8 @@ export const appFr: Catalog<AppKey> = {
   'perf.note': 'Les temps sont mesurés sur cet appareil et ne concernent que le travail de Veil.',
 
   'a11y.motion': 'Animations',
-  'a11y.motion.desc': 'Réduire les animations dans l’interface de Veil et l’étiquette affichée dans les pages.',
+  'a11y.motion.desc':
+    'Réduire les animations dans l’interface de Veil et l’étiquette affichée dans les pages.',
   'a11y.motion.system': 'Comme le système',
   'a11y.motion.reduced': 'Réduites',
   'a11y.motion.full': 'Complètes',
@@ -337,7 +367,8 @@ export const appFr: Catalog<AppKey> = {
   'a11y.shortcut.site': 'Mettre en pause ou reprendre sur ce site',
   'a11y.shortcut.reveal': 'Afficher ou masquer le média au focus',
   'a11y.shortcut.unset': 'Non défini',
-  'a11y.keyboard': 'Les médias masqués restent accessibles au clavier : placez le focus dessus (ou sur un lien qui les entoure) et utilisez le raccourci. Les lecteurs d’écran annoncent les médias protégés.',
+  'a11y.keyboard':
+    'Les médias masqués restent accessibles au clavier : placez le focus dessus (ou sur un lien qui les entoure) et utilisez le raccourci. Les lecteurs d’écran annoncent les médias protégés.',
 
   'lock.title': 'Verrouillage des réglages',
   'lock.desc': 'Exiger un code pour réduire la protection, désactiver Veil ou modifier les règles de sites.',
@@ -357,14 +388,16 @@ export const appFr: Catalog<AppKey> = {
   'lock.scope.settings': 'La réduction de la protection',
   'lock.scope.disable': 'La désactivation ou la pause de Veil',
   'lock.scope.sites': 'La modification des règles de sites',
-  'lock.honest': 'Un code dissuade les changements sur un coup de tête. Toute personne capable de retirer des extensions peut le contourner ; pour une configuration imposée, voir « Appareils gérés » ci-dessous.',
+  'lock.honest':
+    'Un code dissuade les changements sur un coup de tête. Toute personne capable de retirer des extensions peut le contourner ; pour une configuration imposée, voir « Appareils gérés » ci-dessous.',
   'lock.on': 'Verrouillage actif',
   'lock.unlocked': 'Déverrouillé pour quelques minutes',
   'lock.relock': 'Verrouiller maintenant',
   'lock.working': 'Sécurisation…',
   'data.title': 'Vos réglages',
   'data.export': 'Exporter',
-  'data.export.desc': 'Enregistrer les réglages et règles de sites dans un fichier. Le code n’est jamais inclus.',
+  'data.export.desc':
+    'Enregistrer les réglages et règles de sites dans un fichier. Le code n’est jamais inclus.',
   'data.import': 'Importer',
   'data.import.desc': 'Restaurer les réglages depuis un fichier exporté.',
   'data.import.ok': 'Réglages importés.',
@@ -374,7 +407,8 @@ export const appFr: Catalog<AppKey> = {
   'data.reset.confirm': 'Rétablir tous les réglages par défaut ? Les règles de sites seront supprimées.',
   'data.reset.done': 'Tous les réglages ont été réinitialisés.',
   'managed.title': 'Appareils gérés',
-  'managed.desc': 'Les administrateurs peuvent imposer la protection par des stratégies du navigateur (installation forcée de Veil et réglages figés). Veil les lit depuis le stockage géré.',
+  'managed.desc':
+    'Les administrateurs peuvent imposer la protection par des stratégies du navigateur (installation forcée de Veil et réglages figés). Veil les lit depuis le stockage géré.',
   'managed.active': 'Votre organisation gère certains de ces réglages.',
   'managed.none': 'Aucune stratégie n’est appliquée sur cet appareil.',
   'diag.title': 'Diagnostic',
@@ -384,10 +418,13 @@ export const appFr: Catalog<AppKey> = {
   'about.tagline': 'Une protection privée, sur votre appareil, contre les images et vidéos indésirables.',
   'about.version': 'Version {version}',
   'about.limits.title': 'À quoi s’attendre',
-  'about.limits.1': 'La détection automatique n’est pas parfaite. Certains médias indésirables passeront, et certains médias sans problème seront masqués.',
+  'about.limits.1':
+    'La détection automatique n’est pas parfaite. Certains médias indésirables passeront, et certains médias sans problème seront masqués.',
   'about.limits.2': 'La précision dépend des modèles, de la taille de l’image et du type de contenu.',
-  'about.limits.3': 'Les médias que Veil ne peut pas lire (certaines vidéos d’autres origines, canvas protégés) suivent votre réglage « ne peut pas être vérifié ».',
-  'about.limits.4': 'Aucune extension ne peut protéger les pages internes du navigateur ni les boutiques d’extensions.',
+  'about.limits.3':
+    'Les médias que Veil ne peut pas lire (certaines vidéos d’autres origines, canvas protégés) suivent votre réglage « ne peut pas être vérifié ».',
+  'about.limits.4':
+    'Aucune extension ne peut protéger les pages internes du navigateur ni les boutiques d’extensions.',
   'about.limits.5': 'Veil est un outil au service de vos choix, pas une garantie.',
   'about.models.title': 'Modèles',
   'about.model.nsfw': 'Classificateur de contenu — MobileNetV2 (NSFWJS, MIT)',
@@ -397,16 +434,19 @@ export const appFr: Catalog<AppKey> = {
 
   'onb.step': 'Étape {current} sur {total}',
   'onb.welcome.title': 'Naviguez sereinement.',
-  'onb.welcome.body': 'Veil masque les images et vidéos explicites ou indésirables avant qu’elles n’atteignent votre écran — en privé, sur votre appareil.',
+  'onb.welcome.body':
+    'Veil masque les images et vidéos explicites ou indésirables avant qu’elles n’atteignent votre écran — en privé, sur votre appareil.',
   'onb.welcome.cta': 'Commencer',
   'onb.local.title': 'Tout reste sur votre appareil.',
-  'onb.local.body': 'Les modèles d’IA de Veil sont intégrés à l’extension. Les médias sont analysés là où ils se trouvent déjà — dans votre navigateur — et ne sont jamais envoyés.',
+  'onb.local.body':
+    'Les modèles d’IA de Veil sont intégrés à l’extension. Les médias sont analysés là où ils se trouvent déjà — dans votre navigateur — et ne sont jamais envoyés.',
   'onb.local.page': 'Page web',
   'onb.local.device': 'Veil, sur votre appareil',
   'onb.local.result': 'Affiché ou protégé',
   'onb.local.cloud': 'Aucun serveur impliqué',
   'onb.permissions.title': 'Une autorisation, expliquée.',
-  'onb.permissions.body': 'Pour vous protéger sur tous les sites, Veil doit accéder aux pages que vous visitez. Il ne s’en sert que pour trouver, vérifier et masquer les médias.',
+  'onb.permissions.body':
+    'Pour vous protéger sur tous les sites, Veil doit accéder aux pages que vous visitez. Il ne s’en sert que pour trouver, vérifier et masquer les médias.',
   'onb.permissions.granted': 'Accès accordé',
   'onb.permissions.grant': 'Autoriser l’accès',
   'onb.permissions.missing': 'Sans cet accès, Veil ne peut pas protéger les pages.',
@@ -421,8 +461,10 @@ export const appFr: Catalog<AppKey> = {
   'onb.done.body': 'La protection est active. Quelques points utiles :',
   'onb.done.tip.hover': 'Survolez ou placez le focus sur un média masqué pour savoir pourquoi et l’afficher.',
   'onb.done.tip.shortcut': '{shortcut} affiche ou masque le média sous le pointeur.',
-  'onb.done.tip.popup': 'Le bouton de la barre d’outils permet de mettre Veil en pause sur n’importe quel site.',
-  'onb.done.limits': 'Aucun filtre n’est parfait. Veil laissera parfois passer quelque chose, ou masquera un contenu sans problème.',
+  'onb.done.tip.popup':
+    'Le bouton de la barre d’outils permet de mettre Veil en pause sur n’importe quel site.',
+  'onb.done.limits':
+    'Aucun filtre n’est parfait. Veil laissera parfois passer quelque chose, ou masquera un contenu sans problème.',
   'onb.done.cta': 'Commencer à naviguer',
   'onb.done.customize': 'Voir les réglages',
 

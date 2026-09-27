@@ -1,7 +1,36 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Backgrounds</title><link rel="stylesheet" href="/lab.css"></head>
-<body><h1>Inline background images</h1><p class="lede">Cards whose image is an inline <code>background-image</code>, as on many social feeds.</p>
-<div class="grid">
-  <div class="card"><div id="bg-neutral" class="bg" style="background-image: url('/img/neutral/400x300.png?seed=10')"></div><div class="meta">neutral</div></div>
-  <div class="card"><div id="bg-explicit" class="bg" style="background-image: url('__OTHER_ORIGIN__/img/explicit/400x300.png?seed=11')"><span style="color:white">Caption stays visible</span></div><div class="meta">explicit · cross-origin</div></div>
-  <div class="card"><div id="bg-gradient" class="bg" style="background-image: linear-gradient(#89f, #fa8)"></div><div class="meta">gradient only (ignored)</div></div>
-</div></body></html>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Backgrounds</title>
+    <link rel="stylesheet" href="/lab.css" />
+  </head>
+  <body>
+    <h1>Inline background images</h1>
+    <p class="lede">Cards whose image is an inline <code>background-image</code>, as on many social feeds.</p>
+    <div class="grid">
+      <div class="card">
+        <div
+          id="bg-neutral"
+          class="bg"
+          style="background-image: url('/img/neutral/400x300.png?seed=10')"
+        ></div>
+        <div class="meta">neutral</div>
+      </div>
+      <div class="card">
+        <div
+          id="bg-explicit"
+          class="bg"
+          style="background-image: url('__OTHER_ORIGIN__/img/explicit/400x300.png?seed=11')"
+        >
+          <span style="color: white">Caption stays visible</span>
+        </div>
+        <div class="meta">explicit · cross-origin</div>
+      </div>
+      <div class="card">
+        <div id="bg-gradient" class="bg" style="background-image: linear-gradient(#89f, #fa8)"></div>
+        <div class="meta">gradient only (ignored)</div>
+      </div>
+    </div>
+  </body>
+</html>

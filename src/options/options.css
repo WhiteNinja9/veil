@@ -51,7 +51,9 @@ body.surface-app {
   color: var(--text-2);
   font-size: var(--text-md);
   font-weight: 520;
-  transition: background-color var(--dur-1) var(--ease-out), color var(--dur-1) var(--ease-out);
+  transition:
+    background-color var(--dur-1) var(--ease-out),
+    color var(--dur-1) var(--ease-out);
 }
 .nav__item svg {
   width: 18px;
@@ -214,7 +216,9 @@ body.surface-app {
   border-radius: var(--radius-md);
   background: var(--surface);
   cursor: pointer;
-  transition: border-color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
+  transition:
+    border-color var(--dur-2) var(--ease-out),
+    box-shadow var(--dur-2) var(--ease-out);
 }
 .style-option:hover {
   border-color: color-mix(in srgb, var(--accent) 45%, var(--border-strong));
@@ -358,7 +362,9 @@ body.surface-app {
 /* ── Strict Browsing ───────────────────────────────────────────────────── */
 .strict-hero {
   overflow: hidden;
-  transition: background var(--dur-3) var(--ease-out), border-color var(--dur-3) var(--ease-out);
+  transition:
+    background var(--dur-3) var(--ease-out),
+    border-color var(--dur-3) var(--ease-out);
 }
 .strict-hero--on {
   border-color: color-mix(in srgb, var(--accent) 35%, var(--border));

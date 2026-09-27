@@ -8,7 +8,13 @@ import { Card } from '../../ui/components/layout';
 import { Icon } from '../../ui/icons';
 
 type Duration = 'permanent' | 'hour' | 'day' | 'week' | 'session';
-const DURATION_MS: Record<Duration, number | null> = { permanent: null, hour: 3600e3, day: 86400e3, week: 7 * 86400e3, session: null };
+const DURATION_MS: Record<Duration, number | null> = {
+  permanent: null,
+  hour: 3600e3,
+  day: 86400e3,
+  week: 7 * 86400e3,
+  session: null,
+};
 
 export function SitesSection(): JSX.Element {
   const { settings, t, update } = useApp();
@@ -19,8 +25,15 @@ export function SitesSection(): JSX.Element {
   const [filter, setFilter] = useState('');
 
   const modeLabel = (m: SiteMode) =>
-    m === 'off' ? t.t('sites.mode.off') : m === 'warn' ? t.t('sites.mode.warn') : m === 'block' ? t.t('sites.mode.block') : t.t('sites.mode.level', { level: t.t(`level.${m}`) });
-  const modeTone = (m: SiteMode) => (m === 'off' ? 'caution' : m === 'block' ? 'critical' : m === 'warn' ? 'caution' : 'accent');
+    m === 'off'
+      ? t.t('sites.mode.off')
+      : m === 'warn'
+        ? t.t('sites.mode.warn')
+        : m === 'block'
+          ? t.t('sites.mode.block')
+          : t.t('sites.mode.level', { level: t.t(`level.${m}`) });
+  const modeTone = (m: SiteMode) =>
+    m === 'off' ? 'caution' : m === 'block' ? 'critical' : m === 'warn' ? 'caution' : 'accent';
 
   const rules = useMemo(() => {
     const now = Date.now();
@@ -59,7 +72,10 @@ export function SitesSection(): JSX.Element {
 
   const modeOptions: { value: SiteMode; label: string }[] = [
     { value: 'off', label: t.t('sites.mode.off') },
-    ...STRICTNESS_LEVELS.map((level) => ({ value: level as SiteMode, label: t.t('sites.mode.level', { level: t.t(`level.${level}`) }) })),
+    ...STRICTNESS_LEVELS.map((level) => ({
+      value: level as SiteMode,
+      label: t.t('sites.mode.level', { level: t.t(`level.${level}`) }),
+    })),
     { value: 'warn', label: t.t('sites.mode.warn') },
     { value: 'block', label: t.t('sites.mode.block') },
   ];
@@ -92,7 +108,13 @@ export function SitesSection(): JSX.Element {
             <label class="field__label" for="site-mode">
               {t.t('sites.mode')}
             </label>
-            <Select<SiteMode> id="site-mode" label={t.t('sites.mode')} value={mode} options={modeOptions} onChange={setMode} />
+            <Select<SiteMode>
+              id="site-mode"
+              label={t.t('sites.mode')}
+              value={mode}
+              options={modeOptions}
+              onChange={setMode}
+            />
           </div>
           <div class="field">
             <label class="field__label" for="site-duration">
@@ -102,7 +124,10 @@ export function SitesSection(): JSX.Element {
               id="site-duration"
               label={t.t('sites.duration')}
               value={duration}
-              options={(Object.keys(DURATION_MS) as Duration[]).map((d) => ({ value: d, label: t.t(`duration.${d}`) }))}
+              options={(Object.keys(DURATION_MS) as Duration[]).map((d) => ({
+                value: d,
+                label: t.t(`duration.${d}`),
+              }))}
               onChange={setDuration}
             />
           </div>
@@ -129,7 +154,14 @@ export function SitesSection(): JSX.Element {
           settings.sites.length > 6 ? (
             <div class="search-input" style={{ width: '220px' }}>
               <Icon name="search" />
-              <input class="input" type="search" placeholder={t.t('sites.filter')} aria-label={t.t('sites.filter')} value={filter} onInput={(e) => setFilter((e.currentTarget as HTMLInputElement).value)} />
+              <input
+                class="input"
+                type="search"
+                placeholder={t.t('sites.filter')}
+                aria-label={t.t('sites.filter')}
+                value={filter}
+                onInput={(e) => setFilter((e.currentTarget as HTMLInputElement).value)}
+              />
             </div>
           ) : undefined
         }
@@ -151,9 +183,17 @@ export function SitesSection(): JSX.Element {
                 </span>
                 <span class={`pill pill--${modeTone(rule.mode)}`}>{modeLabel(rule.mode)}</span>
                 <span class="rule__expiry subtle small">
-                  {rule.sessionOnly ? t.t('sites.session') : rule.expiresAt ? t.t('sites.expires', { time: t.relativeTime(rule.expiresAt) }) : t.t('sites.permanent')}
+                  {rule.sessionOnly
+                    ? t.t('sites.session')
+                    : rule.expiresAt
+                      ? t.t('sites.expires', { time: t.relativeTime(rule.expiresAt) })
+                      : t.t('sites.permanent')}
                 </span>
-                <IconButton icon="trash" label={t.t('sites.remove', { pattern: rule.pattern })} onClick={() => remove(rule)} />
+                <IconButton
+                  icon="trash"
+                  label={t.t('sites.remove', { pattern: rule.pattern })}
+                  onClick={() => remove(rule)}
+                />
               </li>
             ))}
           </ul>

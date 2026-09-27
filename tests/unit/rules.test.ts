@@ -66,7 +66,13 @@ describe('matchesHost', () => {
 });
 
 describe('findRule', () => {
-  const r = (pattern: string, mode: SiteRule['mode'], expiresAt: number | null = null): SiteRule => ({ id: pattern, pattern, mode, createdAt: 0, expiresAt });
+  const r = (pattern: string, mode: SiteRule['mode'], expiresAt: number | null = null): SiteRule => ({
+    id: pattern,
+    pattern,
+    mode,
+    createdAt: 0,
+    expiresAt,
+  });
 
   it('prefers the most specific rule', () => {
     const rules = [r('example.com', 'strict'), r('news.example.com', 'off'), r('*.example.*', 'block')];

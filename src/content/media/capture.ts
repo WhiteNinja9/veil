@@ -92,7 +92,12 @@ async function blobToDataUrl(blob: Blob): Promise<string> {
  * Image capture that keeps decoding, scaling and encoding off the main
  * thread where the platform allows (createImageBitmap + OffscreenCanvas).
  */
-export async function captureImage(img: HTMLImageElement | ImageBitmapSource, width: number, height: number, maxSide: number): Promise<CaptureResult> {
+export async function captureImage(
+  img: HTMLImageElement | ImageBitmapSource,
+  width: number,
+  height: number,
+  maxSide: number,
+): Promise<CaptureResult> {
   if (!width || !height) return null;
   const scale = Math.min(1, maxSide / Math.max(width, height));
   const w = Math.max(1, Math.round(width * scale));

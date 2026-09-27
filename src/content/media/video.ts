@@ -43,7 +43,13 @@ const FRAME_MAX_SIDE = 256;
 
 export interface VideoHost {
   policy(): EffectivePolicy;
-  detectFrame(item: MediaItem, dataUrl: string, width: number, height: number, key: string): Promise<DetectResponse>;
+  detectFrame(
+    item: MediaItem,
+    dataUrl: string,
+    width: number,
+    height: number,
+    key: string,
+  ): Promise<DetectResponse>;
   detectUrl(item: MediaItem, url: string): Promise<DetectResponse>;
   apply(item: MediaItem, decision: Decision): void;
   pending(item: MediaItem): void;
@@ -205,13 +211,16 @@ export class VideoProtectionManager {
 
   private refill(): void {
     const now = performance.now();
-    this.tokens = Math.min(TOKENS_PER_SECOND, this.tokens + ((now - this.lastRefill) / 1000) * TOKENS_PER_SECOND);
+    this.tokens = Math.min(
+      TOKENS_PER_SECOND,
+      this.tokens + ((now - this.lastRefill) / 1000) * TOKENS_PER_SECOND,
+    );
     this.lastRefill = now;
   }
 
   private tick(): void {
     if (document.visibilityState !== 'visible') return;
-    for (const [video, state] of this.videos) {
+    for (const video of [...this.videos.keys()]) {
       if (!video.isConnected) this.untrack(video);
     }
     // Fullscreen first, then the most overdue (relative to its own interval),
@@ -219,7 +228,12 @@ export class VideoProtectionManager {
     const fullscreen = document.fullscreenElement;
     const now = performance.now();
     const candidates = [...this.videos.values()]
-      .filter((s) => !s.video.paused && !s.video.ended && (s.item.visible || (fullscreen && fullscreen.contains(s.video))))
+      .filter(
+        (s) =>
+          !s.video.paused &&
+          !s.video.ended &&
+          (s.item.visible || (fullscreen && fullscreen.contains(s.video))),
+      )
       .sort((a, b) => urgency(b, fullscreen, now) - urgency(a, fullscreen, now));
     for (const state of candidates) void this.sample(state, false);
   }
@@ -281,14 +295,25 @@ export class VideoProtectionManager {
 
   private onSignals(state: VideoState, signals: Signals): void {
     const policy = this.host.policy();
-    const context = { kind: 'video' as const, renderedSize: state.item.renderedSize, isAd: Boolean(state.item.isAd) };
+    const context = {
+      kind: 'video' as const,
+      renderedSize: state.item.renderedSize,
+      isAd: Boolean(state.item.isAd),
+    };
     const now = performance.now();
     const current = evaluate(signals, context, policy);
     if (signals.classifier) state.ema = emaScores(state.ema, signals.classifier, 0.5);
     const smoothed = state.ema ? evaluate({ ...signals, classifier: state.ema }, context, policy) : current;
 
     this.host.onAnalyzed(state.item, signals);
-    if (__DEV__) log.debug('frame', state.video.id || state.video.currentSrc.slice(-30), current.action, `porn=${signals.classifier?.porn.toFixed(2)}`, `interval=${state.interval}`);
+    if (__DEV__)
+      log.debug(
+        'frame',
+        state.video.id || state.video.currentSrc.slice(-30),
+        current.action,
+        `porn=${signals.classifier?.porn.toFixed(2)}`,
+        `interval=${state.interval}`,
+      );
     const wasProtected = state.item.decision?.action === 'protect' && state.verifiedSrc !== null;
     state.verifiedSrc = state.video.currentSrc;
 
@@ -314,7 +339,11 @@ export class VideoProtectionManager {
       this.host.apply(state.item, current);
     }
 
-    state.interval = adaptiveInterval(policy.video.baseIntervalMs, Math.max(current.pressure, smoothed.pressure), state.safeStreak);
+    state.interval = adaptiveInterval(
+      policy.video.baseIntervalMs,
+      Math.max(current.pressure, smoothed.pressure),
+      state.safeStreak,
+    );
   }
 
   private async analyzePoster(state: VideoState): Promise<void> {
@@ -350,7 +379,9 @@ export class VideoProtectionManager {
 function urgency(state: VideoState, fullscreen: Element | null, now: number): number {
   if (fullscreen && fullscreen.contains(state.video)) return Number.MAX_SAFE_INTEGER;
   // Overdue ratio, with a mild preference for larger videos.
-  return ((now - state.lastAnalyzedAt) / state.interval) * (1 + Math.min(state.item.renderedSize, 1200) / 2400);
+  return (
+    ((now - state.lastAnalyzedAt) / state.interval) * (1 + Math.min(state.item.renderedSize, 1200) / 2400)
+  );
 }
 
 /** Adaptive sampling interval (exported for tests). */

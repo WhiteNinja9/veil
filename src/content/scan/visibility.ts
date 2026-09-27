@@ -19,13 +19,20 @@ export interface VisibilityInfo {
 type Listener = (el: Element, info: VisibilityInfo) => void;
 
 export class VisibilityTracker {
-  private readonly state = new WeakMap<Element, { visible: boolean; near: boolean; width: number; height: number }>();
+  private readonly state = new WeakMap<
+    Element,
+    { visible: boolean; near: boolean; width: number; height: number }
+  >();
   private readonly viewport: IntersectionObserver;
   private readonly near: IntersectionObserver;
 
   constructor(private readonly listener: Listener) {
-    this.viewport = new IntersectionObserver((entries) => this.update(entries, 'visible'), { threshold: [0, 0.01] });
-    this.near = new IntersectionObserver((entries) => this.update(entries, 'near'), { rootMargin: '150% 0px 150% 0px' });
+    this.viewport = new IntersectionObserver((entries) => this.update(entries, 'visible'), {
+      threshold: [0, 0.01],
+    });
+    this.near = new IntersectionObserver((entries) => this.update(entries, 'near'), {
+      rootMargin: '150% 0px 150% 0px',
+    });
   }
 
   private update(entries: IntersectionObserverEntry[], which: 'visible' | 'near'): void {
@@ -43,7 +50,13 @@ export class VisibilityTracker {
     const s = this.state.get(el);
     if (!s) return null;
     const priority: Priority = s.visible ? 0 : s.near ? 1 : 2;
-    return { priority, visible: s.visible, size: Math.max(s.width, s.height), width: s.width, height: s.height };
+    return {
+      priority,
+      visible: s.visible,
+      size: Math.max(s.width, s.height),
+      width: s.width,
+      height: s.height,
+    };
   }
 
   observe(el: Element): void {

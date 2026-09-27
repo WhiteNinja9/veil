@@ -1,13 +1,52 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Lazy images</title><link rel="stylesheet" href="/lab.css"></head>
-<body><h1>Lazy-loaded images</h1><p class="lede">Native <code>loading="lazy"</code> and a JavaScript lazy loader (data-src → src).</p>
-<div class="spacer">scroll ↓</div>
-<div class="grid">
-  <div class="card"><img id="native-lazy" loading="lazy" src="/img/explicit/400x300.png?seed=3" alt=""><div class="meta">native lazy · explicit</div></div>
-  <div class="card"><img id="js-lazy" class="lazy" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="/img/explicit/400x300.png?seed=4" alt=""><div class="meta">JS lazy · explicit</div></div>
-  <div class="card"><img id="js-lazy-neutral" class="lazy" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="/img/neutral/400x300.png?seed=5" alt=""><div class="meta">JS lazy · neutral</div></div>
-</div>
-<script>
-  const io = new IntersectionObserver((entries) => { for (const e of entries) if (e.isIntersecting) { e.target.src = e.target.dataset.src; io.unobserve(e.target); } }, { rootMargin: '200px' });
-  document.querySelectorAll('img.lazy').forEach((img) => io.observe(img));
-</script>
-</body></html>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Lazy images</title>
+    <link rel="stylesheet" href="/lab.css" />
+  </head>
+  <body>
+    <h1>Lazy-loaded images</h1>
+    <p class="lede">Native <code>loading="lazy"</code> and a JavaScript lazy loader (data-src → src).</p>
+    <div class="spacer">scroll ↓</div>
+    <div class="grid">
+      <div class="card">
+        <img id="native-lazy" loading="lazy" src="/img/explicit/400x300.png?seed=3" alt="" />
+        <div class="meta">native lazy · explicit</div>
+      </div>
+      <div class="card">
+        <img
+          id="js-lazy"
+          class="lazy"
+          src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
+          data-src="/img/explicit/400x300.png?seed=4"
+          alt=""
+        />
+        <div class="meta">JS lazy · explicit</div>
+      </div>
+      <div class="card">
+        <img
+          id="js-lazy-neutral"
+          class="lazy"
+          src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
+          data-src="/img/neutral/400x300.png?seed=5"
+          alt=""
+        />
+        <div class="meta">JS lazy · neutral</div>
+      </div>
+    </div>
+    <script>
+      const io = new IntersectionObserver(
+        (entries) => {
+          for (const e of entries)
+            if (e.isIntersecting) {
+              e.target.src = e.target.dataset.src;
+              io.unobserve(e.target);
+            }
+        },
+        { rootMargin: '200px' },
+      );
+      document.querySelectorAll('img.lazy').forEach((img) => io.observe(img));
+    </script>
+  </body>
+</html>

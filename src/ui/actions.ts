@@ -25,7 +25,12 @@ export function levelPatch(level: StrictnessLevel, current: Settings): DeepParti
 export const EXPORT_FORMAT = 'veil-settings';
 
 export function exportSettings(settings: Settings): Blob {
-  const payload = { format: EXPORT_FORMAT, version: settings.schemaVersion, exportedAt: new Date().toISOString(), settings };
+  const payload = {
+    format: EXPORT_FORMAT,
+    version: settings.schemaVersion,
+    exportedAt: new Date().toISOString(),
+    settings,
+  };
   return new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
 }
 
@@ -41,7 +46,10 @@ export function downloadBlob(blob: Blob, filename: string): void {
 export type ReplaceOutcome = 'ok' | 'invalid' | 'cancelled';
 
 /** Replaces settings wholesale, honouring the lock for any weakening. */
-async function replaceGuarded(next: Settings, requestUnlock: () => Promise<boolean>): Promise<ReplaceOutcome> {
+async function replaceGuarded(
+  next: Settings,
+  requestUnlock: () => Promise<boolean>,
+): Promise<ReplaceOutcome> {
   const current = await settingsStore.get();
   const lock = await readLock();
   if (requiresUnlock(lock, current, next) && !(await isUnlocked())) {
@@ -51,23 +59,33 @@ async function replaceGuarded(next: Settings, requestUnlock: () => Promise<boole
   return 'ok';
 }
 
-export async function importSettings(text: string, requestUnlock: () => Promise<boolean>): Promise<ReplaceOutcome> {
+export async function importSettings(
+  text: string,
+  requestUnlock: () => Promise<boolean>,
+): Promise<ReplaceOutcome> {
   let parsed: unknown;
   try {
     parsed = JSON.parse(text);
   } catch {
     return 'invalid';
   }
-  if (!parsed || typeof parsed !== 'object' || (parsed as { format?: unknown }).format !== EXPORT_FORMAT) return 'invalid';
+  if (!parsed || typeof parsed !== 'object' || (parsed as { format?: unknown }).format !== EXPORT_FORMAT)
+    return 'invalid';
   const current = await settingsStore.get();
   // Imports never change onboarding state or bypass sanitisation.
-  const next = sanitizeSettings({ ...(parsed as { settings?: object }).settings, onboardingComplete: current.onboardingComplete });
+  const next = sanitizeSettings({
+    ...(parsed as { settings?: object }).settings,
+    onboardingComplete: current.onboardingComplete,
+  });
   return replaceGuarded(next, requestUnlock);
 }
 
 export async function resetSettings(requestUnlock: () => Promise<boolean>): Promise<ReplaceOutcome> {
   const current = await settingsStore.get();
-  return replaceGuarded({ ...defaultSettings(), onboardingComplete: current.onboardingComplete, language: current.language }, requestUnlock);
+  return replaceGuarded(
+    { ...defaultSettings(), onboardingComplete: current.onboardingComplete, language: current.language },
+    requestUnlock,
+  );
 }
 
 /** Opens the browser's keyboard-shortcut editor. */

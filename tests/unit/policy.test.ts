@@ -1,7 +1,20 @@
 import { describe, expect, it } from 'vitest';
 import type { Signals } from '../../src/ml/types';
-import { AD_THRESHOLD_FACTOR, evaluate, fallbackDecision, requiredSignals, scoreCategories } from '../../src/policy/engine';
-import { categoriesForLevel, isCustomized, PRESETS, sensitivityToThreshold, stricterOf, thresholdToSensitivity } from '../../src/policy/presets';
+import {
+  AD_THRESHOLD_FACTOR,
+  evaluate,
+  fallbackDecision,
+  requiredSignals,
+  scoreCategories,
+} from '../../src/policy/engine';
+import {
+  categoriesForLevel,
+  isCustomized,
+  PRESETS,
+  sensitivityToThreshold,
+  stricterOf,
+  thresholdToSensitivity,
+} from '../../src/policy/presets';
 import { resolvePolicy } from '../../src/policy/resolve';
 import type { EffectivePolicy, PolicyContext } from '../../src/policy/types';
 import { defaultSettings, type Settings } from '../../src/storage/schema';
@@ -17,7 +30,8 @@ const signals = (classifier: Partial<Signals['classifier']> = {}, extra: Partial
 });
 
 const image: PolicyContext = { kind: 'image', renderedSize: 300, isAd: false };
-const policyFor = (settings: Settings = defaultSettings(), host = 'example.com'): EffectivePolicy => resolvePolicy(settings, host).policy;
+const policyFor = (settings: Settings = defaultSettings(), host = 'example.com'): EffectivePolicy =>
+  resolvePolicy(settings, host).policy;
 
 describe('scoreCategories', () => {
   it('maps classifier outputs to categories', () => {
@@ -31,7 +45,9 @@ describe('scoreCategories', () => {
     const base = signals({ sexy: 0.7 });
     expect(scoreCategories(base, true)!.suggestive).toBeCloseTo(0.7); // no detector ran
     expect(scoreCategories({ ...base, people: [] }, true)!.suggestive).toBeCloseTo(0.56);
-    expect(scoreCategories({ ...base, people: [{ x: 0, y: 0, w: 1, h: 1, score: 0.9 }] }, true)!.suggestive).toBeCloseTo(0.7);
+    expect(
+      scoreCategories({ ...base, people: [{ x: 0, y: 0, w: 1, h: 1, score: 0.9 }] }, true)!.suggestive,
+    ).toBeCloseTo(0.7);
     expect(scoreCategories({ ...base, people: [] }, false)!.suggestive).toBeCloseTo(0.7);
   });
 
@@ -60,7 +76,11 @@ describe('evaluate', () => {
   it('treats borderline content differently by level', () => {
     const borderline = signals({ porn: 0.2, sexy: 0.5 }); // suggestive 0.7
     const at = (level: 'minimal' | 'balanced' | 'strict' | 'maximum') =>
-      evaluate(borderline, image, policyFor({ ...defaultSettings(), strictness: level, categories: categoriesForLevel(level) })).action;
+      evaluate(
+        borderline,
+        image,
+        policyFor({ ...defaultSettings(), strictness: level, categories: categoriesForLevel(level) }),
+      ).action;
     expect(at('minimal')).toBe('allow');
     expect(at('balanced')).toBe('allow');
     expect(at('strict')).toBe('protect');
@@ -107,7 +127,11 @@ describe('evaluate', () => {
   it('ignores low-confidence face detections', () => {
     const settings = defaultSettings();
     settings.categories.faces.enabled = true;
-    const d = evaluate(signals({}, { faces: [{ x: 0.4, y: 0.3, w: 0.2, h: 0.2, score: 0.6 }] }), image, policyFor(settings));
+    const d = evaluate(
+      signals({}, { faces: [{ x: 0.4, y: 0.3, w: 0.2, h: 0.2, score: 0.6 }] }),
+      image,
+      policyFor(settings),
+    );
     expect(d.action).toBe('allow');
   });
 
@@ -115,7 +139,10 @@ describe('evaluate', () => {
     const settings = defaultSettings();
     settings.categories.people.enabled = true;
     const person = { x: 0.1, y: 0.1, w: 0.5, h: 0.8, score: 0.9 };
-    expect(evaluate(signals({}, { people: [person] }), { ...image, kind: 'background' }, policyFor(settings)).action).toBe('protect');
+    expect(
+      evaluate(signals({}, { people: [person] }), { ...image, kind: 'background' }, policyFor(settings))
+        .action,
+    ).toBe('protect');
     settings.categories.people.scope = 'whole';
     expect(evaluate(signals({}, { people: [person] }), image, policyFor(settings)).action).toBe('protect');
   });
@@ -133,7 +160,11 @@ describe('evaluate', () => {
   it('prefers whole protection over regions when both apply', () => {
     const settings = defaultSettings();
     settings.categories.faces.enabled = true;
-    const d = evaluate(signals({ porn: 0.9 }, { faces: [{ x: 0.4, y: 0.3, w: 0.2, h: 0.2, score: 0.9 }] }), image, policyFor(settings));
+    const d = evaluate(
+      signals({ porn: 0.9 }, { faces: [{ x: 0.4, y: 0.3, w: 0.2, h: 0.2, score: 0.9 }] }),
+      image,
+      policyFor(settings),
+    );
     expect(d.action).toBe('protect');
   });
 });
@@ -152,7 +183,8 @@ describe('fallbackDecision & requiredSignals', () => {
     settings.categories.faces.enabled = true;
     expect(requiredSignals(policyFor(settings), 'image')).toEqual(['classifier', 'faces']);
     expect(requiredSignals(policyFor(settings), 'video')).toEqual(['classifier']);
-    for (const id of ['explicit', 'illustrated', 'suggestive'] as const) settings.categories[id].enabled = false;
+    for (const id of ['explicit', 'illustrated', 'suggestive'] as const)
+      settings.categories[id].enabled = false;
     settings.categories.faces.enabled = false;
     expect(requiredSignals(policyFor(settings), 'image')).toEqual([]);
   });
@@ -169,7 +201,8 @@ describe('presets', () => {
   });
 
   it('round-trips sensitivity and thresholds', () => {
-    for (const t of [0.05, 0.2, 0.55, 0.8, 0.95]) expect(sensitivityToThreshold(thresholdToSensitivity(t))).toBeCloseTo(t, 1);
+    for (const t of [0.05, 0.2, 0.55, 0.8, 0.95])
+      expect(sensitivityToThreshold(thresholdToSensitivity(t))).toBeCloseTo(t, 1);
     expect(sensitivityToThreshold(0)).toBe(0.95);
     expect(sensitivityToThreshold(100)).toBe(0.05);
   });

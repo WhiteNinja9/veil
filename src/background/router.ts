@@ -11,7 +11,13 @@ import { ext } from '../browser/api';
 import type { DetectResponse, RenderResponse } from '../ml/types';
 import { check } from '../security/validate';
 import { createLogger } from '../shared/logger';
-import { PORT_NAME, portInbound, type PortOutbound, runtimeRequest, type RuntimeRequest } from '../shared/messages';
+import {
+  PORT_NAME,
+  portInbound,
+  type PortOutbound,
+  runtimeRequest,
+  type RuntimeRequest,
+} from '../shared/messages';
 import { hostnameOf } from '../shared/url';
 import type { EngineService } from './engine-service';
 import type { TabStatsStore } from './tab-stats';
@@ -87,7 +93,10 @@ export function registerRouter(engine: EngineService, stats: TabStatsStore, hand
         case 'detect': {
           const request = { ...message.request, initiator };
           if (inflight >= MAX_INFLIGHT_PER_PORT) {
-            reply({ type: 'detected', response: { id: request.id, ok: false, error: 'invalid', message: 'too many requests' } });
+            reply({
+              type: 'detected',
+              response: { id: request.id, ok: false, error: 'invalid', message: 'too many requests' },
+            });
             return;
           }
           inflight++;
@@ -116,7 +125,8 @@ export function registerRouter(engine: EngineService, stats: TabStatsStore, hand
 
   ext().runtime.onMessage.addListener((raw: unknown, sender, sendResponse) => {
     // Offscreen-bound traffic is not for us.
-    if (typeof raw === 'object' && raw !== null && (raw as { target?: unknown }).target === 'offscreen') return false;
+    if (typeof raw === 'object' && raw !== null && (raw as { target?: unknown }).target === 'offscreen')
+      return false;
     const parsed = check(runtimeRequest, raw);
     if (!parsed.ok) return false;
     const request = parsed.value;
@@ -126,7 +136,9 @@ export function registerRouter(engine: EngineService, stats: TabStatsStore, hand
     }
     handlers
       .handle(request, sender)
-      .then(sendResponse, (error: unknown) => sendResponse({ ok: false, error: error instanceof Error ? error.message : String(error) }));
+      .then(sendResponse, (error: unknown) =>
+        sendResponse({ ok: false, error: error instanceof Error ? error.message : String(error) }),
+      );
     return true;
   });
 }

@@ -84,7 +84,8 @@ export function releaseRoot(generation?: string): void {
   const html = root();
   if (!html) return;
   if (generation && html.getAttribute(ROOT_ON) !== generation) return; // a newer instance owns the page
-  for (const name of [ROOT_ON, 'data-veil-style', 'data-veil-img', 'data-veil-video', 'data-veil-bg']) html.removeAttribute(name);
+  for (const name of [ROOT_ON, 'data-veil-style', 'data-veil-img', 'data-veil-video', 'data-veil-bg'])
+    html.removeAttribute(name);
 }
 
 export function rootGeneration(): string | null {

@@ -51,7 +51,9 @@ export function webglRenderer(): string {
     const gl = canvas?.getContext('webgl2') as WebGL2RenderingContext | null;
     if (!gl) return '';
     const ext = gl.getExtension('WEBGL_debug_renderer_info');
-    const renderer = String(ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER));
+    const renderer = String(
+      ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER),
+    );
     gl.getExtension('WEBGL_lose_context')?.loseContext();
     return renderer;
   } catch {
@@ -78,7 +80,10 @@ export async function probeWebGpu(timeoutMs = 2500): Promise<boolean> {
   const gpu = (navigator as Navigator & { gpu?: { requestAdapter(): Promise<unknown> } }).gpu;
   if (!gpu) return false;
   try {
-    const adapter = await Promise.race([gpu.requestAdapter(), new Promise<null>((r) => setTimeout(() => r(null), timeoutMs))]);
+    const adapter = await Promise.race([
+      gpu.requestAdapter(),
+      new Promise<null>((r) => setTimeout(() => r(null), timeoutMs)),
+    ]);
     return Boolean(adapter);
   } catch {
     return false;
@@ -143,7 +148,9 @@ export async function selectBackend(
     const failure = await tryBackend(name);
     if (!failure) return { name, detail: describe(name), initMs: performance.now() - started, skipped };
   }
-  throw new Error(`No inference backend available: ${skipped.map((s) => `${s.name} (${s.reason})`).join('; ')}`);
+  throw new Error(
+    `No inference backend available: ${skipped.map((s) => `${s.name} (${s.reason})`).join('; ')}`,
+  );
 }
 
 function describe(name: HardwareBackend): string {

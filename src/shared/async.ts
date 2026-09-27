@@ -66,12 +66,15 @@ export function throttle<A extends unknown[]>(fn: (...args: A) => void, ms: numb
     }
     pending = args;
     if (!timer) {
-      timer = setTimeout(() => {
-        timer = undefined;
-        last = Date.now();
-        if (pending) fn(...pending);
-        pending = undefined;
-      }, Math.max(remaining, 0));
+      timer = setTimeout(
+        () => {
+          timer = undefined;
+          last = Date.now();
+          if (pending) fn(...pending);
+          pending = undefined;
+        },
+        Math.max(remaining, 0),
+      );
     }
   };
 }

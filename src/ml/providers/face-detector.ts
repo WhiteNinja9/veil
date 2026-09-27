@@ -57,7 +57,13 @@ export class FaceDetector implements DetectorProvider {
       const heads = await this.splitHeads(outputs);
       const candidates = [
         ...decodeBlazeFace(heads.fineScores, heads.fineBoxes, this.anchorsFine, size, FaceDetector.MIN_SCORE),
-        ...decodeBlazeFace(heads.coarseScores, heads.coarseBoxes, this.anchorsCoarse, size, FaceDetector.MIN_SCORE),
+        ...decodeBlazeFace(
+          heads.coarseScores,
+          heads.coarseBoxes,
+          this.anchorsCoarse,
+          size,
+          FaceDetector.MIN_SCORE,
+        ),
       ];
       return nonMaxSuppression(candidates, 0.3, 24)
         .map((r) => clampRegion(unletterbox(r, box)))

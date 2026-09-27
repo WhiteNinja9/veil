@@ -1,6 +1,12 @@
 import type { JSX } from 'preact';
 import { useRef, useState } from 'preact/hooks';
-import { createLockRecord, type LockRecord, markUnlocked, validatePasscode, writeLock } from '../../security/lock';
+import {
+  createLockRecord,
+  type LockRecord,
+  markUnlocked,
+  validatePasscode,
+  writeLock,
+} from '../../security/lock';
 import { downloadBlob, exportSettings, importSettings, resetSettings } from '../../ui/actions';
 import { sendToBackground, useApp } from '../../ui/app-context';
 import { Button, Switch } from '../../ui/components/controls';
@@ -29,7 +35,14 @@ function PasscodeForm({ onSave, busy }: { onSave: (code: string) => void; busy: 
         <label class="field__label" for="new-code">
           {t.t('lock.new')}
         </label>
-        <input id="new-code" class="input" type="password" autocomplete="new-password" value={code} onInput={(e) => setCode((e.currentTarget as HTMLInputElement).value)} />
+        <input
+          id="new-code"
+          class="input"
+          type="password"
+          autocomplete="new-password"
+          value={code}
+          onInput={(e) => setCode((e.currentTarget as HTMLInputElement).value)}
+        />
       </div>
       <div class="field">
         <label class="field__label" for="confirm-code">
@@ -93,7 +106,17 @@ function LockCard(): JSX.Element {
   };
 
   return (
-    <Card title={t.t('lock.title')} actions={lock ? <span class="pill pill--positive"><Icon name="lock" />{t.t('lock.on')}</span> : undefined}>
+    <Card
+      title={t.t('lock.title')}
+      actions={
+        lock ? (
+          <span class="pill pill--positive">
+            <Icon name="lock" />
+            {t.t('lock.on')}
+          </span>
+        ) : undefined
+      }
+    >
       <div class="card__body" id="lock">
         <p class="muted small">{t.t('lock.desc')}</p>
         {lock && (
@@ -130,7 +153,11 @@ function LockCard(): JSX.Element {
           </div>
           {(['settings', 'disable', 'sites'] as const).map((key) => (
             <Row key={key} label={t.t(`lock.scope.${key}`)}>
-              <Switch checked={lock.scope[key]} label={t.t(`lock.scope.${key}`)} onChange={(v) => void setScope(key, v)} />
+              <Switch
+                checked={lock.scope[key]}
+                label={t.t(`lock.scope.${key}`)}
+                onChange={(v) => void setScope(key, v)}
+              />
             </Row>
           ))}
         </div>
@@ -161,7 +188,8 @@ export function AdvancedSection(): JSX.Element {
 
   const onReset = async () => {
     setConfirmReset(false);
-    if ((await resetSettings(requestUnlock)) === 'ok') setMessage({ tone: 'positive', text: t.t('data.reset.done') });
+    if ((await resetSettings(requestUnlock)) === 'ok')
+      setMessage({ tone: 'positive', text: t.t('data.reset.done') });
   };
 
   const copyDiagnostics = async () => {
@@ -170,7 +198,14 @@ export function AdvancedSection(): JSX.Element {
       version: __VERSION__,
       browser: __BROWSER__,
       userAgent: navigator.userAgent,
-      engine: status && { state: status.state, backend: status.backend, detail: status.detail, avgMs: status.avgMs, p95Ms: status.p95Ms, processed: status.processed },
+      engine: status && {
+        state: status.state,
+        backend: status.backend,
+        detail: status.detail,
+        avgMs: status.avgMs,
+        p95Ms: status.p95Ms,
+        processed: status.processed,
+      },
       level: settings.strictness,
       strictBrowsing: settings.strictBrowsing.enabled,
       siteRules: settings.sites.length,
@@ -187,12 +222,29 @@ export function AdvancedSection(): JSX.Element {
       <Card title={t.t('data.title')}>
         <div class="list">
           <Row id="export" label={t.t('data.export')} description={t.t('data.export.desc')}>
-            <Button size="sm" icon="download" onClick={() => downloadBlob(exportSettings(settings), `veil-settings-${new Date().toISOString().slice(0, 10)}.json`)}>
+            <Button
+              size="sm"
+              icon="download"
+              onClick={() =>
+                downloadBlob(
+                  exportSettings(settings),
+                  `veil-settings-${new Date().toISOString().slice(0, 10)}.json`,
+                )
+              }
+            >
               {t.t('data.export')}
             </Button>
           </Row>
           <Row id="import" label={t.t('data.import')} description={t.t('data.import.desc')}>
-            <input ref={file} type="file" accept="application/json,.json" class="sr-only" tabIndex={-1} aria-hidden="true" onChange={(e) => void onImport(e)} />
+            <input
+              ref={file}
+              type="file"
+              accept="application/json,.json"
+              class="sr-only"
+              tabIndex={-1}
+              aria-hidden="true"
+              onChange={(e) => void onImport(e)}
+            />
             <Button size="sm" icon="upload" onClick={() => file.current?.click()}>
               {t.t('data.import')}
             </Button>

@@ -10,7 +10,13 @@
  *     background context.
  */
 import type { HardwareBackend } from '../ml/backend';
-import { SIGNAL_KINDS, type DetectRequest, type RenderRequest } from '../ml/types';
+import {
+  SIGNAL_KINDS,
+  type DetectRequest,
+  type DetectResponse,
+  type RenderRequest,
+  type RenderResponse,
+} from '../ml/types';
 import { type Infer, v } from '../security/validate';
 
 const id = v.string({ max: 64, pattern: /^[\w:.-]+$/ });
@@ -35,7 +41,8 @@ const mediaSource = v.tagged('kind', {
 });
 
 // `priority` is numeric on the wire; validate it as a bounded integer.
-const priority = (value: unknown, path = ''): 0 | 1 | 2 => v.number({ min: 0, max: 2, integer: true })(value, path) as 0 | 1 | 2;
+const priority = (value: unknown, path = ''): 0 | 1 | 2 =>
+  v.number({ min: 0, max: 2, integer: true })(value, path) as 0 | 1 | 2;
 
 export const detectRequest = v.object({
   id,
@@ -82,8 +89,7 @@ export const portInbound = v.tagged('type', {
 export type PortInbound = Infer<typeof portInbound>;
 
 export type PortOutbound =
-  | { type: 'detected'; response: import('../ml/types').DetectResponse }
-  | { type: 'rendered'; response: import('../ml/types').RenderResponse };
+  { type: 'detected'; response: DetectResponse } | { type: 'rendered'; response: RenderResponse };
 
 /** One-shot runtime messages handled by the background. */
 export const runtimeRequest = v.tagged('type', {
@@ -92,9 +98,16 @@ export const runtimeRequest = v.tagged('type', {
   'engine/benchmark': v.object({ type: v.literal('engine/benchmark') }),
   'engine/reset': v.object({ type: v.literal('engine/reset') }),
   'engine/clear-cache': v.object({ type: v.literal('engine/clear-cache') }),
-  'site/proceed': v.object({ type: v.literal('site/proceed'), url, minutes: v.number({ min: 1, max: 1440 }) }),
+  'site/proceed': v.object({
+    type: v.literal('site/proceed'),
+    url,
+    minutes: v.number({ min: 1, max: 1440 }),
+  }),
   'open/options': v.object({ type: v.literal('open/options'), section: v.optional(v.string({ max: 32 })) }),
-  'content/reinject': v.object({ type: v.literal('content/reinject'), tabId: v.number({ min: 0, integer: true }) }),
+  'content/reinject': v.object({
+    type: v.literal('content/reinject'),
+    tabId: v.number({ min: 0, integer: true }),
+  }),
   'frame/top': v.object({ type: v.literal('frame/top') }),
 });
 export type RuntimeRequest = Infer<typeof runtimeRequest>;
@@ -107,8 +120,15 @@ export type ContentCommand =
 
 export const contentCommand = v.tagged('type', {
   ping: v.object({ type: v.literal('ping') }),
-  command: v.object({ type: v.literal('command'), command: v.enum(['reveal-focused', 'toggle-site'] as const) }),
-  context: v.object({ type: v.literal('context'), action: v.enum(['protect', 'show'] as const), srcUrl: url }),
+  command: v.object({
+    type: v.literal('command'),
+    command: v.enum(['reveal-focused', 'toggle-site'] as const),
+  }),
+  context: v.object({
+    type: v.literal('context'),
+    action: v.enum(['protect', 'show'] as const),
+    srcUrl: url,
+  }),
 });
 
 /** Background → offscreen document. */

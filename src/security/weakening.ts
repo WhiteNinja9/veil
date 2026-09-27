@@ -18,7 +18,8 @@ export function weakenedScopes(current: Settings, next: Settings, now = Date.now
   // Turning off / pausing
   if (current.enabled && !next.enabled) scopes.add('disable');
   const pausedNow = (s: Settings) => s.pausedUntil !== null && s.pausedUntil > now;
-  if (pausedNow(next) && (!pausedNow(current) || (next.pausedUntil ?? 0) > (current.pausedUntil ?? 0))) scopes.add('disable');
+  if (pausedNow(next) && (!pausedNow(current) || (next.pausedUntil ?? 0) > (current.pausedUntil ?? 0)))
+    scopes.add('disable');
   if (current.strictBrowsing.enabled && !next.strictBrowsing.enabled) scopes.add('disable');
 
   // Site rules: any change that is not purely additive of stricter rules.
@@ -30,7 +31,9 @@ export function weakenedScopes(current: Settings, next: Settings, now = Date.now
       if (rule.mode === 'off') return false;
       return !prior || rule.mode === 'block';
     });
-    const removedAny = current.sites.some((r) => !next.sites.some((n) => n.pattern === r.pattern && n.mode === r.mode));
+    const removedAny = current.sites.some(
+      (r) => !next.sites.some((n) => n.pattern === r.pattern && n.mode === r.mode),
+    );
     if (!onlyStricter || removedAny) scopes.add('sites');
   }
 
@@ -45,19 +48,28 @@ export function weakenedScopes(current: Settings, next: Settings, now = Date.now
     REVEAL_STRENGTH[next.reveal.mode] < REVEAL_STRENGTH[current.reveal.mode] ||
     (current.reveal.confirm && !next.reveal.confirm) ||
     (current.fallback === 'protect' && next.fallback === 'reveal') ||
-    (['images', 'videos', 'backgrounds', 'thumbnails', 'stricterAds'] as const).some((k) => current.media[k] && !next.media[k]) ||
+    (['images', 'videos', 'backgrounds', 'thumbnails', 'stricterAds'] as const).some(
+      (k) => current.media[k] && !next.media[k],
+    ) ||
     next.media.minSize > current.media.minSize ||
     (current.strictBrowsing.safeSearch && !next.strictBrowsing.safeSearch) ||
     (current.strictBrowsing.youtubeRestricted && !next.strictBrowsing.youtubeRestricted) ||
     (current.strictBrowsing.ignoreSiteExceptions && !next.strictBrowsing.ignoreSiteExceptions) ||
-    (current.appearance.style !== 'hide' && next.appearance.style === 'blur-soft' && current.appearance.style !== 'blur-soft') ||
+    (current.appearance.style !== 'hide' &&
+      next.appearance.style === 'blur-soft' &&
+      current.appearance.style !== 'blur-soft') ||
     (current.video.regionsProtectWhole && !next.video.regionsProtectWhole) ||
     (!current.video.autoRestore && next.video.autoRestore);
   if (weaker) scopes.add('settings');
   return scopes;
 }
 
-export function requiresUnlock(lock: LockRecord | null, current: Settings, next: Settings, now = Date.now()): boolean {
+export function requiresUnlock(
+  lock: LockRecord | null,
+  current: Settings,
+  next: Settings,
+  now = Date.now(),
+): boolean {
   if (!lock) return false;
   for (const scope of weakenedScopes(current, next, now)) if (lock.scope[scope]) return true;
   return false;

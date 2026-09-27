@@ -50,7 +50,9 @@ export function Interstitial(): JSX.Element {
         </span>
         <h1 class="gate__title">{mode === 'block' ? t.t('block.title') : t.t('warn.title')}</h1>
         <p class="gate__body">
-          {mode === 'block' ? t.t('block.body', { host: '⁨' + host + '⁩' }) : t.t('warn.body', { host: '⁨' + host + '⁩' })}
+          {mode === 'block'
+            ? t.t('block.body', { host: '⁨' + host + '⁩' })
+            : t.t('warn.body', { host: '⁨' + host + '⁩' })}
         </p>
         <div class="gate__actions">
           <Button variant="primary" size="lg" icon="arrowLeft" onClick={back}>

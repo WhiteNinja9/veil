@@ -4,7 +4,13 @@ import { resolvePolicy } from '../../src/policy/resolve';
 import type { SiteRule } from '../../src/sites/rules';
 import { defaultSettings } from '../../src/storage/schema';
 
-const rule = (pattern: string, mode: SiteRule['mode'], expiresAt: number | null = null): SiteRule => ({ id: pattern.replace(/\W/g, '').padEnd(8, '0'), pattern, mode, createdAt: 0, expiresAt });
+const rule = (pattern: string, mode: SiteRule['mode'], expiresAt: number | null = null): SiteRule => ({
+  id: pattern.replace(/\W/g, '').padEnd(8, '0'),
+  pattern,
+  mode,
+  createdAt: 0,
+  expiresAt,
+});
 const NOW = 1_700_000_000_000;
 
 describe('resolvePolicy', () => {
@@ -17,11 +23,15 @@ describe('resolvePolicy', () => {
   });
 
   it('is inactive when disabled or paused', () => {
-    expect(resolvePolicy({ ...defaultSettings(), enabled: false }, 'a.com', NOW).policy.inactiveReason).toBe('disabled');
+    expect(resolvePolicy({ ...defaultSettings(), enabled: false }, 'a.com', NOW).policy.inactiveReason).toBe(
+      'disabled',
+    );
     const paused = resolvePolicy({ ...defaultSettings(), pausedUntil: NOW + 1000 }, 'a.com', NOW).policy;
     expect(paused.active).toBe(false);
     expect(paused.inactiveReason).toBe('paused');
-    expect(resolvePolicy({ ...defaultSettings(), pausedUntil: NOW - 1 }, 'a.com', NOW).policy.active).toBe(true);
+    expect(resolvePolicy({ ...defaultSettings(), pausedUntil: NOW - 1 }, 'a.com', NOW).policy.active).toBe(
+      true,
+    );
   });
 
   it('applies site levels using that level’s preset, keeping region preferences', () => {
@@ -52,7 +62,12 @@ describe('resolvePolicy', () => {
       ...defaultSettings(),
       strictness: 'minimal' as const,
       categories: categoriesForLevel('minimal'),
-      strictBrowsing: { enabled: true, safeSearch: true, youtubeRestricted: true, ignoreSiteExceptions: true },
+      strictBrowsing: {
+        enabled: true,
+        safeSearch: true,
+        youtubeRestricted: true,
+        ignoreSiteExceptions: true,
+      },
       sites: [rule('a.com', 'off')],
       pausedUntil: NOW + 10_000,
     };

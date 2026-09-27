@@ -43,7 +43,11 @@ export function checkFetchAllowed(url: string, initiator: string | undefined): v
 
 const IMAGE_TYPE = /^(image\/|application\/octet-stream|binary\/octet-stream$)/i;
 
-export async function fetchMedia(url: string, initiator: string | undefined, fetchImpl: typeof fetch = fetch): Promise<Blob> {
+export async function fetchMedia(
+  url: string,
+  initiator: string | undefined,
+  fetchImpl: typeof fetch = fetch,
+): Promise<Blob> {
   checkFetchAllowed(url, initiator);
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
@@ -57,11 +61,14 @@ export async function fetchMedia(url: string, initiator: string | undefined, fet
     });
     if (!response.ok) throw new MediaError('fetch-failed', `HTTP ${response.status}`);
     const type = response.headers.get('content-type') ?? '';
-    if (type && !IMAGE_TYPE.test(type)) throw new MediaError('decode-failed', `not an image (${type.split(';')[0]})`);
+    if (type && !IMAGE_TYPE.test(type))
+      throw new MediaError('decode-failed', `not an image (${type.split(';')[0]})`);
     const declared = Number(response.headers.get('content-length') ?? '0');
     if (declared > MAX_MEDIA_BYTES) throw new MediaError('too-large', 'image too large');
     const blob = await readCapped(response, MAX_MEDIA_BYTES);
-    return type ? blob : new Blob([blob], { type: sniffType(new Uint8Array(await blob.slice(0, 16).arrayBuffer())) });
+    return type
+      ? blob
+      : new Blob([blob], { type: sniffType(new Uint8Array(await blob.slice(0, 16).arrayBuffer())) });
   } catch (error) {
     if (error instanceof MediaError) throw error;
     if (controller.signal.aborted) throw new MediaError('timeout', 'fetch timed out');
@@ -100,7 +107,8 @@ export function sniffType(head: Uint8Array): string {
   if (b(0) === 0xff && b(1) === 0xd8) return 'image/jpeg';
   if (b(0) === 0x89 && b(1) === 0x50 && b(2) === 0x4e && b(3) === 0x47) return 'image/png';
   if (b(0) === 0x47 && b(1) === 0x49 && b(2) === 0x46) return 'image/gif';
-  if (b(0) === 0x52 && b(1) === 0x49 && b(2) === 0x46 && b(3) === 0x46 && b(8) === 0x57 && b(9) === 0x45) return 'image/webp';
+  if (b(0) === 0x52 && b(1) === 0x49 && b(2) === 0x46 && b(3) === 0x46 && b(8) === 0x57 && b(9) === 0x45)
+    return 'image/webp';
   if (b(4) === 0x66 && b(5) === 0x74 && b(6) === 0x79 && b(7) === 0x70) return 'image/avif';
   return 'application/octet-stream';
 }
@@ -109,7 +117,8 @@ export function sniffType(head: Uint8Array): string {
 export async function loadSource(source: MediaSource, initiator: string | undefined): Promise<Blob> {
   if (source.kind === 'url') return fetchMedia(source.url, initiator);
   if (source.dataUrl.length > MAX_DATA_URL_LENGTH) throw new MediaError('too-large', 'frame too large');
-  if (!/^data:image\/(jpeg|png|webp);base64,/.test(source.dataUrl)) throw new MediaError('invalid', 'bad pixel payload');
+  if (!/^data:image\/(jpeg|png|webp);base64,/.test(source.dataUrl))
+    throw new MediaError('invalid', 'bad pixel payload');
   try {
     return dataUrlToBlob(source.dataUrl);
   } catch {

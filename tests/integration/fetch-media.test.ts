@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { checkFetchAllowed, fetchMedia, loadSource, MAX_MEDIA_BYTES, MediaError, sniffType } from '../../src/ml/host/fetch-media';
+import {
+  checkFetchAllowed,
+  fetchMedia,
+  loadSource,
+  MAX_MEDIA_BYTES,
+  MediaError,
+  sniffType,
+} from '../../src/ml/host/fetch-media';
 
 const PNG = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 
@@ -36,17 +43,37 @@ describe('fetchMedia', () => {
   });
 
   it('rejects non-images, errors and oversize responses', async () => {
-    await expect(fetchMedia('https://a.com/x', 'https://a.com', mockFetch('<html>', { headers: { 'content-type': 'text/html' } }).impl)).rejects.toMatchObject({ code: 'decode-failed' });
-    await expect(fetchMedia('https://a.com/x', 'https://a.com', mockFetch(null, { status: 404 }).impl)).rejects.toMatchObject({ code: 'fetch-failed' });
     await expect(
-      fetchMedia('https://a.com/x', 'https://a.com', mockFetch(PNG, { headers: { 'content-type': 'image/png', 'content-length': String(MAX_MEDIA_BYTES + 1) } }).impl),
+      fetchMedia(
+        'https://a.com/x',
+        'https://a.com',
+        mockFetch('<html>', { headers: { 'content-type': 'text/html' } }).impl,
+      ),
+    ).rejects.toMatchObject({ code: 'decode-failed' });
+    await expect(
+      fetchMedia('https://a.com/x', 'https://a.com', mockFetch(null, { status: 404 }).impl),
+    ).rejects.toMatchObject({ code: 'fetch-failed' });
+    await expect(
+      fetchMedia(
+        'https://a.com/x',
+        'https://a.com',
+        mockFetch(PNG, {
+          headers: { 'content-type': 'image/png', 'content-length': String(MAX_MEDIA_BYTES + 1) },
+        }).impl,
+      ),
     ).rejects.toMatchObject({ code: 'too-large' });
     const huge = new ReadableStream({
       pull(controller) {
         controller.enqueue(new Uint8Array(1024 * 1024));
       },
     });
-    await expect(fetchMedia('https://a.com/x', 'https://a.com', mockFetch(huge, { headers: { 'content-type': 'image/png' } }).impl)).rejects.toMatchObject({ code: 'too-large' });
+    await expect(
+      fetchMedia(
+        'https://a.com/x',
+        'https://a.com',
+        mockFetch(huge, { headers: { 'content-type': 'image/png' } }).impl,
+      ),
+    ).rejects.toMatchObject({ code: 'too-large' });
   });
 
   it('sniffs types when servers omit Content-Type', async () => {
@@ -60,8 +87,16 @@ describe('fetchMedia', () => {
 
 describe('loadSource', () => {
   it('decodes in-page pixel payloads and rejects anything else', async () => {
-    const blob = await loadSource({ kind: 'pixels', dataUrl: 'data:image/jpeg;base64,/9j/', width: 1, height: 1 }, undefined);
+    const blob = await loadSource(
+      { kind: 'pixels', dataUrl: 'data:image/jpeg;base64,/9j/', width: 1, height: 1 },
+      undefined,
+    );
     expect(blob.type).toBe('image/jpeg');
-    await expect(loadSource({ kind: 'pixels', dataUrl: 'data:text/html;base64,PGh0bWw+', width: 1, height: 1 }, undefined)).rejects.toMatchObject({ code: 'invalid' });
+    await expect(
+      loadSource(
+        { kind: 'pixels', dataUrl: 'data:text/html;base64,PGh0bWw+', width: 1, height: 1 },
+        undefined,
+      ),
+    ).rejects.toMatchObject({ code: 'invalid' });
   });
 });

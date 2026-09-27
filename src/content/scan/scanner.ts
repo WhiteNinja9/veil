@@ -121,7 +121,8 @@ export class MediaScanner {
 
   private findShadowRoots(root: Element): void {
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT, {
-      acceptNode: (node) => ((node as Element).localName.includes('-') ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP),
+      acceptNode: (node) =>
+        (node as Element).localName.includes('-') ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP,
     });
     for (let node = walker.nextNode(); node; node = walker.nextNode()) this.checkShadow(node as Element);
   }

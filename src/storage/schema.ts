@@ -89,7 +89,14 @@ export function defaultSettings(): Settings {
     pausedUntil: null,
     strictness: 'balanced',
     categories: categoriesForLevel('balanced'),
-    media: { images: true, videos: true, backgrounds: true, thumbnails: true, minSize: 36, stricterAds: true },
+    media: {
+      images: true,
+      videos: true,
+      backgrounds: true,
+      thumbnails: true,
+      minSize: 36,
+      stricterAds: true,
+    },
     appearance: { style: 'blur-strong', theme: 'system', motion: 'system', showChip: true },
     reveal: { mode: balanced.reveal.mode, confirm: balanced.reveal.confirm, reprotectAfterSec: 0 },
     fallback: balanced.fallback,
@@ -110,7 +117,8 @@ export function defaultSettings(): Settings {
 // cannot reset (or weaken) the rest of a user's configuration.
 
 type Obj = Record<string, unknown>;
-const isObj = (value: unknown): value is Obj => typeof value === 'object' && value !== null && !Array.isArray(value);
+const isObj = (value: unknown): value is Obj =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
 const bool = (value: unknown, fallback: boolean) => (typeof value === 'boolean' ? value : fallback);
 const num = (value: unknown, fallback: number, min: number, max: number) =>
   typeof value === 'number' && Number.isFinite(value) ? Math.min(max, Math.max(min, value)) : fallback;
@@ -122,7 +130,10 @@ function sanitizeCategories(raw: unknown, fallback: CategorySettings): CategoryS
   const input = obj(raw);
   const content = (id: 'explicit' | 'illustrated' | 'suggestive') => {
     const c = obj(input[id]);
-    return { enabled: bool(c.enabled, fallback[id].enabled), threshold: num(c.threshold, fallback[id].threshold, 0.05, 0.99) };
+    return {
+      enabled: bool(c.enabled, fallback[id].enabled),
+      threshold: num(c.threshold, fallback[id].threshold, 0.05, 0.99),
+    };
   };
   const region = (id: 'faces' | 'people') => {
     const c = obj(input[id]);
@@ -158,7 +169,10 @@ export function sanitizeSiteRules(raw: unknown): SiteRule[] {
       pattern: parsed.value.pattern,
       mode,
       createdAt: num(entry.createdAt, Date.now(), 0, 8.64e15),
-      expiresAt: entry.expiresAt === null || entry.expiresAt === undefined ? null : num(entry.expiresAt, 0, 0, 8.64e15),
+      expiresAt:
+        entry.expiresAt === null || entry.expiresAt === undefined
+          ? null
+          : num(entry.expiresAt, 0, 0, 8.64e15),
       ...(entry.sessionOnly === true ? { sessionOnly: true } : {}),
     });
   }
@@ -185,7 +199,8 @@ export function sanitizeSettings(raw: unknown): Settings {
   return {
     schemaVersion: SETTINGS_VERSION,
     enabled: bool(input.enabled, d.enabled),
-    pausedUntil: typeof input.pausedUntil === 'number' && Number.isFinite(input.pausedUntil) ? input.pausedUntil : null,
+    pausedUntil:
+      typeof input.pausedUntil === 'number' && Number.isFinite(input.pausedUntil) ? input.pausedUntil : null,
     strictness,
     categories: sanitizeCategories(input.categories, categoriesForLevel(strictness)),
     media: {
@@ -221,11 +236,18 @@ export function sanitizeSettings(raw: unknown): Settings {
     },
     sites: sanitizeSiteRules(input.sites),
     performance: {
-      backend: oneOf(perf.backend, ['auto', 'webgpu', 'webgl', 'wasm', 'cpu'] as const, d.performance.backend),
+      backend: oneOf(
+        perf.backend,
+        ['auto', 'webgpu', 'webgl', 'wasm', 'cpu'] as const,
+        d.performance.backend,
+      ),
       unloadAfterMin: Math.round(num(perf.unloadAfterMin, d.performance.unloadAfterMin, 1, 240)),
     },
     contextAware: bool(input.contextAware, d.contextAware),
-    stats: { enabled: bool(obj(input.stats).enabled, d.stats.enabled), badge: bool(obj(input.stats).badge, d.stats.badge) },
+    stats: {
+      enabled: bool(obj(input.stats).enabled, d.stats.enabled),
+      badge: bool(obj(input.stats).badge, d.stats.badge),
+    },
     language: oneOf(input.language, LANGUAGES, d.language),
     onboardingComplete: bool(input.onboardingComplete, d.onboardingComplete),
   };

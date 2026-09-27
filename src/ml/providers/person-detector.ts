@@ -38,7 +38,10 @@ export class PersonDetector implements DetectorProvider {
     const input = tf.tidy(() =>
       tf.expandDims(
         tf.cast(
-          tf.image.resizeBilinear(image.pixels, [Math.max(1, Math.round(h * scale)), Math.max(1, Math.round(w * scale))]),
+          tf.image.resizeBilinear(image.pixels, [
+            Math.max(1, Math.round(h * scale)),
+            Math.max(1, Math.round(w * scale)),
+          ]),
           'int32',
         ),
         0,

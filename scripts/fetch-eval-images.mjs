@@ -15,7 +15,21 @@ const out = path.join(root, '.cache', 'eval');
 const SAMPLES = 'https://raw.githubusercontent.com/opencv/opencv/4.x/samples/data/';
 const CASCADE = 'https://raw.githubusercontent.com/opencv/opencv_extra/4.x/testdata/cv/cascadeandhog/images/';
 const FILES = [
-  ...['messi5.jpg', 'fruits.jpg', 'baboon.jpg', 'starry_night.jpg', 'building.jpg', 'home.jpg', 'graf1.png', 'box.png', 'pic1.png', 'smarties.png', 'orange.jpg', 'apple.jpg', 'butterfly.jpg'].map((f) => [SAMPLES + f, f]),
+  ...[
+    'messi5.jpg',
+    'fruits.jpg',
+    'baboon.jpg',
+    'starry_night.jpg',
+    'building.jpg',
+    'home.jpg',
+    'graf1.png',
+    'box.png',
+    'pic1.png',
+    'smarties.png',
+    'orange.jpg',
+    'apple.jpg',
+    'butterfly.jpg',
+  ].map((f) => [SAMPLES + f, f]),
   ...['class57.png', 'karen-and-rob.png'].map((f) => [CASCADE + f, f]),
 ];
 

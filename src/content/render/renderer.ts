@@ -111,7 +111,8 @@ export class ProtectionRenderer {
       this.renders.set(cacheKey, dataUrl);
     }
     // The element may have changed source or decision while we waited.
-    if (item.src !== src || item.decision?.action !== 'regions' || item.revealed || this.regionsBlocked) return;
+    if (item.src !== src || item.decision?.action !== 'regions' || item.revealed || this.regionsBlocked)
+      return;
     const computed = getComputedStyle(item.el);
     setVar(item.el, '--veil-fit', FIT_TO_SIZE[computed.objectFit] ?? 'cover');
     setVar(item.el, '--veil-pos', computed.objectPosition || '50% 50%');

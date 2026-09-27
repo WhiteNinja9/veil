@@ -45,7 +45,11 @@ export function GeneralSection(): JSX.Element {
           <Row
             id="pause"
             label={t.t('general.pause')}
-            description={paused ? t.t('general.paused', { time: t.relativeTime(settings.pausedUntil!) }) : t.t('general.pause.desc')}
+            description={
+              paused
+                ? t.t('general.paused', { time: t.relativeTime(settings.pausedUntil!) })
+                : t.t('general.pause.desc')
+            }
             disabled={!settings.enabled || settings.strictBrowsing.enabled}
           >
             {paused ? (
@@ -55,7 +59,12 @@ export function GeneralSection(): JSX.Element {
             ) : (
               <div class="button-group">
                 {[15, 60, 240].map((m) => (
-                  <Button key={m} size="sm" disabled={!settings.enabled || settings.strictBrowsing.enabled} onClick={() => pauseFor(m)}>
+                  <Button
+                    key={m}
+                    size="sm"
+                    disabled={!settings.enabled || settings.strictBrowsing.enabled}
+                    onClick={() => pauseFor(m)}
+                  >
                     {t.t(`general.pause.${m}` as 'general.pause.15')}
                   </Button>
                 ))}

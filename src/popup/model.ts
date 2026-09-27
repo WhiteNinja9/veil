@@ -49,7 +49,8 @@ export async function loadTabContext(): Promise<TabContext> {
   let connected = false;
   if (supported && tab?.id !== undefined) {
     try {
-      const reply = (await ext().tabs.sendMessage(tab.id, { type: 'ping' }, { frameId: 0 })) as { ok?: boolean } | undefined;
+      const reply = (await ext().tabs.sendMessage(tab.id, { type: 'ping' }, { frameId: 0 })) as
+        { ok?: boolean } | undefined;
       connected = Boolean(reply?.ok);
     } catch {
       connected = false;
@@ -59,7 +60,8 @@ export async function loadTabContext(): Promise<TabContext> {
 }
 
 export function derive(settings: Settings, tab: TabContext, now = Date.now()): PopupModel {
-  if (!tab.supported) return { status: 'unsupported', policy: null, rule: null, displayHost: '', resumesAt: null };
+  if (!tab.supported)
+    return { status: 'unsupported', policy: null, rule: null, displayHost: '', resumesAt: null };
   const { policy, rule } = resolvePolicy(settings, tab.host, now);
   let status: PopupStatus = 'active';
   let resumesAt: number | null = null;
@@ -79,7 +81,12 @@ export function derive(settings: Settings, tab: TabContext, now = Date.now()): P
 export type PauseDuration = 'hour' | 'session' | 'always';
 
 /** Site rules after pausing `host` for a duration (replaces any rule for the exact host). */
-export function pauseSiteRules(sites: SiteRule[], host: string, duration: PauseDuration, now = Date.now()): SiteRule[] {
+export function pauseSiteRules(
+  sites: SiteRule[],
+  host: string,
+  duration: PauseDuration,
+  now = Date.now(),
+): SiteRule[] {
   const pattern = host.replace(/^www\./, '');
   const rest = sites.filter((r) => r.pattern !== pattern);
   return [
@@ -103,7 +110,8 @@ export function resumeSiteRules(sites: SiteRule[], rule: SiteRule | null): SiteR
 export async function loadTabStats(tabId: number | null): Promise<TabStats | null> {
   if (tabId === null) return null;
   try {
-    const reply = (await ext().runtime.sendMessage({ type: 'tab/state', tabId })) as { stats?: TabStats } | undefined;
+    const reply = (await ext().runtime.sendMessage({ type: 'tab/state', tabId })) as
+      { stats?: TabStats } | undefined;
     return reply?.stats ?? null;
   } catch {
     return null;

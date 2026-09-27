@@ -4,9 +4,7 @@
 
 body.surface-app {
   min-height: 100vh;
-  background:
-    radial-gradient(80% 60% at 50% 0%, var(--accent-soft), transparent 70%),
-    var(--bg);
+  background: radial-gradient(80% 60% at 50% 0%, var(--accent-soft), transparent 70%), var(--bg);
 }
 .small {
   font-size: var(--text-sm);
@@ -48,7 +46,9 @@ body.surface-app {
   height: 4px;
   border-radius: var(--radius-full);
   background: var(--border-strong);
-  transition: background-color var(--dur-3) var(--ease-out), width var(--dur-3) var(--ease-out);
+  transition:
+    background-color var(--dur-3) var(--ease-out),
+    width var(--dur-3) var(--ease-out);
 }
 .progress__dot.is-done {
   background: var(--accent);

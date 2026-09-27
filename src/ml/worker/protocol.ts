@@ -51,14 +51,26 @@ export type ToWorker =
   | { type: 'cancel'; id: string }
   | { type: 'preload'; signals: SignalKind[] }
   | { type: 'status'; requestId: string }
-  | { type: 'benchmark'; requestId: string; config: WorkerConfig; backends: HardwareBackend[]; iterations: number };
+  | {
+      type: 'benchmark';
+      requestId: string;
+      config: WorkerConfig;
+      backends: HardwareBackend[];
+      iterations: number;
+    };
 
 export type FromWorker =
   | { type: 'ready'; backend: string; detail: string; initMs: number }
   | { type: 'trying'; backend: string }
   | { type: 'fatal'; message: string }
   | { type: 'detected'; id: string; ok: true; signals: Signals }
-  | { type: 'detected'; id: string; ok: false; error: 'decode-failed' | 'engine-unavailable' | 'cancelled'; message?: string }
+  | {
+      type: 'detected';
+      id: string;
+      ok: false;
+      error: 'decode-failed' | 'engine-unavailable' | 'cancelled';
+      message?: string;
+    }
   | { type: 'rendered'; id: string; ok: true; dataUrl: string }
   | { type: 'rendered'; id: string; ok: false; error: string }
   | { type: 'status'; requestId: string; status: EngineStatus }

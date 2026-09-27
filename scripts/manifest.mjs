@@ -11,7 +11,12 @@ const EXTENSION_CSP = "script-src 'self' 'wasm-unsafe-eval'; object-src 'none'; 
 
 export function createManifest({ target, version, mode }) {
   const isFirefox = target === 'firefox';
-  const icons = { 16: 'icons/icon-16.png', 32: 'icons/icon-32.png', 48: 'icons/icon-48.png', 128: 'icons/icon-128.png' };
+  const icons = {
+    16: 'icons/icon-16.png',
+    32: 'icons/icon-32.png',
+    48: 'icons/icon-48.png',
+    128: 'icons/icon-128.png',
+  };
 
   const manifest = {
     manifest_version: 3,
@@ -76,9 +81,11 @@ export function createManifest({ target, version, mode }) {
     manifest.browser_specific_settings = {
       gecko: {
         id: 'veil@veil-protection.app',
-        strict_min_version: '128.0',
+        // 140 (ESR): first release with data_collection_permissions.
+        strict_min_version: '140.0',
         data_collection_permissions: { required: ['none'] },
       },
+      gecko_android: { strict_min_version: '142.0' },
     };
   } else {
     manifest.background = { service_worker: 'background.js', type: 'module' };

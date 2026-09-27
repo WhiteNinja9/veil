@@ -83,7 +83,10 @@ class OffscreenClient implements InferenceClient {
     try {
       return (await ext().runtime.sendMessage(message)) as T;
     } catch (error) {
-      if (attempt < 20 && /Receiving end does not exist|Could not establish connection/i.test(String(error))) {
+      if (
+        attempt < 20 &&
+        /Receiving end does not exist|Could not establish connection/i.test(String(error))
+      ) {
         await new Promise((resolve) => setTimeout(resolve, 25 * (attempt + 1)));
         return this.send<T>(message, attempt + 1);
       }
@@ -100,7 +103,11 @@ class OffscreenClient implements InferenceClient {
   async detect(request: DetectRequest): Promise<DetectResponse> {
     try {
       await this.ensureDocument();
-      const response = await this.send<DetectResponse | undefined>({ target: 'offscreen', type: 'detect', request });
+      const response = await this.send<DetectResponse | undefined>({
+        target: 'offscreen',
+        type: 'detect',
+        request,
+      });
       return response ?? { id: request.id, ok: false, error: 'engine-unavailable', message: 'no response' };
     } catch (error) {
       log.warn('Offscreen detect failed', error);
@@ -111,7 +118,11 @@ class OffscreenClient implements InferenceClient {
   async render(request: RenderRequest): Promise<RenderResponse> {
     try {
       await this.ensureDocument();
-      const response = await this.send<RenderResponse | undefined>({ target: 'offscreen', type: 'render', request });
+      const response = await this.send<RenderResponse | undefined>({
+        target: 'offscreen',
+        type: 'render',
+        request,
+      });
       return response ?? { id: request.id, ok: false, error: 'no response' };
     } catch (error) {
       return { id: request.id, ok: false, error: String(error) };
@@ -184,9 +195,22 @@ class DirectClient implements InferenceClient {
 }
 
 function idleStatus(): HostStatus {
-  return { state: 'idle', backend: null, models: [], queue: 0, processed: 0, avgMs: 0, p95Ms: 0, cacheHitRate: 0, detail: '', running: false };
+  return {
+    state: 'idle',
+    backend: null,
+    models: [],
+    queue: 0,
+    processed: 0,
+    avgMs: 0,
+    p95Ms: 0,
+    cacheHitRate: 0,
+    detail: '',
+    running: false,
+  };
 }
 
 export function createInferenceClient(): InferenceClient {
-  return capabilities.offscreen ? new OffscreenClient() : new DirectClient();
+  // Build-time branch: the Firefox bundle contains no offscreen code at all.
+  if (__BROWSER__ === 'chrome') return capabilities.offscreen ? new OffscreenClient() : new DirectClient();
+  return new DirectClient();
 }

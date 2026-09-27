@@ -1,9 +1,4 @@
-import type {
-  CategorySettings,
-  FallbackAction,
-  RevealMode,
-  StrictnessLevel,
-} from './types';
+import type { CategorySettings, FallbackAction, RevealMode, StrictnessLevel } from './types';
 
 /**
  * Protection levels. Thresholds apply to the content classifier's softmax

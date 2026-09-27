@@ -66,7 +66,11 @@ export function hammingDistance(a: FrameSignature, b: FrameSignature): number {
 /** Largest per-channel difference of mean colour (0 when either lacks colour data). */
 export function colorDistance(a: FrameSignature, b: FrameSignature): number {
   if (!a.rgb || !b.rgb) return 0;
-  return Math.max(Math.abs(a.rgb[0] - b.rgb[0]), Math.abs(a.rgb[1] - b.rgb[1]), Math.abs(a.rgb[2] - b.rgb[2]));
+  return Math.max(
+    Math.abs(a.rgb[0] - b.rgb[0]),
+    Math.abs(a.rgb[1] - b.rgb[1]),
+    Math.abs(a.rgb[2] - b.rgb[2]),
+  );
 }
 
 export function meanColor(rgba: ArrayLike<number>): [number, number, number] {

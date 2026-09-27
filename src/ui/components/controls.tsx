@@ -56,15 +56,31 @@ export function Button(props: {
       aria-busy={props.busy || undefined}
       onClick={props.onClick}
     >
-      {props.busy ? <span class="spinner" aria-hidden="true" /> : props.icon ? <Icon name={props.icon} /> : null}
+      {props.busy ? (
+        <span class="spinner" aria-hidden="true" />
+      ) : props.icon ? (
+        <Icon name={props.icon} />
+      ) : null}
       {props.children}
     </button>
   );
 }
 
-export function IconButton(props: { icon: IconName; label: string; onClick: () => void; disabled?: boolean }): JSX.Element {
+export function IconButton(props: {
+  icon: IconName;
+  label: string;
+  onClick: () => void;
+  disabled?: boolean;
+}): JSX.Element {
   return (
-    <button type="button" class="icon-btn" aria-label={props.label} title={props.label} onClick={props.onClick} disabled={props.disabled}>
+    <button
+      type="button"
+      class="icon-btn"
+      aria-label={props.label}
+      title={props.label}
+      onClick={props.onClick}
+      disabled={props.disabled}
+    >
       <Icon name={props.icon} />
     </button>
   );
@@ -80,7 +96,10 @@ export function Segmented<T extends string>(props: {
 }): JSX.Element {
   const ref = useRef<HTMLDivElement>(null);
   const [thumb, setThumb] = useState<{ start: number; width: number } | null>(null);
-  const index = Math.max(0, props.options.findIndex((o) => o.value === props.value));
+  const index = Math.max(
+    0,
+    props.options.findIndex((o) => o.value === props.value),
+  );
 
   useLayoutEffect(() => {
     const container = ref.current;
@@ -97,7 +116,8 @@ export function Segmented<T extends string>(props: {
     const backward = rtl ? 'ArrowRight' : 'ArrowLeft';
     let next = index;
     if (event.key === forward || event.key === 'ArrowDown') next = (index + 1) % props.options.length;
-    else if (event.key === backward || event.key === 'ArrowUp') next = (index - 1 + props.options.length) % props.options.length;
+    else if (event.key === backward || event.key === 'ArrowUp')
+      next = (index - 1 + props.options.length) % props.options.length;
     else return;
     event.preventDefault();
     props.onChange(props.options[next]!.value);
@@ -106,7 +126,13 @@ export function Segmented<T extends string>(props: {
 
   return (
     <div ref={ref} class="segmented" role="radiogroup" aria-label={props.label} onKeyDown={onKeyDown}>
-      {thumb && <span class="segmented__thumb" aria-hidden="true" style={{ insetInlineStart: `${thumb.start}px`, width: `${thumb.width}px` }} />}
+      {thumb && (
+        <span
+          class="segmented__thumb"
+          aria-hidden="true"
+          style={{ insetInlineStart: `${thumb.start}px`, width: `${thumb.width}px` }}
+        />
+      )}
       {props.options.map((option, i) => (
         <button
           key={option.value}

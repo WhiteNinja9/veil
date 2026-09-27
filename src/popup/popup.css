@@ -41,14 +41,22 @@ body.surface-popup {
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   background:
-    radial-gradient(120% 140% at 0% 0%, color-mix(in srgb, var(--hero-tint, var(--accent)) 12%, transparent), transparent 60%),
+    radial-gradient(
+      120% 140% at 0% 0%,
+      color-mix(in srgb, var(--hero-tint, var(--accent)) 12%, transparent),
+      transparent 60%
+    ),
     var(--surface);
   box-shadow: var(--shadow-md);
   transition: background var(--dur-3) var(--ease-out);
 }
 :root[dir='rtl'] .hero {
   background:
-    radial-gradient(120% 140% at 100% 0%, color-mix(in srgb, var(--hero-tint, var(--accent)) 12%, transparent), transparent 60%),
+    radial-gradient(
+      120% 140% at 100% 0%,
+      color-mix(in srgb, var(--hero-tint, var(--accent)) 12%, transparent),
+      transparent 60%
+    ),
     var(--surface);
 }
 .hero--positive {

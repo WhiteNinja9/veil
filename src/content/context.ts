@@ -6,7 +6,8 @@
  */
 import { hostnameOf } from '../shared/url';
 
-const AD_TOKEN = /(?:^|[\s_-])(ad|ads|adv|advert|advertisement|advertising|sponsor|sponsored|promo|promoted|dfp|gpt-ad|adslot|ad-slot|adunit|ad-unit|banner-ad|taboola|outbrain)(?:$|[\s_\d-])/i;
+const AD_TOKEN =
+  /(?:^|[\s_-])(ad|ads|adv|advert|advertisement|advertising|sponsor|sponsored|promo|promoted|dfp|gpt-ad|adslot|ad-slot|adunit|ad-unit|banner-ad|taboola|outbrain)(?:$|[\s_\d-])/i;
 
 const AD_FRAME_HOSTS = [
   'doubleclick.net',
@@ -41,7 +42,12 @@ export function looksLikeAd(el: Element): boolean {
   if (isAdFrame()) return true;
   let node: Element | null = el;
   for (let depth = 0; node && depth < 6; depth++, node = node.parentElement) {
-    if (node.hasAttribute('data-ad') || node.hasAttribute('data-ad-slot') || node.hasAttribute('data-google-query-id')) return true;
+    if (
+      node.hasAttribute('data-ad') ||
+      node.hasAttribute('data-ad-slot') ||
+      node.hasAttribute('data-google-query-id')
+    )
+      return true;
     if (node.tagName === 'INS' && node.classList.contains('adsbygoogle')) return true;
     const id = node.id;
     if (id && AD_TOKEN.test(id)) return true;

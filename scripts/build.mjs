@@ -78,14 +78,20 @@ async function copyStatic(outDir, target) {
   // Inference kernels for the WASM backend (loaded only when WebGPU/WebGL are unavailable).
   const wasmSrc = path.join(root, 'node_modules', '@tensorflow', 'tfjs-backend-wasm', 'dist');
   await mkdir(path.join(outDir, 'wasm'), { recursive: true });
-  for (const file of ['tfjs-backend-wasm.wasm', 'tfjs-backend-wasm-simd.wasm', 'tfjs-backend-wasm-threaded-simd.wasm']) {
+  for (const file of [
+    'tfjs-backend-wasm.wasm',
+    'tfjs-backend-wasm-simd.wasm',
+    'tfjs-backend-wasm-threaded-simd.wasm',
+  ]) {
     await cp(path.join(wasmSrc, file), path.join(outDir, 'wasm', file));
   }
 
   if (!testModel) {
     const modelsDir = path.join(root, 'assets', 'models');
     if (!existsSync(path.join(modelsDir, 'models.json'))) {
-      throw new Error('Models missing. Run `npm run models` first (fetches and verifies pinned model files).');
+      throw new Error(
+        'Models missing. Run `npm run models` first (fetches and verifies pinned model files).',
+      );
     }
     await cp(modelsDir, path.join(outDir, 'models'), { recursive: true });
   }

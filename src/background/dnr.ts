@@ -40,7 +40,9 @@ export function patternToUrlRegex(pattern: string): string | null {
     case 'subdomains':
       return `^https?://[^/?#@]+\\.${escapeRegex(host)}${tail}`;
     case 'glob': {
-      const labels = parsed.value.pattern.split('.').map((label) => (label === '*' ? '[^/?#@.]+(?:\\.[^/?#@.]+)*' : escapeRegex(label)));
+      const labels = parsed.value.pattern
+        .split('.')
+        .map((label) => (label === '*' ? '[^/?#@.]+(?:\\.[^/?#@.]+)*' : escapeRegex(label)));
       return `^https?://${labels.join('\\.')}${tail}`;
     }
   }
@@ -88,14 +90,34 @@ export function buildStrictBrowsingRules(settings: Settings): Rule[] {
   if (!enabled) return [];
   const rules: Rule[] = [];
   const search = (id: number, regexFilter: string, key: string, value: string) =>
-    rules.push({ id, priority: 5, action: addParam(key, value), condition: { regexFilter, resourceTypes: SEARCH_TYPES } });
+    rules.push({
+      id,
+      priority: 5,
+      action: addParam(key, value),
+      condition: { regexFilter, resourceTypes: SEARCH_TYPES },
+    });
   if (safeSearch) {
     search(1, '^https?://(?:www\\.)?google\\.[a-z.]{2,12}/(?:search|images)(?:[?#].*)?$', 'safe', 'active');
-    search(2, '^https?://(?:www\\.|cn\\.)?bing\\.com/(?:search|images|videos)(?:/[^?#]*)?(?:[?#].*)?$', 'adlt', 'strict');
+    search(
+      2,
+      '^https?://(?:www\\.|cn\\.)?bing\\.com/(?:search|images|videos)(?:/[^?#]*)?(?:[?#].*)?$',
+      'adlt',
+      'strict',
+    );
     search(3, '^https?://(?:html\\.|lite\\.)?duckduckgo\\.com/(?:html/?|lite/?)?(?:[?#].*)?$', 'kp', '1');
-    search(4, '^https?://(?:[a-z]+\\.)?search\\.yahoo\\.com/(?:search|images|video)?[^?#]*(?:[?#].*)?$', 'vm', 'r');
+    search(
+      4,
+      '^https?://(?:[a-z]+\\.)?search\\.yahoo\\.com/(?:search|images|video)?[^?#]*(?:[?#].*)?$',
+      'vm',
+      'r',
+    );
     search(5, '^https?://search\\.brave\\.com/(?:search|images|videos)(?:[?#].*)?$', 'safesearch', 'strict');
-    search(6, '^https?://(?:www\\.)?yandex\\.[a-z.]{2,8}/(?:search|images)(?:/[^?#]*)?(?:[?#].*)?$', 'family', 'yes');
+    search(
+      6,
+      '^https?://(?:www\\.)?yandex\\.[a-z.]{2,8}/(?:search|images)(?:/[^?#]*)?(?:[?#].*)?$',
+      'family',
+      'yes',
+    );
   }
   if (youtubeRestricted) {
     rules.push({
@@ -103,10 +125,22 @@ export function buildStrictBrowsingRules(settings: Settings): Rule[] {
       priority: 5,
       action: {
         type: 'modifyHeaders' as chrome.declarativeNetRequest.RuleActionType,
-        requestHeaders: [{ header: 'YouTube-Restrict', operation: 'set' as chrome.declarativeNetRequest.HeaderOperation, value: 'Strict' }],
+        requestHeaders: [
+          {
+            header: 'YouTube-Restrict',
+            operation: 'set' as chrome.declarativeNetRequest.HeaderOperation,
+            value: 'Strict',
+          },
+        ],
       },
       condition: {
-        requestDomains: ['youtube.com', 'm.youtube.com', 'youtubei.googleapis.com', 'youtube.googleapis.com', 'youtube-nocookie.com'],
+        requestDomains: [
+          'youtube.com',
+          'm.youtube.com',
+          'youtubei.googleapis.com',
+          'youtube.googleapis.com',
+          'youtube-nocookie.com',
+        ],
         resourceTypes: SEARCH_TYPES,
       },
     });
@@ -118,7 +152,10 @@ export function buildStrictBrowsingRules(settings: Settings): Rule[] {
 export async function syncDynamicRules(settings: Settings, now = Date.now()): Promise<void> {
   const dnr = ext().declarativeNetRequest;
   if (!dnr?.updateDynamicRules) return;
-  const next = [...buildStrictBrowsingRules(settings), ...(settings.enabled ? buildSiteRules(settings.sites, now) : [])];
+  const next = [
+    ...buildStrictBrowsingRules(settings),
+    ...(settings.enabled ? buildSiteRules(settings.sites, now) : []),
+  ];
   const existing = await dnr.getDynamicRules();
   await dnr.updateDynamicRules({ removeRuleIds: existing.map((r) => r.id), addRules: next });
 }

@@ -44,7 +44,9 @@
   --btn-bg: var(--accent);
   --btn-fg: var(--text-on-accent);
   --btn-border: transparent;
-  box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  box-shadow:
+    var(--shadow-sm),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 .btn--primary:hover {
   background: var(--accent-hover);
@@ -99,7 +101,9 @@
   background: transparent;
   color: var(--text-2);
   cursor: pointer;
-  transition: background-color var(--dur-1) var(--ease-out), color var(--dur-1) var(--ease-out);
+  transition:
+    background-color var(--dur-1) var(--ease-out),
+    color var(--dur-1) var(--ease-out);
 }
 .icon-btn:hover {
   background: var(--surface-hover);
@@ -121,7 +125,9 @@
   border-radius: var(--radius-full);
   background: var(--toggle-off);
   cursor: pointer;
-  transition: background-color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
+  transition:
+    background-color var(--dur-2) var(--ease-out),
+    box-shadow var(--dur-2) var(--ease-out);
   box-shadow: var(--shadow-inset);
 }
 .switch::after {
@@ -133,7 +139,9 @@
   height: 20px;
   border-radius: 50%;
   background: #fff;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.12);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.2),
+    0 2px 6px rgba(0, 0, 0, 0.12);
   transition: transform var(--dur-2) var(--ease-spring);
 }
 .switch[aria-checked='true'] {
@@ -232,7 +240,11 @@
 .slider::-webkit-slider-runnable-track {
   height: 4px;
   border-radius: var(--radius-full);
-  background: linear-gradient(to var(--slider-dir, right), var(--accent) var(--fill), var(--surface-3) var(--fill));
+  background: linear-gradient(
+    to var(--slider-dir, right),
+    var(--accent) var(--fill),
+    var(--surface-3) var(--fill)
+  );
 }
 .slider::-moz-range-track {
   height: 4px;
@@ -251,7 +263,9 @@
   border: 0;
   border-radius: 50%;
   background: #fff;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.08),
+    0 2px 6px rgba(0, 0, 0, 0.2);
   appearance: none;
   transition: transform var(--dur-1) var(--ease-out);
 }
@@ -264,7 +278,9 @@
   border: 0;
   border-radius: 50%;
   background: #fff;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.08),
+    0 2px 6px rgba(0, 0, 0, 0.2);
 }
 :root[dir='rtl'] .slider {
   --slider-dir: left;
@@ -273,7 +289,9 @@
   outline: none;
 }
 .slider:focus-visible::-webkit-slider-thumb {
-  box-shadow: 0 0 0 4px var(--focus-ring), 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow:
+    0 0 0 4px var(--focus-ring),
+    0 2px 6px rgba(0, 0, 0, 0.2);
 }
 .slider:disabled {
   opacity: 0.45;
@@ -454,7 +472,9 @@ kbd {
   background: var(--surface);
   color: var(--text);
   font-size: var(--text-md);
-  transition: border-color var(--dur-1) var(--ease-out), box-shadow var(--dur-1) var(--ease-out);
+  transition:
+    border-color var(--dur-1) var(--ease-out),
+    box-shadow var(--dur-1) var(--ease-out);
 }
 .input::placeholder {
   color: var(--text-3);

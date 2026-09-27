@@ -80,7 +80,10 @@ export function Onboarding(): JSX.Element {
   const { settings, t, update } = useApp();
   const [step, setStep] = useState<Step>('welcome');
   const [access, setAccess] = useState<boolean | null>(null);
-  const [bench, setBench] = useState<{ state: 'idle' | 'running' | 'done' | 'failed'; best?: BenchmarkResult }>({ state: 'idle' });
+  const [bench, setBench] = useState<{
+    state: 'idle' | 'running' | 'done' | 'failed';
+    best?: BenchmarkResult;
+  }>({ state: 'idle' });
   const [shortcut, setShortcut] = useState('Alt+Shift+R');
   const index = STEPS.indexOf(step);
 
@@ -94,7 +97,10 @@ export function Onboarding(): JSX.Element {
     if (step === 'tune' && bench.state === 'idle') {
       setBench({ state: 'running' });
       const deadline = new Promise<null>((resolve) => setTimeout(() => resolve(null), 45_000));
-      void Promise.race([sendToBackground<{ results: BenchmarkResult[]; best: string | null }>({ type: 'engine/benchmark' }), deadline]).then((reply) => {
+      void Promise.race([
+        sendToBackground<{ results: BenchmarkResult[]; best: string | null }>({ type: 'engine/benchmark' }),
+        deadline,
+      ]).then((reply) => {
         const best = reply?.results.find((r) => r.backend === reply.best);
         setBench(best ? { state: 'done', best } : { state: 'failed' });
       });
@@ -125,9 +131,19 @@ export function Onboarding(): JSX.Element {
           <Mark size={24} />
           <span class="brand__name">{t.t('app.name')}</span>
         </div>
-        <div class="progress" role="progressbar" aria-valuemin={1} aria-valuemax={STEPS.length} aria-valuenow={index + 1} aria-label={t.t('onb.step', { current: index + 1, total: STEPS.length })}>
+        <div
+          class="progress"
+          role="progressbar"
+          aria-valuemin={1}
+          aria-valuemax={STEPS.length}
+          aria-valuenow={index + 1}
+          aria-label={t.t('onb.step', { current: index + 1, total: STEPS.length })}
+        >
           {STEPS.map((s, i) => (
-            <span key={s} class={`progress__dot${i <= index ? ' is-done' : ''}${i === index ? ' is-current' : ''}`} />
+            <span
+              key={s}
+              class={`progress__dot${i <= index ? ' is-done' : ''}${i === index ? ' is-current' : ''}`}
+            />
           ))}
         </div>
       </header>
@@ -203,7 +219,9 @@ export function Onboarding(): JSX.Element {
                   meta={
                     <span class="choice__meta">
                       <LevelMeter level={i} />
-                      {level === 'balanced' && <span class="pill pill--accent">{t.t('common.recommended')}</span>}
+                      {level === 'balanced' && (
+                        <span class="pill pill--accent">{t.t('common.recommended')}</span>
+                      )}
                     </span>
                   }
                   onSelect={() => void update(levelPatch(level, settings))}
@@ -221,7 +239,11 @@ export function Onboarding(): JSX.Element {
             <p class="onboarding__body">{t.t('onb.tune.body')}</p>
             <div class={`tune tune--${bench.state}`} role="status" aria-live="polite">
               <span class="tune__icon" aria-hidden="true">
-                {bench.state === 'running' ? <span class="spinner" /> : <Icon name={bench.state === 'done' ? 'check' : 'gauge'} />}
+                {bench.state === 'running' ? (
+                  <span class="spinner" />
+                ) : (
+                  <Icon name={bench.state === 'done' ? 'check' : 'gauge'} />
+                )}
               </span>
               <span>
                 {bench.state === 'done' && bench.best

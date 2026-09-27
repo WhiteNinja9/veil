@@ -18,7 +18,12 @@ const MODEL_NAMES: Record<string, string> = {
   'test-people': 'Test people',
 };
 
-export const BACKEND_NAMES: Record<string, string> = { webgpu: 'WebGPU', webgl: 'WebGL', wasm: 'WebAssembly', cpu: 'CPU' };
+export const BACKEND_NAMES: Record<string, string> = {
+  webgpu: 'WebGPU',
+  webgl: 'WebGL',
+  wasm: 'WebAssembly',
+  cpu: 'CPU',
+};
 
 export function PerformanceSection(): JSX.Element {
   const { settings, t, update } = useApp();
@@ -46,9 +51,11 @@ export function PerformanceSection(): JSX.Element {
     setRunning(false);
   };
 
-  const ms = (value: number | undefined) => (value === undefined ? '—' : t.t('common.ms', { value: t.number(value, { maximumFractionDigits: 1 }) }));
+  const ms = (value: number | undefined) =>
+    value === undefined ? '—' : t.t('common.ms', { value: t.number(value, { maximumFractionDigits: 1 }) });
   const state = status?.state ?? 'idle';
-  const stateTone = state === 'ready' ? 'positive' : state === 'error' ? 'critical' : state === 'loading' ? 'accent' : '';
+  const stateTone =
+    state === 'ready' ? 'positive' : state === 'error' ? 'critical' : state === 'loading' ? 'accent' : '';
 
   return (
     <div class="stack">
@@ -66,7 +73,7 @@ export function PerformanceSection(): JSX.Element {
             <div>
               <dt>{t.t('perf.backend')}</dt>
               <dd>
-                {status?.backend ? BACKEND_NAMES[status.backend] ?? status.backend : '—'}
+                {status?.backend ? (BACKEND_NAMES[status.backend] ?? status.backend) : '—'}
                 {status?.detail && <span class="subtle small metrics__detail">{status.detail}</span>}
               </dd>
             </div>
@@ -111,7 +118,10 @@ export function PerformanceSection(): JSX.Element {
               inline
               label={t.t('perf.backendPref')}
               value={settings.performance.backend}
-              options={(['auto', 'webgpu', 'webgl', 'wasm', 'cpu'] as const).map((b) => ({ value: b, label: t.t(`perf.backend.${b}`) }))}
+              options={(['auto', 'webgpu', 'webgl', 'wasm', 'cpu'] as const).map((b) => ({
+                value: b,
+                label: t.t(`perf.backend.${b}`),
+              }))}
               onChange={(backend) => void update({ performance: { backend } })}
             />
           </Row>
@@ -137,7 +147,11 @@ export function PerformanceSection(): JSX.Element {
           </div>
           {bench && (
             <>
-              {bench.best && <p class="bench-best">{t.t('perf.benchmark.best', { backend: BACKEND_NAMES[bench.best] ?? bench.best })}</p>}
+              {bench.best && (
+                <p class="bench-best">
+                  {t.t('perf.benchmark.best', { backend: BACKEND_NAMES[bench.best] ?? bench.best })}
+                </p>
+              )}
               <table class="table">
                 <thead>
                   <tr>

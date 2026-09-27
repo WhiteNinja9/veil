@@ -11,7 +11,10 @@ const EVAL_DIR = '.cache/eval';
 const images = existsSync(EVAL_DIR) ? readdirSync(EVAL_DIR).filter((f) => /\.(jpe?g|png)$/.test(f)) : [];
 
 test.use({ build: REAL_BUILD });
-test.skip(!existsSync(`${REAL_BUILD}/models/models.json`) || images.length === 0, 'production build or eval images missing');
+test.skip(
+  !existsSync(`${REAL_BUILD}/models/models.json`) || images.length === 0,
+  'production build or eval images missing',
+);
 test.setTimeout(180_000);
 
 test('no safe sample image is protected at the Balanced level', async ({ context, lab }) => {
@@ -19,11 +22,18 @@ test('no safe sample image is protected at the Balanced level', async ({ context
   const page = await context.newPage();
   await page.goto(`${lab.originA}/eval.html`);
   await page.waitForFunction(
-    () => [...document.querySelectorAll('img')].every((img) => ['ok', 'x', 'rg'].includes(img.getAttribute('data-veil') ?? '')),
+    () =>
+      [...document.querySelectorAll('img')].every((img) =>
+        ['ok', 'x', 'rg'].includes(img.getAttribute('data-veil') ?? ''),
+      ),
     undefined,
     { timeout: 150_000 },
   );
-  const protectedImages = await page.evaluate(() => [...document.querySelectorAll('img')].filter((img) => img.getAttribute('data-veil') !== 'ok').map((img) => img.id));
+  const protectedImages = await page.evaluate(() =>
+    [...document.querySelectorAll('img')]
+      .filter((img) => img.getAttribute('data-veil') !== 'ok')
+      .map((img) => img.id),
+  );
   expect(protectedImages).toEqual([]);
 });
 
@@ -32,9 +42,17 @@ test('face protection blurs only face regions in real photos', async ({ context,
   await setSettings(context, { categories: { faces: { enabled: true, threshold: 0.75, scope: 'regions' } } });
   const page = await context.newPage();
   await page.goto(`${lab.originA}/eval.html`);
-  await page.waitForFunction(() => document.querySelector('#karen-and-rob-png')?.getAttribute('data-veil') === 'rg', undefined, { timeout: 150_000 });
+  await page.waitForFunction(
+    () => document.querySelector('#karen-and-rob-png')?.getAttribute('data-veil') === 'rg',
+    undefined,
+    { timeout: 150_000 },
+  );
   // Photos without people are untouched.
   if (images.includes('fruits.jpg')) {
-    await page.waitForFunction(() => document.querySelector('#fruits-jpg')?.getAttribute('data-veil') === 'ok', undefined, { timeout: 60_000 });
+    await page.waitForFunction(
+      () => document.querySelector('#fruits-jpg')?.getAttribute('data-veil') === 'ok',
+      undefined,
+      { timeout: 60_000 },
+    );
   }
 });

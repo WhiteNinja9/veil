@@ -2,8 +2,17 @@ import type { ComponentChildren, JSX } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { Icon, type IconName } from '../icons';
 
-export function Card(props: { children: ComponentChildren; padded?: boolean; flat?: boolean; class?: string; title?: string; actions?: ComponentChildren }): JSX.Element {
-  const classes = ['card', props.padded ? 'card--pad' : '', props.flat ? 'card--flat' : '', props.class ?? ''].filter(Boolean).join(' ');
+export function Card(props: {
+  children: ComponentChildren;
+  padded?: boolean;
+  flat?: boolean;
+  class?: string;
+  title?: string;
+  actions?: ComponentChildren;
+}): JSX.Element {
+  const classes = ['card', props.padded ? 'card--pad' : '', props.flat ? 'card--flat' : '', props.class ?? '']
+    .filter(Boolean)
+    .join(' ');
   return (
     <section class={classes}>
       {props.title && (
@@ -32,7 +41,9 @@ export function Row(props: {
   managed?: boolean;
   managedLabel?: string;
 }): JSX.Element {
-  const classes = ['row', props.stack ? 'row--stack' : '', props.disabled ? 'row--disabled' : ''].filter(Boolean).join(' ');
+  const classes = ['row', props.stack ? 'row--stack' : '', props.disabled ? 'row--disabled' : '']
+    .filter(Boolean)
+    .join(' ');
   return (
     <div class={classes} id={props.id} data-setting={props.id}>
       {props.icon && !props.stack && (
@@ -57,7 +68,12 @@ export function Row(props: {
   );
 }
 
-export function Banner(props: { tone?: 'neutral' | 'accent' | 'caution' | 'positive'; icon?: IconName; children: ComponentChildren; role?: 'status' | 'alert' }): JSX.Element {
+export function Banner(props: {
+  tone?: 'neutral' | 'accent' | 'caution' | 'positive';
+  icon?: IconName;
+  children: ComponentChildren;
+  role?: 'status' | 'alert';
+}): JSX.Element {
   const tone = props.tone && props.tone !== 'neutral' ? ` banner--${props.tone}` : '';
   return (
     <div class={`banner${tone}`} role={props.role}>
@@ -76,7 +92,13 @@ export function Choice(props: {
   role?: 'radio' | 'checkbox';
 }): JSX.Element {
   return (
-    <button type="button" role={props.role ?? 'radio'} aria-checked={props.checked} class="choice" onClick={props.onSelect}>
+    <button
+      type="button"
+      role={props.role ?? 'radio'}
+      aria-checked={props.checked}
+      class="choice"
+      onClick={props.onSelect}
+    >
       <span class="choice__title">
         <span>{props.title}</span>
         <span class="choice__check" aria-hidden="true">
@@ -95,7 +117,8 @@ export function CountUp({ value, format }: { value: number; format: (n: number) 
   const from = useRef(value);
   useEffect(() => {
     const reduced =
-      matchMedia('(prefers-reduced-motion: reduce)').matches || document.documentElement.dataset.motion === 'reduced';
+      matchMedia('(prefers-reduced-motion: reduce)').matches ||
+      document.documentElement.dataset.motion === 'reduced';
     const start = from.current;
     if (reduced || start === value) {
       setShown(value);
@@ -118,7 +141,15 @@ export function CountUp({ value, format }: { value: number; format: (n: number) 
   return <span class="num">{format(shown)}</span>;
 }
 
-export function Stat({ value, label, format }: { value: number; label: string; format: (n: number) => string }): JSX.Element {
+export function Stat({
+  value,
+  label,
+  format,
+}: {
+  value: number;
+  label: string;
+  format: (n: number) => string;
+}): JSX.Element {
   return (
     <div class="stat">
       <div class="stat__value">

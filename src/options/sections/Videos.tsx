@@ -20,7 +20,11 @@ export function VideosSection(): JSX.Element {
       <Card>
         <div class="list">
           <Row id="videos" label={t.t('videos.videos')} description={t.t('videos.videos.desc')}>
-            <Switch checked={settings.media.videos} label={t.t('videos.videos')} onChange={(videos) => void update({ media: { videos } })} />
+            <Switch
+              checked={settings.media.videos}
+              label={t.t('videos.videos')}
+              onChange={(videos) => void update({ media: { videos } })}
+            />
           </Row>
           <div class="row row--stack" id="sampling">
             <div class="row__text">
@@ -31,11 +35,19 @@ export function VideosSection(): JSX.Element {
               label={t.t('videos.sampling')}
               value={samplingOf(settings.video.baseIntervalMs)}
               disabled={!settings.media.videos}
-              options={(Object.keys(SAMPLING) as Sampling[]).map((key) => ({ value: key, label: t.t(`videos.sampling.${key}`) }))}
+              options={(Object.keys(SAMPLING) as Sampling[]).map((key) => ({
+                value: key,
+                label: t.t(`videos.sampling.${key}`),
+              }))}
               onChange={(key) => void update({ video: { baseIntervalMs: SAMPLING[key] } })}
             />
           </div>
-          <Row id="autorestore" label={t.t('videos.autoRestore')} description={t.t('videos.autoRestore.desc')} disabled={!settings.media.videos}>
+          <Row
+            id="autorestore"
+            label={t.t('videos.autoRestore')}
+            description={t.t('videos.autoRestore.desc')}
+            disabled={!settings.media.videos}
+          >
             <Switch
               checked={settings.video.autoRestore}
               disabled={!settings.media.videos}
@@ -43,7 +55,12 @@ export function VideosSection(): JSX.Element {
               onChange={(autoRestore) => void update({ video: { autoRestore } })}
             />
           </Row>
-          <Row id="regionswhole" label={t.t('videos.regionsWhole')} description={t.t('videos.regionsWhole.desc')} disabled={!regionsOn}>
+          <Row
+            id="regionswhole"
+            label={t.t('videos.regionsWhole')}
+            description={t.t('videos.regionsWhole.desc')}
+            disabled={!regionsOn}
+          >
             <Switch
               checked={settings.video.regionsProtectWhole}
               disabled={!regionsOn || !settings.media.videos}

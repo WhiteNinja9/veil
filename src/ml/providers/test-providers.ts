@@ -28,7 +28,10 @@ export const TEST_MARKERS = {
 type Marker = keyof typeof TEST_MARKERS | 'none';
 
 function nearest(rgb: number[]): Marker {
-  for (const [name, target] of Object.entries(TEST_MARKERS) as [keyof typeof TEST_MARKERS, readonly number[]][]) {
+  for (const [name, target] of Object.entries(TEST_MARKERS) as [
+    keyof typeof TEST_MARKERS,
+    readonly number[],
+  ][]) {
     if (target.every((c, i) => Math.abs(c - (rgb[i] ?? 0)) <= 45)) return name;
   }
   return 'none';
@@ -37,13 +40,21 @@ function nearest(rgb: number[]): Marker {
 async function markerOf(image: PreparedImage): Promise<Marker> {
   const [h, w] = image.pixels.shape;
   const size = Math.max(1, Math.min(16, Math.floor(Math.min(h, w) / 4)));
-  const mean = tf.tidy(() => tf.mean(tf.cast(tf.slice(image.pixels, [0, 0, 0], [size, size, 3]), 'float32'), [0, 1]));
+  const mean = tf.tidy(() =>
+    tf.mean(tf.cast(tf.slice(image.pixels, [0, 0, 0], [size, size, 3]), 'float32'), [0, 1]),
+  );
   const rgb = Array.from(await mean.data()) as number[];
   mean.dispose();
   return nearest(rgb);
 }
 
-const neutral = (): ClassifierScores => ({ drawing: 0.01, hentai: 0.005, neutral: 0.97, porn: 0.005, sexy: 0.01 });
+const neutral = (): ClassifierScores => ({
+  drawing: 0.01,
+  hentai: 0.005,
+  neutral: 0.97,
+  porn: 0.005,
+  sexy: 0.01,
+});
 
 export class TestClassifier implements ClassifierProvider {
   readonly id = 'test-classifier';

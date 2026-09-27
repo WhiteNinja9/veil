@@ -8,7 +8,11 @@ import { pageEn } from '../../src/i18n/locales/page.en';
 import { pageFr } from '../../src/i18n/locales/page.fr';
 
 const placeholders = (message: Message) =>
-  [...new Set((typeof message === 'string' ? message : Object.values(message).join(' ')).match(/\{\w+\}/g) ?? [])].sort();
+  [
+    ...new Set(
+      (typeof message === 'string' ? message : Object.values(message).join(' ')).match(/\{\w+\}/g) ?? [],
+    ),
+  ].sort();
 
 describe('catalog completeness', () => {
   for (const [name, en, others] of [
@@ -23,7 +27,10 @@ describe('catalog completeness', () => {
           const target = record[key]!;
           expect(typeof target, key).toBe(typeof source);
           expect(placeholders(target), key).toEqual(placeholders(source));
-          expect(String(typeof target === 'string' ? target : target.other).trim().length, key).toBeGreaterThan(0);
+          expect(
+            String(typeof target === 'string' ? target : target.other).trim().length,
+            key,
+          ).toBeGreaterThan(0);
         }
       });
     }

@@ -74,7 +74,9 @@ export function isContextInvalidated(): boolean {
  * privileged helpers both engines expose to content scripts.
  */
 export function openOrClosedShadowRoot(element: Element): ShadowRoot | null {
-  const api = ext() as ChromeApi & { dom?: { openOrClosedShadowRoot?: (el: HTMLElement) => ShadowRoot | null } };
+  const api = ext() as ChromeApi & {
+    dom?: { openOrClosedShadowRoot?: (el: HTMLElement) => ShadowRoot | null };
+  };
   try {
     if (api.dom?.openOrClosedShadowRoot && element instanceof HTMLElement) {
       return api.dom.openOrClosedShadowRoot(element);

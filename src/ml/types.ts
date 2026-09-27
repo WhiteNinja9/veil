@@ -87,7 +87,8 @@ export interface RenderRequest {
   initiator?: string;
 }
 
-export type RenderResponse = { id: string; ok: true; dataUrl: string } | { id: string; ok: false; error: string };
+export type RenderResponse =
+  { id: string; ok: true; dataUrl: string } | { id: string; ok: false; error: string };
 
 export type BackendName = 'webgpu' | 'webgl' | 'wasm' | 'cpu' | 'test';
 

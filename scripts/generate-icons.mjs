@@ -12,8 +12,13 @@ const page = await browser.newPage({ deviceScaleFactor: 1 });
 await mkdir(path.join(root, 'static/icons'), { recursive: true });
 for (const size of [16, 32, 48, 128]) {
   await page.setViewportSize({ width: size, height: size });
-  await page.setContent(`<style>html,body{margin:0;background:transparent}svg{display:block;width:${size}px;height:${size}px}</style>${svg}`);
-  const png = await page.screenshot({ omitBackground: true, clip: { x: 0, y: 0, width: size, height: size } });
+  await page.setContent(
+    `<style>html,body{margin:0;background:transparent}svg{display:block;width:${size}px;height:${size}px}</style>${svg}`,
+  );
+  const png = await page.screenshot({
+    omitBackground: true,
+    clip: { x: 0, y: 0, width: size, height: size },
+  });
   await writeFile(path.join(root, `static/icons/icon-${size}.png`), png);
   console.log(`  ✓ icon-${size}.png`);
 }

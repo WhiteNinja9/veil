@@ -5,7 +5,7 @@ import { aggregateFrames } from '../postprocess';
 import { FaceDetector } from '../providers/face-detector';
 import { NsfwClassifier } from '../providers/nsfw-classifier';
 import { PersonDetector } from '../providers/person-detector';
-import { type AnyProvider, type ClassifierProvider, type DetectorProvider, isClassifier, type PreparedImage } from '../providers/provider';
+import type { AnyProvider, ClassifierProvider, DetectorProvider, PreparedImage } from '../providers/provider';
 import { TestClassifier, TestFaceDetector, TestPersonDetector } from '../providers/test-providers';
 import { blobToDataUrl, RENDER_MAX_SIDE, renderConcealed } from '../render';
 import type { EngineStatus, Region, SignalKind, Signals } from '../types';
@@ -69,10 +69,13 @@ export class DetectionEngine {
           await tf.ready();
           this.selection = { name: 'cpu', detail: 'test model (deterministic)', initMs: 0, skipped: [] };
         } else {
-          this.selection = await selectBackend(candidateOrder(this.config.backend, this.config.profileBest, this.config.exclude), {
-            wasmBaseUrl: this.config.wasmBaseUrl,
-            onAttempt: this.onAttempt,
-          });
+          this.selection = await selectBackend(
+            candidateOrder(this.config.backend, this.config.profileBest, this.config.exclude),
+            {
+              wasmBaseUrl: this.config.wasmBaseUrl,
+              onAttempt: this.onAttempt,
+            },
+          );
         }
         this.state = 'ready';
         return this.selection;
@@ -170,7 +173,9 @@ export class DetectionEngine {
         try {
           return await decodeImage(entry.job.blob, this.config.animatedFrames);
         } catch (error) {
-          entry.reject(new EngineJobError('decode-failed', error instanceof Error ? error.message : 'decode failed'));
+          entry.reject(
+            new EngineJobError('decode-failed', error instanceof Error ? error.message : 'decode failed'),
+          );
           return null;
         }
       }),
@@ -208,13 +213,14 @@ export class DetectionEngine {
     work: { entry: QueuedJob; media: DecodedMedia; images: PreparedImage[] }[],
     started: number,
   ): Promise<void> {
-    const results = work.map(() => ({} as Pick<Signals, 'classifier' | 'faces' | 'people'>));
+    const results = work.map(() => ({}) as Pick<Signals, 'classifier' | 'faces' | 'people'>);
     const classifier = this.providers.get('classifier') as ClassifierProvider | undefined;
 
     // 1. Classifier, batched across every frame of every job that wants it.
     const classifyItems: { workIndex: number; image: PreparedImage }[] = [];
     work.forEach((w, workIndex) => {
-      if (w.entry.job.signals.includes('classifier')) w.images.forEach((image) => classifyItems.push({ workIndex, image }));
+      if (w.entry.job.signals.includes('classifier'))
+        w.images.forEach((image) => classifyItems.push({ workIndex, image }));
     });
     if (classifier && classifyItems.length) {
       const perWork = new Map<number, ReturnType<typeof aggregateFrames>[]>();
@@ -317,7 +323,11 @@ export class DetectionEngine {
         .filter((kind) => this.providers.has(kind))
         .map((kind) => {
           const provider = this.providers.get(kind)!;
-          return { id: provider.id, loaded: provider.loaded, loadMs: Math.round(this.loadTimes.get(provider.id) ?? 0) };
+          return {
+            id: provider.id,
+            loaded: provider.loaded,
+            loadMs: Math.round(this.loadTimes.get(provider.id) ?? 0),
+          };
         }),
       queue: this.queue.length,
       processed: this.processed,
@@ -353,7 +363,10 @@ export async function benchmarkBackends(
   for (const backend of backends) {
     const result: BenchmarkResult = { backend, ok: false };
     try {
-      const selection = await selectBackend([backend], { wasmBaseUrl: config.wasmBaseUrl, allowSoftwareGl: true });
+      const selection = await selectBackend([backend], {
+        wasmBaseUrl: config.wasmBaseUrl,
+        allowSoftwareGl: true,
+      });
       result.initMs = round(selection.initMs);
       result.detail = selection.detail;
       const classifier = config.testModel ? new TestClassifier() : new NsfwClassifier();

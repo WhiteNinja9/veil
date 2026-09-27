@@ -9,7 +9,14 @@
 import { createLogger } from '../../shared/logger';
 import type { HardwareBackend } from '../backend';
 import type { BenchmarkResult, FromWorker, ToWorker, WorkerConfig } from '../worker/protocol';
-import type { DetectRequest, DetectResponse, EngineStatus, RenderRequest, RenderResponse, SignalKind } from '../types';
+import type {
+  DetectRequest,
+  DetectResponse,
+  EngineStatus,
+  RenderRequest,
+  RenderResponse,
+  SignalKind,
+} from '../types';
 import { loadSource, MediaError } from './fetch-media';
 
 const log = createLogger('host');
@@ -25,7 +32,11 @@ export interface HostOptions {
   wasmBaseUrl: string;
   testModel: boolean;
   /** Reads the latest user preferences each time the worker (re)starts. */
-  preferences: () => Promise<{ backend: HardwareBackend | 'auto'; profileBest?: HardwareBackend; unloadAfterMin: number }>;
+  preferences: () => Promise<{
+    backend: HardwareBackend | 'auto';
+    profileBest?: HardwareBackend;
+    unloadAfterMin: number;
+  }>;
   createWorker?: (url: string) => Worker;
 }
 
@@ -62,7 +73,8 @@ export class InferenceHost {
   }
 
   private ensureWorker(): Promise<void> {
-    if (Date.now() < this.cooldownUntil) return Promise.reject(new MediaError('engine-unavailable', 'engine cooling down'));
+    if (Date.now() < this.cooldownUntil)
+      return Promise.reject(new MediaError('engine-unavailable', 'engine cooling down'));
     if (this.ready) return this.ready;
     this.ready = (async () => {
       const prefs = await this.options.preferences();
@@ -88,7 +100,9 @@ export class InferenceHost {
         };
         worker.addEventListener('message', onMessage);
       });
-      worker.addEventListener('message', (event: MessageEvent<FromWorker>) => this.onWorkerMessage(event.data));
+      worker.addEventListener('message', (event: MessageEvent<FromWorker>) =>
+        this.onWorkerMessage(event.data),
+      );
       worker.addEventListener('error', (event) => this.onCrash(event.message || 'worker error'));
       const config: WorkerConfig = {
         modelBaseUrl: this.options.modelBaseUrl,
@@ -114,7 +128,12 @@ export class InferenceHost {
   }
 
   private onWorkerMessage(message: FromWorker): void {
-    const id = message.type === 'detected' || message.type === 'rendered' ? message.id : 'requestId' in message ? message.requestId : null;
+    const id =
+      message.type === 'detected' || message.type === 'rendered'
+        ? message.id
+        : 'requestId' in message
+          ? message.requestId
+          : null;
     if (!id) return;
     const pending = this.pending.get(id);
     if (!pending) return;
@@ -151,7 +170,13 @@ export class InferenceHost {
     this.ready = null;
     for (const [id, pending] of this.pending) {
       clearTimeout(pending.timer);
-      pending.resolve({ type: 'detected', id, ok: false, error: 'engine-unavailable', message: 'engine restarted' });
+      pending.resolve({
+        type: 'detected',
+        id,
+        ok: false,
+        error: 'engine-unavailable',
+        message: 'engine restarted',
+      });
     }
     this.pending.clear();
   }
@@ -193,19 +218,39 @@ export class InferenceHost {
       await this.ensureWorker();
     } catch (error) {
       const code = error instanceof MediaError ? error.code : 'engine-unavailable';
-      return { id: request.id, ok: false, error: code, message: error instanceof Error ? error.message : undefined };
+      return {
+        id: request.id,
+        ok: false,
+        error: code,
+        message: error instanceof Error ? error.message : undefined,
+      };
     }
     const retainForRender = request.signals.includes('faces') || request.signals.includes('people');
     const message = await this.request<Extract<FromWorker, { type: 'detected' }>>(
       request.id,
-      { type: 'detect', job: { id: request.id, key: request.key, blob, signals: request.signals, priority: request.priority, retainForRender } },
+      {
+        type: 'detect',
+        job: {
+          id: request.id,
+          key: request.key,
+          blob,
+          signals: request.signals,
+          priority: request.priority,
+          retainForRender,
+        },
+      },
       DETECT_TIMEOUT_MS,
     );
     if (message.ok) {
       this.consecutiveTimeouts = 0;
       return { id: request.id, ok: true, signals: message.signals };
     }
-    return { id: request.id, ok: false, error: message.error, ...(message.message ? { message: message.message } : {}) };
+    return {
+      id: request.id,
+      ok: false,
+      error: message.error,
+      ...(message.message ? { message: message.message } : {}),
+    };
   }
 
   async render(request: RenderRequest): Promise<RenderResponse> {
@@ -215,18 +260,26 @@ export class InferenceHost {
       // Try the retained decode first; re-fetch only if the worker no longer has it.
       let message = await this.request<Extract<FromWorker, { type: 'rendered' }>>(
         request.id,
-        { type: 'render', job: { id: request.id, key: request.key, regions: request.regions, style: request.style } },
+        {
+          type: 'render',
+          job: { id: request.id, key: request.key, regions: request.regions, style: request.style },
+        },
         DETECT_TIMEOUT_MS,
       );
       if (!message.ok) {
         const blob = await loadSource(request.source, request.initiator);
         message = await this.request(
           request.id,
-          { type: 'render', job: { id: request.id, key: request.key, blob, regions: request.regions, style: request.style } },
+          {
+            type: 'render',
+            job: { id: request.id, key: request.key, blob, regions: request.regions, style: request.style },
+          },
           DETECT_TIMEOUT_MS,
         );
       }
-      return message.ok ? { id: request.id, ok: true, dataUrl: message.dataUrl } : { id: request.id, ok: false, error: message.error };
+      return message.ok
+        ? { id: request.id, ok: true, dataUrl: message.dataUrl }
+        : { id: request.id, ok: false, error: message.error };
     } catch (error) {
       return { id: request.id, ok: false, error: error instanceof Error ? error.message : 'render failed' };
     }
@@ -270,13 +323,22 @@ export class InferenceHost {
    * Benchmarks each backend in its own short-lived worker, so a backend that
    * hangs or crashes (GPU drivers do) cannot take the others down with it.
    */
-  async benchmark(backends: HardwareBackend[], iterations = 8, perBackendTimeoutMs = 45_000): Promise<BenchmarkResult[]> {
+  async benchmark(
+    backends: HardwareBackend[],
+    iterations = 8,
+    perBackendTimeoutMs = 45_000,
+  ): Promise<BenchmarkResult[]> {
     const results: BenchmarkResult[] = [];
-    for (const backend of backends) results.push(await this.benchmarkOne(backend, iterations, perBackendTimeoutMs));
+    for (const backend of backends)
+      results.push(await this.benchmarkOne(backend, iterations, perBackendTimeoutMs));
     return results;
   }
 
-  private async benchmarkOne(backend: HardwareBackend, iterations: number, timeoutMs: number): Promise<BenchmarkResult> {
+  private async benchmarkOne(
+    backend: HardwareBackend,
+    iterations: number,
+    timeoutMs: number,
+  ): Promise<BenchmarkResult> {
     const worker = this.spawn(this.options.workerUrl);
     try {
       const requestId = `bench-${++this.requestSeq}`;
@@ -300,7 +362,13 @@ export class InferenceHost {
           testModel: this.options.testModel,
           animatedFrames: 1,
         };
-        worker.postMessage({ type: 'benchmark', requestId, config, backends: [backend], iterations } satisfies ToWorker);
+        worker.postMessage({
+          type: 'benchmark',
+          requestId,
+          config,
+          backends: [backend],
+          iterations,
+        } satisfies ToWorker);
       });
     } finally {
       worker.terminate();

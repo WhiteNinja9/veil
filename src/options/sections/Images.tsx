@@ -56,13 +56,29 @@ export function ImagesSection(): JSX.Element {
       <Card>
         <div class="list">
           <Row id="images" label={t.t('images.images')}>
-            <Switch checked={media.images} label={t.t('images.images')} onChange={(images) => void update({ media: { images } })} />
+            <Switch
+              checked={media.images}
+              label={t.t('images.images')}
+              onChange={(images) => void update({ media: { images } })}
+            />
           </Row>
-          <Row id="backgrounds" label={t.t('images.backgrounds')} description={t.t('images.backgrounds.desc')}>
-            <Switch checked={media.backgrounds} label={t.t('images.backgrounds')} onChange={(backgrounds) => void update({ media: { backgrounds } })} />
+          <Row
+            id="backgrounds"
+            label={t.t('images.backgrounds')}
+            description={t.t('images.backgrounds.desc')}
+          >
+            <Switch
+              checked={media.backgrounds}
+              label={t.t('images.backgrounds')}
+              onChange={(backgrounds) => void update({ media: { backgrounds } })}
+            />
           </Row>
           <Row id="thumbnails" label={t.t('images.thumbnails')} description={t.t('images.thumbnails.desc')}>
-            <Switch checked={media.thumbnails} label={t.t('images.thumbnails')} onChange={(thumbnails) => void update({ media: { thumbnails } })} />
+            <Switch
+              checked={media.thumbnails}
+              label={t.t('images.thumbnails')}
+              onChange={(thumbnails) => void update({ media: { thumbnails } })}
+            />
           </Row>
           <div class="row row--stack" id="minsize">
             <div class="row__inline">
@@ -86,7 +102,11 @@ export function ImagesSection(): JSX.Element {
             />
           </div>
           <Row id="ads" label={t.t('images.ads')} description={t.t('images.ads.desc')}>
-            <Switch checked={media.stricterAds} label={t.t('images.ads')} onChange={(stricterAds) => void update({ media: { stricterAds } })} />
+            <Switch
+              checked={media.stricterAds}
+              label={t.t('images.ads')}
+              onChange={(stricterAds) => void update({ media: { stricterAds } })}
+            />
           </Row>
         </div>
       </Card>
@@ -115,7 +135,11 @@ export function ImagesSection(): JSX.Element {
       <Card>
         <div class="list">
           <Row id="chip" label={t.t('images.chip')} description={t.t('images.chip.desc')}>
-            <Switch checked={settings.appearance.showChip} label={t.t('images.chip')} onChange={(showChip) => void update({ appearance: { showChip } })} />
+            <Switch
+              checked={settings.appearance.showChip}
+              label={t.t('images.chip')}
+              onChange={(showChip) => void update({ appearance: { showChip } })}
+            />
           </Row>
         </div>
       </Card>

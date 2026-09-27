@@ -71,7 +71,10 @@ export class SettingsStore {
       patch.enabled = true;
       patch.pausedUntil = null;
     }
-    if (policy.minimumStrictness && stricterOf(settings.strictness, policy.minimumStrictness) !== settings.strictness) {
+    if (
+      policy.minimumStrictness &&
+      stricterOf(settings.strictness, policy.minimumStrictness) !== settings.strictness
+    ) {
       patch.strictness = policy.minimumStrictness;
       patch.categories = categoriesForLevel(policy.minimumStrictness, settings.categories);
     }
@@ -159,11 +162,17 @@ export function parseManagedPolicy(raw: unknown): ManagedPolicy | null {
   const input = raw as Record<string, unknown>;
   const policy: ManagedPolicy = {};
   if (input.enforceEnabled === true) policy.enforceEnabled = true;
-  if (typeof input.minimumStrictness === 'string' && (STRICTNESS_LEVELS as readonly string[]).includes(input.minimumStrictness)) {
+  if (
+    typeof input.minimumStrictness === 'string' &&
+    (STRICTNESS_LEVELS as readonly string[]).includes(input.minimumStrictness)
+  ) {
     policy.minimumStrictness = input.minimumStrictness as StrictnessLevel;
   }
   if (input.strictBrowsing === true) policy.strictBrowsing = true;
-  if (typeof input.revealMode === 'string' && (REVEAL_MODES as readonly string[]).includes(input.revealMode)) {
+  if (
+    typeof input.revealMode === 'string' &&
+    (REVEAL_MODES as readonly string[]).includes(input.revealMode)
+  ) {
     policy.revealMode = input.revealMode as RevealMode;
   }
   return Object.keys(policy).length ? policy : null;

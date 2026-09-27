@@ -24,11 +24,20 @@ describe('SettingsStore', () => {
     reader.subscribe((s) => seen.push(s.strictness));
     await writer.update({ strictness: 'strict' });
     expect(seen).toEqual(['strict']);
-    expect(((await api.storage.local.get(SETTINGS_KEY))[SETTINGS_KEY] as { strictness: string }).strictness).toBe('strict');
+    expect(
+      ((await api.storage.local.get(SETTINGS_KEY))[SETTINGS_KEY] as { strictness: string }).strictness,
+    ).toBe('strict');
   });
 
   it('overlays administrator policy that users cannot weaken', async () => {
-    api = installChromeMock({ managed: { enforceEnabled: true, minimumStrictness: 'strict', strictBrowsing: true, revealMode: 'disabled' } });
+    api = installChromeMock({
+      managed: {
+        enforceEnabled: true,
+        minimumStrictness: 'strict',
+        strictBrowsing: true,
+        revealMode: 'disabled',
+      },
+    });
     await api.storage.local.set({ [SETTINGS_KEY]: { enabled: false, strictness: 'minimal' } });
     // The background mirrors the managed area; pages read only the mirror.
     await syncManagedPolicy();
@@ -55,14 +64,17 @@ describe('SettingsStore', () => {
 
 describe('managed policy mirror', () => {
   it('ignores malformed policy values and clears the mirror when policy is removed', async () => {
-    const api = installChromeMock({ managed: { minimumStrictness: 'extreme', revealMode: 42, strictBrowsing: 'yes' } });
+    const api = installChromeMock({
+      managed: { minimumStrictness: 'extreme', revealMode: 42, strictBrowsing: 'yes' },
+    });
     expect(await syncManagedPolicy()).toBeNull();
     expect((await api.storage.local.get(MANAGED_MIRROR_KEY))[MANAGED_MIRROR_KEY]).toBeUndefined();
   });
 
   it('never blocks on a slow managed area', async () => {
     const api = installChromeMock();
-    (api.storage as unknown as { managed: { get: () => Promise<never> } }).managed.get = () => new Promise(() => undefined);
+    (api.storage as unknown as { managed: { get: () => Promise<never> } }).managed.get = () =>
+      new Promise(() => undefined);
     const started = Date.now();
     expect(await syncManagedPolicy(50)).toBeNull();
     expect(Date.now() - started).toBeLessThan(500);

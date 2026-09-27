@@ -65,7 +65,11 @@ test.describe('reveal', () => {
     await expect(page.locator('veil-layer .chip button')).toHaveCount(0);
     // Context-menu "Show" obeys the same policy.
     const tabId = await tabIdFor(context, lab.originA);
-    await sendToTab(context, tabId, { type: 'context', action: 'show', srcUrl: `${lab.originA}/img/explicit/400x300.png` });
+    await sendToTab(context, tabId, {
+      type: 'context',
+      action: 'show',
+      srcUrl: `${lab.originA}/img/explicit/400x300.png`,
+    });
     await page.waitForTimeout(400);
     expect(await veilStateOf(page, '#explicit')).toBe('x');
   });
@@ -85,11 +89,19 @@ test.describe('reveal', () => {
     await page.goto(`${lab.originA}/static.html`);
     await waitForVeil(page, '#neutral', 'ok');
     const tabId = await tabIdFor(context, lab.originA);
-    await sendToTab(context, tabId, { type: 'context', action: 'protect', srcUrl: `${lab.originA}/img/neutral/400x300.png` });
+    await sendToTab(context, tabId, {
+      type: 'context',
+      action: 'protect',
+      srcUrl: `${lab.originA}/img/neutral/400x300.png`,
+    });
     await waitForVeil(page, '#neutral', 'x');
     await hoverCenter(page, '#neutral');
     await expect(page.locator('veil-layer .chip')).toContainText('Hidden by you');
-    await sendToTab(context, tabId, { type: 'context', action: 'show', srcUrl: `${lab.originA}/img/explicit/400x300.png` });
+    await sendToTab(context, tabId, {
+      type: 'context',
+      action: 'show',
+      srcUrl: `${lab.originA}/img/explicit/400x300.png`,
+    });
     await waitForVeil(page, '#explicit', 'ok');
   });
 

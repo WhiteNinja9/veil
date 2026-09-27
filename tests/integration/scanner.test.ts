@@ -7,7 +7,13 @@ import { installChromeMock } from '../helpers/chrome-mock';
 const tick = () => new Promise((r) => setTimeout(r, 0));
 
 function harness(watchStyles = true) {
-  const seen = { images: [] as string[], videos: 0, backgrounds: [] as string[], changes: [] as string[], shadows: 0 };
+  const seen = {
+    images: [] as string[],
+    videos: 0,
+    backgrounds: [] as string[],
+    changes: [] as string[],
+    shadows: 0,
+  };
   const scanner = new MediaScanner(
     {
       image: (img) => seen.images.push(img.id),
@@ -29,7 +35,8 @@ describe('MediaScanner', () => {
   });
 
   it('discovers existing and dynamically inserted media', async () => {
-    document.body.innerHTML = '<img id="a"><div><video></video><div id="bg" style="background-image:url(x.png)"></div></div>';
+    document.body.innerHTML =
+      '<img id="a"><div><video></video><div id="bg" style="background-image:url(x.png)"></div></div>';
     const { scanner, seen } = harness();
     scanner.start();
     expect(seen.images).toEqual(['a']);
@@ -44,7 +51,8 @@ describe('MediaScanner', () => {
   });
 
   it('reports source changes on recycled nodes, including <picture> sources', async () => {
-    document.body.innerHTML = '<img id="slot" src="a.png"><picture id="pic"><source id="s" srcset="b.png"><img id="inner"></picture>';
+    document.body.innerHTML =
+      '<img id="slot" src="a.png"><picture id="pic"><source id="s" srcset="b.png"><img id="inner"></picture>';
     const { scanner, seen } = harness();
     scanner.start();
     document.getElementById('slot')!.setAttribute('src', 'c.png');

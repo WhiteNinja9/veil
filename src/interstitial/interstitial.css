@@ -4,9 +4,7 @@
 
 body.surface-app {
   min-height: 100vh;
-  background:
-    radial-gradient(70% 50% at 50% 0%, var(--accent-soft), transparent 70%),
-    var(--bg);
+  background: radial-gradient(70% 50% at 50% 0%, var(--accent-soft), transparent 70%), var(--bg);
 }
 .gate {
   display: grid;

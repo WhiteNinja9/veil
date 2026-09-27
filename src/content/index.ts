@@ -35,7 +35,8 @@ async function resolveHost(): Promise<string> {
   const sync = topLevelHostSync();
   if (sync !== null) return sync;
   try {
-    const response = (await ext().runtime.sendMessage({ type: 'frame/top' })) as { host?: string } | undefined;
+    const response = (await ext().runtime.sendMessage({ type: 'frame/top' })) as
+      { host?: string } | undefined;
     return response?.host ?? location.hostname;
   } catch {
     return location.hostname;
@@ -44,7 +45,8 @@ async function resolveHost(): Promise<string> {
 
 async function readShortcut(): Promise<string> {
   try {
-    const stored = (await ext().storage.local.get(SHORTCUTS_KEY))[SHORTCUTS_KEY] as Record<string, string> | undefined;
+    const stored = (await ext().storage.local.get(SHORTCUTS_KEY))[SHORTCUTS_KEY] as
+      Record<string, string> | undefined;
     return stored?.['reveal-focused'] || 'Alt+Shift+R';
   } catch {
     return 'Alt+Shift+R';
@@ -82,7 +84,8 @@ function bootstrap(): void {
     }
     clearTimeout(expiryTimer);
     const expiry = nextExpiry(settings, Date.now());
-    if (expiry !== null) expiryTimer = setTimeout(() => apply(settings), Math.min(expiry - Date.now() + 50, 2 ** 31 - 1));
+    if (expiry !== null)
+      expiryTimer = setTimeout(() => apply(settings), Math.min(expiry - Date.now() + 50, 2 ** 31 - 1));
   };
 
   let shortcut = 'Alt+Shift+R';
@@ -110,7 +113,8 @@ function bootstrap(): void {
       return false;
     }
     if (!instance.controller) return false;
-    if (command.type === 'command' && command.command === 'reveal-focused') instance.controller.revealFocused();
+    if (command.type === 'command' && command.command === 'reveal-focused')
+      instance.controller.revealFocused();
     if (command.type === 'context') instance.controller.applyManual(command.srcUrl, command.action);
     return false;
   });

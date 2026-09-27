@@ -49,7 +49,13 @@ function applyDocumentPreferences(settings: Settings, t: AppTranslator): void {
   else html.dataset.motion = settings.appearance.motion;
 }
 
-export function AppProvider({ children, fallback }: { children: ComponentChildren; fallback?: ComponentChildren }): JSX.Element {
+export function AppProvider({
+  children,
+  fallback,
+}: {
+  children: ComponentChildren;
+  fallback?: ComponentChildren;
+}): JSX.Element {
   const [settings, setSettings] = useState<Settings | null>(null);
   const [lock, setLock] = useState<LockRecord | null>(null);
   const [unlocked, setUnlocked] = useState(false);
@@ -132,7 +138,15 @@ export function AppProvider({ children, fallback }: { children: ComponentChildre
   );
 }
 
-function UnlockDialog({ open, t, onDone }: { open: boolean; t: AppTranslator; onDone: (ok: boolean) => void }): JSX.Element {
+function UnlockDialog({
+  open,
+  t,
+  onDone,
+}: {
+  open: boolean;
+  t: AppTranslator;
+  onDone: (ok: boolean) => void;
+}): JSX.Element {
   const [code, setCode] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -158,13 +172,20 @@ function UnlockDialog({ open, t, onDone }: { open: boolean; t: AppTranslator; on
     }
     setCode('');
     setError(
-      result.reason === 'locked-out' && result.retryAt ? t.t('lock.lockedOut', { time: t.relativeTime(result.retryAt) }) : t.t('lock.wrong'),
+      result.reason === 'locked-out' && result.retryAt
+        ? t.t('lock.lockedOut', { time: t.relativeTime(result.retryAt) })
+        : t.t('lock.wrong'),
     );
     input.current?.focus();
   };
 
   return (
-    <Dialog open={open} onClose={() => onDone(false)} title={t.t('lock.unlockTitle')} description={t.t('lock.unlockDesc')}>
+    <Dialog
+      open={open}
+      onClose={() => onDone(false)}
+      title={t.t('lock.unlockTitle')}
+      description={t.t('lock.unlockDesc')}
+    >
       <form onSubmit={submit} class="field">
         <label class="sr-only" for="unlock-code">
           {t.t('lock.current')}

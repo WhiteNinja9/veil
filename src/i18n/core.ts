@@ -50,10 +50,15 @@ export function createTranslator<K extends string>(
 ): Translator<K> {
   const numberFormat = new Intl.NumberFormat(locale);
   const pluralRules = new Intl.PluralRules(locale);
-  const formatValue = (value: string | number) => (typeof value === 'number' ? numberFormat.format(value) : value);
+  const formatValue = (value: string | number) =>
+    typeof value === 'number' ? numberFormat.format(value) : value;
 
   const interpolate = (template: string, params?: Params) =>
-    params ? template.replace(/\{(\w+)\}/g, (match, name: string) => (name in params ? formatValue(params[name]!) : match)) : template;
+    params
+      ? template.replace(/\{(\w+)\}/g, (match, name: string) =>
+          name in params ? formatValue(params[name]!) : match,
+        )
+      : template;
 
   const t = (key: K, params?: Params): string => {
     const message = catalog[key] ?? fallback[key];
@@ -71,7 +76,9 @@ export function createTranslator<K extends string>(
     t,
     number: (value, options) => new Intl.NumberFormat(locale, options).format(value),
     percent: (value, fractionDigits = 0) =>
-      new Intl.NumberFormat(locale, { style: 'percent', maximumFractionDigits: fractionDigits }).format(value),
+      new Intl.NumberFormat(locale, { style: 'percent', maximumFractionDigits: fractionDigits }).format(
+        value,
+      ),
     relativeTime: (targetMs, nowMs = Date.now()) => {
       const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
       const diffSec = Math.round((targetMs - nowMs) / 1000);

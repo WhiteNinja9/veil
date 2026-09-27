@@ -38,7 +38,13 @@ import { EngineClient } from './engine/client';
 import { AnalysisScheduler } from './engine/scheduler';
 import { captureImage, captureUrlInPage, isPageReadable } from './media/capture';
 import { createItem, type MediaItem, MediaRegistry } from './media/item';
-import { backgroundUrl, imageAttributeSignature, imageSource, isFetchableUrl, isVectorSource } from './media/sources';
+import {
+  backgroundUrl,
+  imageAttributeSignature,
+  imageSource,
+  isFetchableUrl,
+  isVectorSource,
+} from './media/sources';
 import { VideoProtectionManager } from './media/video';
 import { ProtectionRenderer } from './render/renderer';
 import { RevealController } from './render/reveal';
@@ -107,8 +113,14 @@ export class ProtectionController {
     this.videos = new VideoProtectionManager({
       policy: () => this.policy,
       detectFrame: (item, dataUrl, width, height, key) =>
-        this.detect(item, { kind: 'pixels', dataUrl, width, height }, key, requiredSignals(this.policy, 'video')),
-      detectUrl: (item, url) => this.detect(item, { kind: 'url', url }, hashString(url), requiredSignals(this.policy, 'video')),
+        this.detect(
+          item,
+          { kind: 'pixels', dataUrl, width, height },
+          key,
+          requiredSignals(this.policy, 'video'),
+        ),
+      detectUrl: (item, url) =>
+        this.detect(item, { kind: 'url', url }, hashString(url), requiredSignals(this.policy, 'video')),
       apply: (item, decision) => this.render(item, decision),
       pending: (item) => this.renderer.pending(item),
       fallback: (item) => {
@@ -288,12 +300,17 @@ export class ProtectionController {
       this.skip(item);
       return;
     }
-    if (src === item.src && (item.state === 'decided' || item.state === 'queued' || item.state === 'analyzing')) return;
+    if (
+      src === item.src &&
+      (item.state === 'decided' || item.state === 'queued' || item.state === 'analyzing')
+    )
+      return;
     const meta = this.meta.get(item)!;
     const signature = imageAttributeSignature(img);
     // Same attributes, new currentSrc: the browser picked another srcset
     // candidate (e.g. after a resize). Same picture — re-verify quietly.
-    const responsiveSwap = item.state === 'decided' && item.decision?.action === 'allow' && meta.attrSig === signature;
+    const responsiveSwap =
+      item.state === 'decided' && item.decision?.action === 'allow' && meta.attrSig === signature;
     meta.attrSig = signature;
     this.resetItem(item, src, !responsiveSwap);
     if (isVectorSource(src) || img.naturalWidth < MIN_NATURAL || img.naturalHeight < MIN_NATURAL) {
@@ -430,7 +447,9 @@ export class ProtectionController {
     if (!meta?.measured) return; // wait for the first visibility entry (gives us size without layout)
 
     const natural =
-      item.kind === 'image' ? Math.max((item.el as HTMLImageElement).naturalWidth, (item.el as HTMLImageElement).naturalHeight) : 0;
+      item.kind === 'image'
+        ? Math.max((item.el as HTMLImageElement).naturalWidth, (item.el as HTMLImageElement).naturalHeight)
+        : 0;
     const size = item.renderedSize || natural;
     if (size > 0 && size < this.policy.media.minSize) {
       this.skip(item);
@@ -500,7 +519,8 @@ export class ProtectionController {
       item.signals = response.signals;
       if (!response.cached) this.stats.recordAnalysis(response.signals.ms);
     } else {
-      if (__DEV__) log.debug('detect failed', src.slice(-50), source.kind, response.error, response.message ?? '');
+      if (__DEV__)
+        log.debug('detect failed', src.slice(-50), source.kind, response.error, response.message ?? '');
       item.unverifiable = true;
     }
     this.decide(item);
@@ -522,7 +542,12 @@ export class ProtectionController {
   }
 
   /** Detection with page-level caching and in-flight de-duplication. */
-  private detect(item: MediaItem, source: MediaSource, key: string, signals: SignalKind[]): Promise<DetectResponse> {
+  private detect(
+    item: MediaItem,
+    source: MediaSource,
+    key: string,
+    signals: SignalKind[],
+  ): Promise<DetectResponse> {
     const cached = this.cachedSignals(key, signals);
     if (cached) return Promise.resolve({ id: 'cache', ok: true, signals: cached, cached: true });
     const dedupeKey = `${key}|${signals.join(',')}`;
@@ -549,17 +574,41 @@ export class ProtectionController {
 
   private decide(item: MediaItem): void {
     let decision: Decision;
-    if (item.manual === 'protect') decision = { action: 'protect', reasons: [{ category: 'manual', score: 1, threshold: 0 }], confidence: 1, pressure: 1 };
-    else if (item.manual === 'show') decision = { action: 'allow', reasons: [{ category: 'manual', score: 0, threshold: 0 }], confidence: 1, pressure: 0 };
+    if (item.manual === 'protect')
+      decision = {
+        action: 'protect',
+        reasons: [{ category: 'manual', score: 1, threshold: 0 }],
+        confidence: 1,
+        pressure: 1,
+      };
+    else if (item.manual === 'show')
+      decision = {
+        action: 'allow',
+        reasons: [{ category: 'manual', score: 0, threshold: 0 }],
+        confidence: 1,
+        pressure: 0,
+      };
     else if (item.signals) {
-      decision = evaluate(item.signals, { kind: item.kind, renderedSize: item.renderedSize, isAd: Boolean(item.isAd) }, this.policy);
+      decision = evaluate(
+        item.signals,
+        { kind: item.kind, renderedSize: item.renderedSize, isAd: Boolean(item.isAd) },
+        this.policy,
+      );
     } else if (item.unverifiable) decision = fallbackDecision(this.policy);
     else return;
     item.decision = decision;
     item.state = 'decided';
     if (__DEV__) {
       const c = item.signals?.classifier;
-      log.debug('decide', item.src.slice(-60), decision.action, c ? `porn=${c.porn.toFixed(2)} sexy=${c.sexy.toFixed(2)} neutral=${c.neutral.toFixed(2)}` : 'no-signals', item.unverifiable ? 'unverifiable' : '');
+      log.debug(
+        'decide',
+        item.src.slice(-60),
+        decision.action,
+        c
+          ? `porn=${c.porn.toFixed(2)} sexy=${c.sexy.toFixed(2)} neutral=${c.neutral.toFixed(2)}`
+          : 'no-signals',
+        item.unverifiable ? 'unverifiable' : '',
+      );
     }
     this.render(item, decision);
   }

@@ -22,14 +22,22 @@ const SAMPLER = () => {
     for (const el of document.querySelectorAll<HTMLElement>('[style*="background-image"]')) {
       if (!unsafe(el.getAttribute('style') ?? '')) continue;
       if (el.getAttribute('data-veil') === 'x') continue;
-      if (getComputedStyle(el).backgroundImage !== 'none') w.__flash.push({ src: 'bg', state: el.getAttribute('data-veil'), t: performance.now() });
+      if (getComputedStyle(el).backgroundImage !== 'none')
+        w.__flash.push({ src: 'bg', state: el.getAttribute('data-veil'), t: performance.now() });
     }
     requestAnimationFrame(sample);
   };
   requestAnimationFrame(sample);
 };
 
-for (const path of ['static.html', 'srcset.html', 'backgrounds.html', 'spa.html', 'feed.html', 'search.html']) {
+for (const path of [
+  'static.html',
+  'srcset.html',
+  'backgrounds.html',
+  'spa.html',
+  'feed.html',
+  'search.html',
+]) {
   test(`no unprotected frame of unsafe media: ${path}`, async ({ context, lab }) => {
     const page = await context.newPage();
     await page.addInitScript(SAMPLER);
@@ -61,7 +69,12 @@ test('gate is released immediately when protection is off for the site', async (
   await sw.evaluate(async () => {
     const key = 'veil.settings';
     const s = (await chrome.storage.local.get(key))[key] as Record<string, unknown>;
-    await chrome.storage.local.set({ [key]: { ...s, sites: [{ id: 'aaaaaaaa', pattern: '127.0.0.1', mode: 'off', createdAt: 0, expiresAt: null }] } });
+    await chrome.storage.local.set({
+      [key]: {
+        ...s,
+        sites: [{ id: 'aaaaaaaa', pattern: '127.0.0.1', mode: 'off', createdAt: 0, expiresAt: null }],
+      },
+    });
   });
   await page.waitForFunction(() => !document.documentElement.hasAttribute('data-veil-on'));
   expect(await page.locator('#explicit').evaluate((el) => getComputedStyle(el).filter)).toBe('none');

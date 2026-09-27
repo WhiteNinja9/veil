@@ -92,7 +92,8 @@ export function evaluate(signals: Signals, context: PolicyContext, policy: Effec
     if (setting.scope === 'whole' || (!regionsRenderable && context.kind === 'background')) {
       reasons.push({ category: id, score: best, threshold: setting.threshold });
     } else if (!regionsRenderable) {
-      if (policy.video.regionsProtectWhole) reasons.push({ category: id, score: best, threshold: setting.threshold });
+      if (policy.video.regionsProtectWhole)
+        reasons.push({ category: id, score: best, threshold: setting.threshold });
     } else {
       regions.push(...hits.map((r) => padRegion(r, REGION_PADDING[id])));
       regionReasons.push({ category: id, score: best, threshold: setting.threshold });
@@ -121,12 +122,25 @@ export function evaluate(signals: Signals, context: PolicyContext, policy: Effec
 /** Decision used when media could not be verified. */
 export function fallbackDecision(policy: EffectivePolicy): Decision {
   return policy.fallback === 'protect'
-    ? { action: 'protect', reasons: [{ category: 'unverified', score: 0, threshold: 0 }], confidence: 0, pressure: 1 }
-    : { action: 'allow', reasons: [{ category: 'unverified', score: 0, threshold: 0 }], confidence: 0, pressure: 0 };
+    ? {
+        action: 'protect',
+        reasons: [{ category: 'unverified', score: 0, threshold: 0 }],
+        confidence: 0,
+        pressure: 1,
+      }
+    : {
+        action: 'allow',
+        reasons: [{ category: 'unverified', score: 0, threshold: 0 }],
+        confidence: 0,
+        pressure: 0,
+      };
 }
 
 /** Signals a policy needs from the engine; unused detectors are never loaded. */
-export function requiredSignals(policy: EffectivePolicy, kind: PolicyContext['kind']): ('classifier' | 'faces' | 'people')[] {
+export function requiredSignals(
+  policy: EffectivePolicy,
+  kind: PolicyContext['kind'],
+): ('classifier' | 'faces' | 'people')[] {
   const kinds: ('classifier' | 'faces' | 'people')[] = [];
   const c = policy.categories;
   if (c.explicit.enabled || c.illustrated.enabled || c.suggestive.enabled) kinds.push('classifier');

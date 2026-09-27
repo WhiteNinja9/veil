@@ -11,7 +11,14 @@
  *   - hit-rate accounting for diagnostics
  */
 import type { HardwareBackend } from '../ml/backend';
-import type { DetectRequest, DetectResponse, RenderRequest, RenderResponse, SignalKind, Signals } from '../ml/types';
+import type {
+  DetectRequest,
+  DetectResponse,
+  RenderRequest,
+  RenderResponse,
+  SignalKind,
+  Signals,
+} from '../ml/types';
 import type { HostPreferences } from '../shared/messages';
 import { LruCache } from '../shared/lru';
 import type { InferenceClient } from './inference-client';
@@ -20,7 +27,10 @@ export const CACHE_MAX_ENTRIES = 5000;
 export const CACHE_TTL_MS = 30 * 60 * 1000;
 
 export class EngineService {
-  private readonly cache = new LruCache<string, Signals>({ maxEntries: CACHE_MAX_ENTRIES, ttlMs: CACHE_TTL_MS });
+  private readonly cache = new LruCache<string, Signals>({
+    maxEntries: CACHE_MAX_ENTRIES,
+    ttlMs: CACHE_TTL_MS,
+  });
   private readonly inflight = new Map<string, Promise<DetectResponse>>();
   private lookups = 0;
   private hits = 0;
@@ -46,7 +56,8 @@ export class EngineService {
       pending = this.client
         .detect({ ...request, signals })
         .then((response) => {
-          if (response.ok) this.cache.set(request.key, mergeSignals(this.cache.peek(request.key), response.signals));
+          if (response.ok)
+            this.cache.set(request.key, mergeSignals(this.cache.peek(request.key), response.signals));
           return response;
         })
         .finally(() => this.inflight.delete(dedupeKey));
@@ -71,7 +82,11 @@ export class EngineService {
 
   async status() {
     const status = await this.client.status();
-    return { ...status, cacheHitRate: this.lookups ? this.hits / this.lookups : 0, cacheEntries: this.cache.size };
+    return {
+      ...status,
+      cacheHitRate: this.lookups ? this.hits / this.lookups : 0,
+      cacheEntries: this.cache.size,
+    };
   }
 
   benchmark(backends: HardwareBackend[]) {

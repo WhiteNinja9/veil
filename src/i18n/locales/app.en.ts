@@ -168,12 +168,15 @@ export const appEn = {
   // Protection
   'protection.categories': 'What to hide',
   'protection.modesty': 'People and faces',
-  'protection.modesty.desc': 'Hide people or faces whatever the content. These detectors only load when turned on.',
+  'protection.modesty.desc':
+    'Hide people or faces whatever the content. These detectors only load when turned on.',
   'protection.advanced': 'Accuracy',
   'protection.contextAware': 'Context-aware scoring',
-  'protection.contextAware.desc': 'When People detection is on, suggestive scores are lowered for images with nobody in them — fewer false alarms on food, sand or wood.',
+  'protection.contextAware.desc':
+    'When People detection is on, suggestive scores are lowered for images with nobody in them — fewer false alarms on food, sand or wood.',
   'protection.fallback': 'When media can’t be checked',
-  'protection.fallback.desc': 'For example cross-origin video that doesn’t allow frame access, or images that fail to load for Veil.',
+  'protection.fallback.desc':
+    'For example cross-origin video that doesn’t allow frame access, or images that fail to load for Veil.',
   'protection.reveal': 'Showing hidden media',
   'protection.reveal.mode': 'How hidden media is shown',
   'protection.reveal.confirm': 'Ask before showing',
@@ -205,15 +208,18 @@ export const appEn = {
   'videos.videos': 'Protect videos',
   'videos.videos.desc': 'Videos stay hidden until their first frame is checked.',
   'videos.sampling': 'Analysis frequency',
-  'videos.sampling.desc': 'How often playing video is checked. Veil checks immediately when a scene changes, and more often when something looks borderline.',
+  'videos.sampling.desc':
+    'How often playing video is checked. Veil checks immediately when a scene changes, and more often when something looks borderline.',
   'videos.sampling.efficient': 'Efficient',
   'videos.sampling.balanced': 'Balanced',
   'videos.sampling.thorough': 'Thorough',
   'videos.autoRestore': 'Show again when safe',
   'videos.autoRestore.desc': 'Lift protection after several consecutive safe frames.',
   'videos.regionsWhole': 'Hide videos with people or faces',
-  'videos.regionsWhole.desc': 'When Faces or People is on, protect the whole video. Regions can’t be blurred inside video.',
-  'videos.limit': 'Some sites serve video in a way that doesn’t allow frame access. Those videos can’t be checked and follow your “When media can’t be checked” setting.',
+  'videos.regionsWhole.desc':
+    'When Faces or People is on, protect the whole video. Regions can’t be blurred inside video.',
+  'videos.limit':
+    'Some sites serve video in a way that doesn’t allow frame access. Those videos can’t be checked and follow your “When media can’t be checked” setting.',
 
   // Sites
   'sites.add': 'Add a rule',
@@ -226,9 +232,11 @@ export const appEn = {
   'sites.mode.block': 'Block',
   'sites.mode.level': 'Level: {level}',
   'sites.empty.title': 'No site rules',
-  'sites.empty.desc': 'Every site uses your default level. Add a rule to pause, strengthen, warn about or block a site.',
+  'sites.empty.desc':
+    'Every site uses your default level. Add a rule to pause, strengthen, warn about or block a site.',
   'sites.filter': 'Filter rules',
-  'sites.help': 'example.com includes its subdomains · *.example.com only subdomains · =example.com only that exact address · * matches any part',
+  'sites.help':
+    'example.com includes its subdomains · *.example.com only subdomains · =example.com only that exact address · * matches any part',
   'sites.error.empty': 'Enter a website.',
   'sites.error.invalid': 'Enter a domain such as example.com.',
   'sites.error.too-broad': 'That pattern would match too many sites.',
@@ -251,17 +259,20 @@ export const appEn = {
   'strict.effect.fallback': 'Media that can’t be checked stays hidden',
   'strict.effect.pause': 'Pausing is disabled',
   'strict.safeSearch': 'Enforce SafeSearch',
-  'strict.safeSearch.desc': 'Turns on the safe filters of Google, Bing, DuckDuckGo, Yahoo, Brave Search and Yandex.',
+  'strict.safeSearch.desc':
+    'Turns on the safe filters of Google, Bing, DuckDuckGo, Yahoo, Brave Search and Yandex.',
   'strict.youtube': 'YouTube Restricted Mode',
   'strict.youtube.desc': 'Asks YouTube to hide potentially mature videos, using YouTube’s own filter.',
   'strict.siteExceptions': 'Ignore “Protection off” site rules',
   'strict.siteExceptions.desc': 'Sites you paused are protected while Strict Browsing is on.',
   'strict.lockHint': 'Add a passcode under Advanced so Strict Browsing can’t be turned off on impulse.',
-  'strict.limits': 'Strict Browsing reduces exposure; it can’t guarantee it. Sites change, filters miss things, and anyone who can manage browser extensions can remove Veil.',
+  'strict.limits':
+    'Strict Browsing reduces exposure; it can’t guarantee it. Sites change, filters miss things, and anyone who can manage browser extensions can remove Veil.',
 
   // Privacy Center
   'privacy.title': 'Privacy Center',
-  'privacy.lede': 'Veil is built to know as little about you as possible. Every statement here can be checked in the source code.',
+  'privacy.lede':
+    'Veil is built to know as little about you as possible. Every statement here can be checked in the source code.',
   'privacy.item.protection': 'Protection',
   'privacy.item.local': 'On-device processing',
   'privacy.item.cloud': 'Cloud processing',
@@ -281,7 +292,8 @@ export const appEn = {
   'privacy.stores.settings': 'Your settings and site rules',
   'privacy.stores.lock': 'A passcode verifier, if you set a lock (never the passcode itself)',
   'privacy.stores.profile': 'Which accelerator is fastest on this device',
-  'privacy.stores.memory': 'For up to 30 minutes, in memory only: results for recently checked media, so the same image isn’t analysed twice. Cleared when the browser closes.',
+  'privacy.stores.memory':
+    'For up to 30 minutes, in memory only: results for recently checked media, so the same image isn’t analysed twice. Cleared when the browser closes.',
   'privacy.never.title': 'What Veil never does',
   'privacy.never.upload': 'Upload images, video or page content',
   'privacy.never.history': 'Record the pages you visit',
@@ -297,11 +309,13 @@ export const appEn = {
   'privacy.badge': 'Show count on the toolbar icon',
   'privacy.badge.desc': 'Number of hidden items on the current page.',
   'perm.hosts': 'Access to websites',
-  'perm.hosts.desc': 'Needed to check and hide images and video on the pages you visit. Media is only read to be classified on this device.',
+  'perm.hosts.desc':
+    'Needed to check and hide images and video on the pages you visit. Media is only read to be classified on this device.',
   'perm.storage': 'Storage',
   'perm.storage.desc': 'Saves your settings on this device.',
   'perm.dnr': 'Block content',
-  'perm.dnr.desc': 'Applies your blocked-site and SafeSearch rules inside the browser, without Veil seeing where you browse.',
+  'perm.dnr.desc':
+    'Applies your blocked-site and SafeSearch rules inside the browser, without Veil seeing where you browse.',
   'perm.scripting': 'Scripting',
   'perm.scripting.desc': 'Protects tabs that were already open when Veil was installed or updated.',
   'perm.menus': 'Context menu',
@@ -332,7 +346,8 @@ export const appEn = {
   'perf.backend.wasm': 'WebAssembly',
   'perf.backend.cpu': 'CPU (slowest)',
   'perf.unload': 'Free memory when idle',
-  'perf.unload.desc': 'Unload the engine after this much inactivity. It restarts in about a second when needed.',
+  'perf.unload.desc':
+    'Unload the engine after this much inactivity. It restarts in about a second when needed.',
   'perf.benchmark': 'Measure this device',
   'perf.benchmark.desc': 'Runs a short test on each available accelerator and remembers the fastest.',
   'perf.benchmark.run': 'Run measurement',
@@ -354,7 +369,8 @@ export const appEn = {
   'a11y.shortcut.site': 'Pause or resume this site',
   'a11y.shortcut.reveal': 'Show or hide focused media',
   'a11y.shortcut.unset': 'Not set',
-  'a11y.keyboard': 'Hidden media stays reachable by keyboard: focus it (or a link around it) and use the shortcut. Screen readers announce protected media.',
+  'a11y.keyboard':
+    'Hidden media stays reachable by keyboard: focus it (or a link around it) and use the shortcut. Screen readers announce protected media.',
 
   // Advanced
   'lock.title': 'Settings lock',
@@ -375,7 +391,8 @@ export const appEn = {
   'lock.scope.settings': 'Lowering protection',
   'lock.scope.disable': 'Turning Veil off or pausing it',
   'lock.scope.sites': 'Changing site rules',
-  'lock.honest': 'A passcode deters changes in the moment. Anyone who can remove browser extensions can still bypass it; for enforced setups, see Managed devices below.',
+  'lock.honest':
+    'A passcode deters changes in the moment. Anyone who can remove browser extensions can still bypass it; for enforced setups, see Managed devices below.',
   'lock.on': 'Lock is on',
   'lock.unlocked': 'Unlocked for a few minutes',
   'lock.relock': 'Lock now',
@@ -392,7 +409,8 @@ export const appEn = {
   'data.reset.confirm': 'Reset all settings to their defaults? Site rules will be removed.',
   'data.reset.done': 'All settings were reset.',
   'managed.title': 'Managed devices',
-  'managed.desc': 'Administrators can enforce protection with browser policies (force-install Veil and pin settings). Veil reads them from managed storage.',
+  'managed.desc':
+    'Administrators can enforce protection with browser policies (force-install Veil and pin settings). Veil reads them from managed storage.',
   'managed.active': 'Your organization manages some of these settings.',
   'managed.none': 'No policies are applied on this device.',
   'diag.title': 'Diagnostics',
@@ -403,9 +421,11 @@ export const appEn = {
   'about.tagline': 'Private, on-device protection from unwanted images and video.',
   'about.version': 'Version {version}',
   'about.limits.title': 'What to expect',
-  'about.limits.1': 'Automated detection is imperfect. Some unwanted media will be missed, and some safe media will be hidden.',
+  'about.limits.1':
+    'Automated detection is imperfect. Some unwanted media will be missed, and some safe media will be hidden.',
   'about.limits.2': 'Accuracy depends on the models, the image size and the kind of content.',
-  'about.limits.3': 'Media Veil can’t read (some cross-origin video, protected canvases) follows your “can’t be checked” setting.',
+  'about.limits.3':
+    'Media Veil can’t read (some cross-origin video, protected canvases) follows your “can’t be checked” setting.',
   'about.limits.4': 'Browser-internal pages and extension stores can’t be protected by any extension.',
   'about.limits.5': 'Veil is a tool for your own choices, not a guarantee.',
   'about.models.title': 'Models',
@@ -417,16 +437,19 @@ export const appEn = {
   // Onboarding
   'onb.step': 'Step {current} of {total}',
   'onb.welcome.title': 'Browse with calm.',
-  'onb.welcome.body': 'Veil hides explicit and unwanted images and video before they reach your screen — privately, on your device.',
+  'onb.welcome.body':
+    'Veil hides explicit and unwanted images and video before they reach your screen — privately, on your device.',
   'onb.welcome.cta': 'Get started',
   'onb.local.title': 'Everything stays on your device.',
-  'onb.local.body': 'Veil’s AI models ship inside the extension. Media is analysed where it already is — in your browser — and never uploaded.',
+  'onb.local.body':
+    'Veil’s AI models ship inside the extension. Media is analysed where it already is — in your browser — and never uploaded.',
   'onb.local.page': 'Web page',
   'onb.local.device': 'Veil, on your device',
   'onb.local.result': 'Shown or protected',
   'onb.local.cloud': 'No servers involved',
   'onb.permissions.title': 'One permission, explained.',
-  'onb.permissions.body': 'To protect you on every site, Veil needs access to the pages you visit. It uses it only to find, check and hide media.',
+  'onb.permissions.body':
+    'To protect you on every site, Veil needs access to the pages you visit. It uses it only to find, check and hide media.',
   'onb.permissions.granted': 'Access granted',
   'onb.permissions.grant': 'Allow access',
   'onb.permissions.missing': 'Veil can’t protect pages without this access.',

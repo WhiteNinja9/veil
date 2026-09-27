@@ -7,14 +7,30 @@
  * the context is invalidated; we report that so the page can be released.
  */
 import { ext, isContextInvalidated } from '../../browser/api';
-import type { DetectRequest, DetectResponse, RenderRequest, RenderResponse, SignalKind } from '../../ml/types';
+import type {
+  DetectRequest,
+  DetectResponse,
+  RenderRequest,
+  RenderResponse,
+  SignalKind,
+} from '../../ml/types';
 import { type FrameStats, PORT_NAME, type PortInbound, type PortOutbound } from '../../shared/messages';
 
 export const REQUEST_TIMEOUT_MS = 25_000;
 
 type Pending =
-  | { kind: 'detect'; request: DetectRequest; resolve: (r: DetectResponse) => void; timer: ReturnType<typeof setTimeout> }
-  | { kind: 'render'; request: RenderRequest; resolve: (r: RenderResponse) => void; timer: ReturnType<typeof setTimeout> };
+  | {
+      kind: 'detect';
+      request: DetectRequest;
+      resolve: (r: DetectResponse) => void;
+      timer: ReturnType<typeof setTimeout>;
+    }
+  | {
+      kind: 'render';
+      request: RenderRequest;
+      resolve: (r: RenderResponse) => void;
+      timer: ReturnType<typeof setTimeout>;
+    };
 
 export class EngineClient {
   private port: chrome.runtime.Port | null = null;
@@ -58,7 +74,8 @@ export class EngineClient {
     this.invalidated = true;
     for (const [id, pending] of this.pending) {
       clearTimeout(pending.timer);
-      if (pending.kind === 'detect') pending.resolve({ id, ok: false, error: 'engine-unavailable', message: 'extension reloaded' });
+      if (pending.kind === 'detect')
+        pending.resolve({ id, ok: false, error: 'engine-unavailable', message: 'extension reloaded' });
       else pending.resolve({ id, ok: false, error: 'extension reloaded' });
     }
     this.pending.clear();
@@ -69,7 +86,11 @@ export class EngineClient {
     const port = this.connect();
     if (!port) return;
     for (const pending of this.pending.values()) {
-      this.post(pending.kind === 'detect' ? { type: 'detect', request: pending.request } : { type: 'render', request: pending.request });
+      this.post(
+        pending.kind === 'detect'
+          ? { type: 'detect', request: pending.request }
+          : { type: 'render', request: pending.request },
+      );
     }
   }
 

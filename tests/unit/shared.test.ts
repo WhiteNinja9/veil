@@ -76,7 +76,19 @@ describe('url helpers', () => {
   });
 
   it('recognises private network hosts', () => {
-    for (const host of ['localhost', 'a.localhost', '127.0.0.1', '10.1.2.3', '192.168.0.10', '172.20.0.1', '169.254.1.1', '100.64.0.1', '::1', 'printer.local', 'fd12::1']) {
+    for (const host of [
+      'localhost',
+      'a.localhost',
+      '127.0.0.1',
+      '10.1.2.3',
+      '192.168.0.10',
+      '172.20.0.1',
+      '169.254.1.1',
+      '100.64.0.1',
+      '::1',
+      'printer.local',
+      'fd12::1',
+    ]) {
       expect(isPrivateHost(host), host).toBe(true);
     }
     for (const host of ['example.com', '8.8.8.8', '172.32.0.1', '100.128.0.1', '']) {
@@ -93,9 +105,22 @@ describe('async helpers', () => {
 
   it('retry stops on fatal errors and succeeds eventually', async () => {
     let calls = 0;
-    await expect(retry(async () => (++calls < 3 ? Promise.reject(new Error('x')) : 'ok'), { attempts: 5, baseDelayMs: 1 })).resolves.toBe('ok');
+    await expect(
+      retry(async () => (++calls < 3 ? Promise.reject(new Error('x')) : 'ok'), {
+        attempts: 5,
+        baseDelayMs: 1,
+      }),
+    ).resolves.toBe('ok');
     calls = 0;
-    await expect(retry(async () => { calls++; throw new Error('fatal'); }, { attempts: 5, baseDelayMs: 1, shouldRetry: () => false })).rejects.toThrow('fatal');
+    await expect(
+      retry(
+        async () => {
+          calls++;
+          throw new Error('fatal');
+        },
+        { attempts: 5, baseDelayMs: 1, shouldRetry: () => false },
+      ),
+    ).rejects.toThrow('fatal');
     expect(calls).toBe(1);
   });
 

@@ -11,7 +11,15 @@ import { normalizeHostInput } from '../shared/url';
  *   *.example.*       glob: `*` matches one or more whole labels
  */
 export type SiteMode = 'off' | StrictnessLevel | 'warn' | 'block';
-export const SITE_MODES: readonly SiteMode[] = ['off', 'minimal', 'balanced', 'strict', 'maximum', 'warn', 'block'];
+export const SITE_MODES: readonly SiteMode[] = [
+  'off',
+  'minimal',
+  'balanced',
+  'strict',
+  'maximum',
+  'warn',
+  'block',
+];
 
 export interface SiteRule {
   id: string;
@@ -38,7 +46,9 @@ export type PatternError = 'empty' | 'invalid' | 'too-broad';
 
 const LABEL = /^(\*|[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?|xn--[a-z0-9-]+)$/;
 
-export function parsePattern(input: string): { ok: true; value: CompiledPattern } | { ok: false; error: PatternError } {
+export function parsePattern(
+  input: string,
+): { ok: true; value: CompiledPattern } | { ok: false; error: PatternError } {
   let raw = input.trim().toLowerCase();
   if (!raw) return { ok: false, error: 'empty' };
 
@@ -48,7 +58,10 @@ export function parsePattern(input: string): { ok: true; value: CompiledPattern 
     raw = raw.slice(1);
   }
   // Tolerate pasted URLs: strip scheme, path, query, port.
-  raw = raw.replace(/^[a-z][a-z0-9+.-]*:\/\//, '').replace(/[/?#].*$/, '').replace(/:\d+$/, '');
+  raw = raw
+    .replace(/^[a-z][a-z0-9+.-]*:\/\//, '')
+    .replace(/[/?#].*$/, '')
+    .replace(/:\d+$/, '');
   if (!raw.includes('*')) {
     const host = normalizeHostInput(raw);
     if (!host || (!host.includes('.') && host !== 'localhost')) return { ok: false, error: 'invalid' };
@@ -56,7 +69,13 @@ export function parsePattern(input: string): { ok: true; value: CompiledPattern 
     const pattern = kind === 'exact' ? `=${host}` : host;
     return {
       ok: true,
-      value: { pattern, kind, host, regex: null, specificity: (kind === 'exact' ? 2000 : 1000) + host.length },
+      value: {
+        pattern,
+        kind,
+        host,
+        regex: null,
+        specificity: (kind === 'exact' ? 2000 : 1000) + host.length,
+      },
     };
   }
 
@@ -69,11 +88,16 @@ export function parsePattern(input: string): { ok: true; value: CompiledPattern 
   if (labels[0] === '*' && !labels.slice(1).includes('*')) {
     const host = labels.slice(1).join('.');
     if (!host.includes('.')) return { ok: false, error: 'too-broad' };
-    return { ok: true, value: { pattern: `*.${host}`, kind: 'subdomains', host, regex: null, specificity: 900 + host.length } };
+    return {
+      ok: true,
+      value: { pattern: `*.${host}`, kind: 'subdomains', host, regex: null, specificity: 900 + host.length },
+    };
   }
 
   if (literal.length === 1 && literal[0]!.length < 3) return { ok: false, error: 'too-broad' };
-  const source = labels.map((l) => (l === '*' ? '[a-z0-9-]+(?:\\.[a-z0-9-]+)*' : l.replace(/-/g, '\\-'))).join('\\.');
+  const source = labels
+    .map((l) => (l === '*' ? '[a-z0-9-]+(?:\\.[a-z0-9-]+)*' : l.replace(/-/g, '\\-')))
+    .join('\\.');
   return {
     ok: true,
     value: {

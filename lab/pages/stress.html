@@ -1,7 +1,28 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Stress</title><link rel="stylesheet" href="/lab.css"><style>.grid{grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:6px}</style></head>
-<body><h1>Stress: 600 thumbnails</h1><p class="lede">Measures scheduling: visible thumbnails should resolve first.</p>
-<div id="grid" class="grid"></div>
-<script>
-  const grid = document.getElementById('grid');
-  for (let i = 0; i < 600; i++) { const img = document.createElement('img'); img.style.cssText = 'width:100%;aspect-ratio:1;display:block;border-radius:8px'; img.src = `/img/${i % 25 === 0 ? 'explicit' : 'neutral'}/160x160.png?seed=${i}`; grid.append(img); }
-</script></body></html>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Stress</title>
+    <link rel="stylesheet" href="/lab.css" />
+    <style>
+      .grid {
+        grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+        gap: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Stress: 600 thumbnails</h1>
+    <p class="lede">Measures scheduling: visible thumbnails should resolve first.</p>
+    <div id="grid" class="grid"></div>
+    <script>
+      const grid = document.getElementById('grid');
+      for (let i = 0; i < 600; i++) {
+        const img = document.createElement('img');
+        img.style.cssText = 'width:100%;aspect-ratio:1;display:block;border-radius:8px';
+        img.src = `/img/${i % 25 === 0 ? 'explicit' : 'neutral'}/160x160.png?seed=${i}`;
+        grid.append(img);
+      }
+    </script>
+  </body>
+</html>

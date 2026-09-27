@@ -39,7 +39,8 @@ export const v = {
     return (value, path = '') => {
       if (typeof value !== 'string') return fail(path, 'expected string');
       if (value.length > max) return fail(path, `longer than ${max}`);
-      if (options.min !== undefined && value.length < options.min) return fail(path, `shorter than ${options.min}`);
+      if (options.min !== undefined && value.length < options.min)
+        return fail(path, `shorter than ${options.min}`);
       if (options.pattern && !options.pattern.test(value)) return fail(path, 'invalid format');
       return value;
     };
@@ -60,13 +61,16 @@ export const v = {
   },
 
   literal<const T extends string | number | boolean>(expected: T): Validator<T> {
-    return (value, path = '') => (value === expected ? (value as T) : fail(path, `expected ${String(expected)}`));
+    return (value, path = '') =>
+      value === expected ? (value as T) : fail(path, `expected ${String(expected)}`);
   },
 
   enum<const T extends string>(values: readonly T[]): Validator<T> {
     const set = new Set<string>(values);
     return (value, path = '') =>
-      typeof value === 'string' && set.has(value) ? (value as T) : fail(path, `expected one of ${values.join(', ')}`);
+      typeof value === 'string' && set.has(value)
+        ? (value as T)
+        : fail(path, `expected one of ${values.join(', ')}`);
   },
 
   array<T>(item: Validator<T>, options: { max?: number } = {}): Validator<T[]> {
@@ -80,7 +84,8 @@ export const v = {
 
   object<S extends Shape>(shape: S, options: { passthrough?: boolean } = {}): Validator<ObjectOf<S>> {
     return (value, path = '') => {
-      if (typeof value !== 'object' || value === null || Array.isArray(value)) return fail(path, 'expected object');
+      if (typeof value !== 'object' || value === null || Array.isArray(value))
+        return fail(path, 'expected object');
       const record = value as Record<string, unknown>;
       if (!options.passthrough) {
         for (const key of Object.keys(record)) {
@@ -105,18 +110,25 @@ export const v = {
   },
 
   /** Discriminated union keyed on a string `type` field. */
-  tagged<M extends Record<string, Validator<unknown>>>(key: string, variants: M): Validator<Infer<M[keyof M]>> {
+  tagged<M extends Record<string, Validator<unknown>>>(
+    key: string,
+    variants: M,
+  ): Validator<Infer<M[keyof M]>> {
     return (value, path = '') => {
       if (typeof value !== 'object' || value === null) return fail(path, 'expected object');
       const tag = (value as Record<string, unknown>)[key];
-      if (typeof tag !== 'string' || !Object.hasOwn(variants, tag)) return fail(`${path}.${key}`, 'unknown variant');
+      if (typeof tag !== 'string' || !Object.hasOwn(variants, tag))
+        return fail(`${path}.${key}`, 'unknown variant');
       return variants[tag]!(value, path) as Infer<M[keyof M]>;
     };
   },
 };
 
 /** Runs a validator and returns a result object instead of throwing. */
-export function check<T>(validator: Validator<T>, value: unknown): { ok: true; value: T } | { ok: false; error: string } {
+export function check<T>(
+  validator: Validator<T>,
+  value: unknown,
+): { ok: true; value: T } | { ok: false; error: string } {
   try {
     return { ok: true, value: validator(value) };
   } catch (error) {

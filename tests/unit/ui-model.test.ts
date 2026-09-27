@@ -6,14 +6,22 @@ import { createTranslator } from '../../src/i18n/core';
 import { appEn } from '../../src/i18n/locales/app.en';
 import { defaultSettings } from '../../src/storage/schema';
 
-const tab = (url: string) => ({ tabId: 1, url, host: new URL(url).hostname, supported: true, connected: true });
+const tab = (url: string) => ({
+  tabId: 1,
+  url,
+  host: new URL(url).hostname,
+  supported: true,
+  connected: true,
+});
 
 describe('popup model', () => {
   it('derives status from settings and site rules', () => {
     const settings = defaultSettings();
     expect(derive(settings, tab('https://a.com/')).status).toBe('active');
     expect(derive({ ...settings, enabled: false }, tab('https://a.com/')).status).toBe('off');
-    expect(derive({ ...settings, pausedUntil: Date.now() + 1000 }, tab('https://a.com/')).status).toBe('paused-all');
+    expect(derive({ ...settings, pausedUntil: Date.now() + 1000 }, tab('https://a.com/')).status).toBe(
+      'paused-all',
+    );
     expect(derive(settings, { ...tab('https://a.com/'), supported: false }).status).toBe('unsupported');
   });
 

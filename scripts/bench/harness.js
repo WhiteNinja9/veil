@@ -35,7 +35,10 @@ window.runEngine = async ({ backend, images, signals, testModel = false, repeat 
       const blob = await (await fetch(`/eval/${name}`)).blob();
       const id = `${name}#${r}`;
       const started = performance.now();
-      worker.postMessage({ type: 'detect', job: { id, key: id, blob, signals, priority: 0, retainForRender: false } });
+      worker.postMessage({
+        type: 'detect',
+        job: { id, key: id, blob, signals, priority: 0, retainForRender: false },
+      });
       const message = await waitFor(worker, (m) => m.type === 'detected' && m.id === id);
       results.push({ name, round: r, wallMs: performance.now() - started, ...message });
     }
@@ -46,7 +49,10 @@ window.runEngine = async ({ backend, images, signals, testModel = false, repeat 
     images.map(async (name, i) => {
       const blob = await (await fetch(`/eval/${name}`)).blob();
       const id = `burst-${i}`;
-      worker.postMessage({ type: 'detect', job: { id, key: id, blob, signals, priority: 0, retainForRender: false } });
+      worker.postMessage({
+        type: 'detect',
+        job: { id, key: id, blob, signals, priority: 0, retainForRender: false },
+      });
       return waitFor(worker, (m) => m.type === 'detected' && m.id === id);
     }),
   );
@@ -59,7 +65,13 @@ window.runEngine = async ({ backend, images, signals, testModel = false, repeat 
 
 window.runBenchmark = async ({ backends, iterations, testModel = false }) => {
   const worker = new Worker('/engine-worker.js');
-  worker.postMessage({ type: 'benchmark', requestId: 'bench', config: config('auto', testModel), backends, iterations });
+  worker.postMessage({
+    type: 'benchmark',
+    requestId: 'bench',
+    config: config('auto', testModel),
+    backends,
+    iterations,
+  });
   const message = await waitFor(worker, (m) => m.type === 'benchmark', 300000);
   worker.terminate();
   return message.results;

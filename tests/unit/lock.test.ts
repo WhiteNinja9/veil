@@ -1,5 +1,16 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { attemptUnlock, constantTimeEqual, createLockRecord, isUnlocked, lockoutDuration, readLock, relock, validatePasscode, verifyPasscode, writeLock } from '../../src/security/lock';
+import {
+  attemptUnlock,
+  constantTimeEqual,
+  createLockRecord,
+  isUnlocked,
+  lockoutDuration,
+  readLock,
+  relock,
+  validatePasscode,
+  verifyPasscode,
+  writeLock,
+} from '../../src/security/lock';
 import { installChromeMock } from '../helpers/chrome-mock';
 
 const SCOPE = { settings: true, disable: true, sites: true };
@@ -50,7 +61,8 @@ describe('passcode lock', () => {
 
     await writeLock(await createLockRecord('1234', SCOPE, FAST));
     const now = 1_000_000;
-    for (let i = 0; i < 4; i++) expect(await attemptUnlock('0000', now)).toEqual({ ok: false, reason: 'wrong' });
+    for (let i = 0; i < 4; i++)
+      expect(await attemptUnlock('0000', now)).toEqual({ ok: false, reason: 'wrong' });
     const fifth = await attemptUnlock('0000', now);
     expect(fifth).toMatchObject({ ok: false, reason: 'locked-out' });
     // Even the right code is refused during the lock-out window.

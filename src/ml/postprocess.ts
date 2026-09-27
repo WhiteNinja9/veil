@@ -51,7 +51,13 @@ export function letterbox(width: number, height: number): { side: number; scaleX
 }
 
 export function unletterbox(r: Region, box: { scaleX: number; scaleY: number }): Region {
-  return { x: r.x * box.scaleX, y: r.y * box.scaleY, w: r.w * box.scaleX, h: r.h * box.scaleY, score: r.score };
+  return {
+    x: r.x * box.scaleX,
+    y: r.y * box.scaleY,
+    w: r.w * box.scaleX,
+    h: r.h * box.scaleY,
+    score: r.score,
+  };
 }
 
 // ── BlazeFace ──────────────────────────────────────────────────────────────
@@ -167,7 +173,11 @@ export function aggregateFrames(frames: ClassifierScores[]): ClassifierScores {
 }
 
 /** Exponential moving average over classifier scores (temporal smoothing for video). */
-export function emaScores(previous: ClassifierScores | null, next: ClassifierScores, alpha: number): ClassifierScores {
+export function emaScores(
+  previous: ClassifierScores | null,
+  next: ClassifierScores,
+  alpha: number,
+): ClassifierScores {
   if (!previous) return next;
   const mix = (a: number, b: number) => a * (1 - alpha) + b * alpha;
   return {

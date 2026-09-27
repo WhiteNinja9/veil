@@ -2,7 +2,11 @@ import { expect, tabIdFor, test, waitForVeil } from './fixtures';
 
 /** Each test documents a bug that was found and fixed; they must never regress. */
 test.describe('regressions', () => {
-  test('first page after install gets real verdicts, not fallbacks (offscreen listener race)', async ({ context, lab, extensionId }) => {
+  test('first page after install gets real verdicts, not fallbacks (offscreen listener race)', async ({
+    context,
+    lab,
+    extensionId,
+  }) => {
     const page = await context.newPage();
     await page.goto(`${lab.originA}/static.html`);
     for (const id of ['explicit', 'suggestive', 'illustrated']) await waitForVeil(page, `#${id}`, 'x');
@@ -11,7 +15,15 @@ test.describe('regressions', () => {
     const probe = await context.newPage();
     await probe.goto(`chrome-extension://${extensionId}/popup.html`);
     const stats = async () =>
-      probe.evaluate(async (id) => ((await chrome.runtime.sendMessage({ type: 'tab/state', tabId: id })) as { stats: { unverified: number; scanned: number } }).stats, tabId);
+      probe.evaluate(
+        async (id) =>
+          (
+            (await chrome.runtime.sendMessage({ type: 'tab/state', tabId: id })) as {
+              stats: { unverified: number; scanned: number };
+            }
+          ).stats,
+        tabId,
+      );
     await expect.poll(async () => (await stats()).scanned).toBeGreaterThan(0);
     expect((await stats()).unverified).toBe(0);
   });

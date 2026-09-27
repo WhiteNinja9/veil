@@ -19,7 +19,13 @@ export function StrictSection(): JSX.Element {
             <h2 class="strict-hero__title">{t.t('strict.title')}</h2>
             <p class="row__desc">{t.t('strict.desc')}</p>
           </div>
-          <Switch size="lg" checked={strict.enabled} disabled={enforced} label={t.t('strict.title')} onChange={(enabled) => void update({ strictBrowsing: { enabled } })} />
+          <Switch
+            size="lg"
+            checked={strict.enabled}
+            disabled={enforced}
+            label={t.t('strict.title')}
+            onChange={(enabled) => void update({ strictBrowsing: { enabled } })}
+          />
         </div>
         <ul class="checklist" role="list">
           {(['level', 'reveal', 'fallback', 'pause'] as const).map((key) => (
@@ -33,10 +39,25 @@ export function StrictSection(): JSX.Element {
 
       <Card>
         <div class="list">
-          <Row id="safesearch" label={t.t('strict.safeSearch')} description={t.t('strict.safeSearch.desc')} disabled={!strict.enabled}>
-            <Switch checked={strict.safeSearch} disabled={!strict.enabled} label={t.t('strict.safeSearch')} onChange={(safeSearch) => void update({ strictBrowsing: { safeSearch } })} />
+          <Row
+            id="safesearch"
+            label={t.t('strict.safeSearch')}
+            description={t.t('strict.safeSearch.desc')}
+            disabled={!strict.enabled}
+          >
+            <Switch
+              checked={strict.safeSearch}
+              disabled={!strict.enabled}
+              label={t.t('strict.safeSearch')}
+              onChange={(safeSearch) => void update({ strictBrowsing: { safeSearch } })}
+            />
           </Row>
-          <Row id="youtube" label={t.t('strict.youtube')} description={t.t('strict.youtube.desc')} disabled={!strict.enabled}>
+          <Row
+            id="youtube"
+            label={t.t('strict.youtube')}
+            description={t.t('strict.youtube.desc')}
+            disabled={!strict.enabled}
+          >
             <Switch
               checked={strict.youtubeRestricted}
               disabled={!strict.enabled}
@@ -44,7 +65,12 @@ export function StrictSection(): JSX.Element {
               onChange={(youtubeRestricted) => void update({ strictBrowsing: { youtubeRestricted } })}
             />
           </Row>
-          <Row id="exceptions" label={t.t('strict.siteExceptions')} description={t.t('strict.siteExceptions.desc')} disabled={!strict.enabled}>
+          <Row
+            id="exceptions"
+            label={t.t('strict.siteExceptions')}
+            description={t.t('strict.siteExceptions.desc')}
+            disabled={!strict.enabled}
+          >
             <Switch
               checked={strict.ignoreSiteExceptions}
               disabled={!strict.enabled}
@@ -57,8 +83,7 @@ export function StrictSection(): JSX.Element {
 
       {!lock && (
         <Banner tone="accent" icon="lock">
-          {t.t('strict.lockHint')}{' '}
-          <a href="#advanced/lock">{t.t('lock.set')}</a>
+          {t.t('strict.lockHint')} <a href="#advanced/lock">{t.t('lock.set')}</a>
         </Banner>
       )}
       <Banner icon="info">{t.t('strict.limits')}</Banner>

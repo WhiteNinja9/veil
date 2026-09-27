@@ -9,7 +9,8 @@ export function imageAttributeSignature(img: HTMLImageElement): string {
   let signature = `${img.getAttribute('src') ?? ''}|${img.getAttribute('srcset') ?? ''}`;
   const picture = img.parentElement;
   if (picture?.localName === 'picture') {
-    for (const source of picture.querySelectorAll('source')) signature += `|${source.getAttribute('srcset') ?? ''}`;
+    for (const source of picture.querySelectorAll('source'))
+      signature += `|${source.getAttribute('srcset') ?? ''}`;
   }
   return signature;
 }

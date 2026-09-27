@@ -1,15 +1,51 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Static images</title><link rel="stylesheet" href="/lab.css"></head>
-<body><h1>Static images</h1><p class="lede">Same-origin and cross-origin images, several sizes.</p>
-<div class="grid">
-  <div class="card"><img id="neutral" src="/img/neutral/400x300.png" alt="neutral"><div class="meta">neutral · same-origin</div></div>
-  <div class="card"><img id="explicit" src="/img/explicit/400x300.png" alt="explicit fixture"><div class="meta">explicit · same-origin</div></div>
-  <div class="card"><img id="explicit-xo" src="__OTHER_ORIGIN__/img/explicit/400x300.png?seed=1" alt="explicit fixture"><div class="meta">explicit · cross-origin</div></div>
-  <div class="card"><img id="suggestive" src="/img/suggestive/400x300.png" alt="suggestive fixture"><div class="meta">suggestive</div></div>
-  <div class="card"><img id="illustrated" src="__OTHER_ORIGIN__/img/illustrated/400x300.png" alt="illustrated fixture"><div class="meta">illustrated · cross-origin</div></div>
-  <div class="card"><img id="borderline" src="/img/borderline/400x300.png" alt="borderline fixture"><div class="meta">borderline (strict only)</div></div>
-  <div class="card"><img id="face" src="/img/face/400x300.png" alt="face fixture"><div class="meta">face</div></div>
-  <div class="card"><img id="slow" src="/img/explicit/400x300.png?delay=1200&seed=2" alt="slow explicit fixture"><div class="meta">explicit · slow network</div></div>
-</div>
-<p><img id="tiny" src="/img/explicit/12x12.png" alt=""> tiny tracking pixel (skipped)</p>
-<p><img id="icon" src="/img/explicit/24x24.png" width="24" height="24" alt=""> small icon (below minimum size)</p>
-</body></html>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Static images</title>
+    <link rel="stylesheet" href="/lab.css" />
+  </head>
+  <body>
+    <h1>Static images</h1>
+    <p class="lede">Same-origin and cross-origin images, several sizes.</p>
+    <div class="grid">
+      <div class="card">
+        <img id="neutral" src="/img/neutral/400x300.png" alt="neutral" />
+        <div class="meta">neutral · same-origin</div>
+      </div>
+      <div class="card">
+        <img id="explicit" src="/img/explicit/400x300.png" alt="explicit fixture" />
+        <div class="meta">explicit · same-origin</div>
+      </div>
+      <div class="card">
+        <img id="explicit-xo" src="__OTHER_ORIGIN__/img/explicit/400x300.png?seed=1" alt="explicit fixture" />
+        <div class="meta">explicit · cross-origin</div>
+      </div>
+      <div class="card">
+        <img id="suggestive" src="/img/suggestive/400x300.png" alt="suggestive fixture" />
+        <div class="meta">suggestive</div>
+      </div>
+      <div class="card">
+        <img id="illustrated" src="__OTHER_ORIGIN__/img/illustrated/400x300.png" alt="illustrated fixture" />
+        <div class="meta">illustrated · cross-origin</div>
+      </div>
+      <div class="card">
+        <img id="borderline" src="/img/borderline/400x300.png" alt="borderline fixture" />
+        <div class="meta">borderline (strict only)</div>
+      </div>
+      <div class="card">
+        <img id="face" src="/img/face/400x300.png" alt="face fixture" />
+        <div class="meta">face</div>
+      </div>
+      <div class="card">
+        <img id="slow" src="/img/explicit/400x300.png?delay=1200&seed=2" alt="slow explicit fixture" />
+        <div class="meta">explicit · slow network</div>
+      </div>
+    </div>
+    <p><img id="tiny" src="/img/explicit/12x12.png" alt="" /> tiny tracking pixel (skipped)</p>
+    <p>
+      <img id="icon" src="/img/explicit/24x24.png" width="24" height="24" alt="" /> small icon (below minimum
+      size)
+    </p>
+  </body>
+</html>

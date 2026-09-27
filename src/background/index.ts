@@ -69,7 +69,9 @@ async function applySettings(settings: Settings): Promise<void> {
     await configureEngine(settings).catch((error: unknown) => log.warn('Engine configure failed', error));
   }
   if (!settings.stats.badge) {
-    await ext().action.setBadgeText({ text: '' }).catch(() => undefined);
+    await ext()
+      .action.setBadgeText({ text: '' })
+      .catch(() => undefined);
   }
 }
 
@@ -81,8 +83,12 @@ async function updateBadge(tabId: number, stats: TabStats): Promise<void> {
   const settings = settingsStore.peek() ?? (await settingsStore.get());
   if (!settings.stats.badge) return;
   const text = stats.protected > 0 ? (stats.protected > 99 ? '99+' : String(stats.protected)) : '';
-  await ext().action.setBadgeBackgroundColor({ tabId, color: '#5b5fd6' }).catch(() => undefined);
-  await ext().action.setBadgeText({ tabId, text }).catch(() => undefined);
+  await ext()
+    .action.setBadgeBackgroundColor({ tabId, color: '#5b5fd6' })
+    .catch(() => undefined);
+  await ext()
+    .action.setBadgeText({ tabId, text })
+    .catch(() => undefined);
 }
 
 // ── Runtime requests (extension pages) ─────────────────────────────────────
@@ -130,13 +136,21 @@ async function handle(request: RuntimeRequest, sender: chrome.runtime.MessageSen
 
 async function benchmark() {
   const candidates: HardwareBackend[] = ['webgpu', 'webgl', 'wasm'];
-  const reply = (await engine.benchmark(candidates).catch((error: unknown) => ({ ok: false, error: String(error) }))) as unknown;
+  const reply = (await engine
+    .benchmark(candidates)
+    .catch((error: unknown) => ({ ok: false, error: String(error) }))) as unknown;
   if (!Array.isArray(reply)) {
     log.warn('Benchmark failed', reply);
-    return { results: [], best: null, error: (reply as { error?: string } | null)?.error ?? 'benchmark failed' };
+    return {
+      results: [],
+      best: null,
+      error: (reply as { error?: string } | null)?.error ?? 'benchmark failed',
+    };
   }
   const results = reply as BenchmarkResult[];
-  const ok = results.filter((r) => r.ok && typeof r.medianMs === 'number').sort((a, b) => a.medianMs! - b.medianMs!);
+  const ok = results
+    .filter((r) => r.ok && typeof r.medianMs === 'number')
+    .sort((a, b) => a.medianMs! - b.medianMs!);
   const best = ok[0]?.backend;
   if (best) {
     const profile: EngineProfile = { best, measuredAt: Date.now(), userAgent: navigator.userAgent, results };
@@ -168,7 +182,9 @@ ext().commands?.onCommand.addListener((command) => {
     const tab = await activeTab();
     if (!tab?.id) return;
     if (command === 'reveal-focused') {
-      await ext().tabs.sendMessage(tab.id, { type: 'command', command: 'reveal-focused' }).catch(() => undefined);
+      await ext()
+        .tabs.sendMessage(tab.id, { type: 'command', command: 'reveal-focused' })
+        .catch(() => undefined);
       return;
     }
     if (command === 'toggle-site') {
@@ -178,7 +194,16 @@ ext().commands?.onCommand.addListener((command) => {
       const existing = settings.sites.find((rule) => rule.pattern === host && rule.mode === 'off');
       const sites = existing
         ? settings.sites.filter((rule) => rule !== existing)
-        : [...settings.sites.filter((rule) => rule.pattern !== host), { id: createRuleId(), pattern: host, mode: 'off' as const, createdAt: Date.now(), expiresAt: null }];
+        : [
+            ...settings.sites.filter((rule) => rule.pattern !== host),
+            {
+              id: createRuleId(),
+              pattern: host,
+              mode: 'off' as const,
+              createdAt: Date.now(),
+              expiresAt: null,
+            },
+          ];
       await settingsStore.update({ sites });
     }
   })();
@@ -197,10 +222,15 @@ async function createMenus(settings: Settings): Promise<void> {
 
 ext().contextMenus?.onClicked.addListener((info, tab) => {
   if (!tab?.id || !info.srcUrl) return;
-  const action = info.menuItemId === 'veil-hide' ? 'protect' : info.menuItemId === 'veil-show' ? 'show' : null;
+  const action =
+    info.menuItemId === 'veil-hide' ? 'protect' : info.menuItemId === 'veil-show' ? 'show' : null;
   if (!action) return;
   void ext()
-    .tabs.sendMessage(tab.id, { type: 'context', action, srcUrl: info.srcUrl }, { frameId: info.frameId ?? 0 })
+    .tabs.sendMessage(
+      tab.id,
+      { type: 'context', action, srcUrl: info.srcUrl },
+      { frameId: info.frameId ?? 0 },
+    )
     .catch(() => undefined);
 });
 
@@ -209,21 +239,29 @@ ext().contextMenus?.onClicked.addListener((info, tab) => {
 async function storeShortcuts(): Promise<void> {
   const commands = await ext().commands?.getAll?.();
   if (!commands) return;
-  const shortcuts = Object.fromEntries(commands.filter((c) => c.name).map((c) => [c.name!, c.shortcut ?? '']));
+  const shortcuts = Object.fromEntries(
+    commands.filter((c) => c.name).map((c) => [c.name!, c.shortcut ?? '']),
+  );
   await ext().storage.local.set({ [SHORTCUTS_KEY]: shortcuts });
 }
 
 async function injectIntoTab(tabId: number): Promise<void> {
   const scripting = ext().scripting;
   if (!scripting) return;
-  await scripting.insertCSS({ target: { tabId, allFrames: true }, files: ['content.css'] }).catch(() => undefined);
-  await scripting.executeScript({ target: { tabId, allFrames: true }, files: ['content.js'] }).catch(() => undefined);
+  await scripting
+    .insertCSS({ target: { tabId, allFrames: true }, files: ['content.css'] })
+    .catch(() => undefined);
+  await scripting
+    .executeScript({ target: { tabId, allFrames: true }, files: ['content.js'] })
+    .catch(() => undefined);
 }
 
 /** Tabs opened before install/update have no (live) content script: protect them now. */
 async function injectIntoOpenTabs(): Promise<void> {
   const tabs = await ext().tabs.query({ url: ['http://*/*', 'https://*/*'] });
-  await Promise.all(tabs.filter((tab) => tab.id !== undefined && !tab.discarded).map((tab) => injectIntoTab(tab.id!)));
+  await Promise.all(
+    tabs.filter((tab) => tab.id !== undefined && !tab.discarded).map((tab) => injectIntoTab(tab.id!)),
+  );
 }
 
 async function initialize(): Promise<Settings> {

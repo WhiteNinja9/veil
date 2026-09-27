@@ -20,7 +20,15 @@ export function AboutSection(): JSX.Element {
 
       <Card title={t.t('about.limits.title')}>
         <ul class="bullets" role="list" id="limits">
-          {(['about.limits.1', 'about.limits.2', 'about.limits.3', 'about.limits.4', 'about.limits.5'] as const).map((key) => (
+          {(
+            [
+              'about.limits.1',
+              'about.limits.2',
+              'about.limits.3',
+              'about.limits.4',
+              'about.limits.5',
+            ] as const
+          ).map((key) => (
             <li key={key}>{t.t(key)}</li>
           ))}
         </ul>
